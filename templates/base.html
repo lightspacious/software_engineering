@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多界面系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <a href="{{ url_for('main_info') }}" class="nav-link {% if request.endpoint == 'main_info' %}active{% endif %}">主要信息</a>
+            <a href="{{ url_for('underwater') }}" class="nav-link {% if request.endpoint == 'underwater' %}active{% endif %}">水下系统</a>
+            <a href="{{ url_for('smart_center') }}" class="nav-link {% if request.endpoint == 'smart_center' %}active{% endif %}">智能中心</a>
+            <a href="{{ url_for('admin') }}" class="nav-link {% if request.endpoint == 'admin' %}active{% endif %}">管理员管理界面</a>
+        </nav>
+        
+        <!-- 内容区域 -->
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>
