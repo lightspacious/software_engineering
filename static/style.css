@@ -17,9 +17,9 @@ body {
 }
 
 /* 导航栏样式 */
-.navbar {
-    background-color: rgba(0, 47, 95, 0.85);  /* 半透明深蓝背景 */
-    backdrop-filter: blur(4px);               /* 模糊增强科技感 */
+/* .navbar {
+    background-color: rgba(0, 47, 95, 0.85);  
+    backdrop-filter: blur(4px);               
     overflow: hidden;
     margin-bottom: 20px;
 }
@@ -42,6 +42,53 @@ body {
 .nav-link.active {
     background-color: #4CAF50;
     color: white;
+} */
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to right, #002a5c, #004080);
+    padding: 10px 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.nav-left a {
+    color: white;
+    margin-right: 30px;
+    text-decoration: none;
+    font-size: 16px;
+    padding-bottom: 5px;
+}
+
+.nav-left a.active {
+    border-bottom: 3px solid #00c3ff;
+    font-weight: bold;
+}
+
+.nav-title {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    flex-grow: 1;
+    color: #ffffff;
+    font-family: "Orbitron", "Noto Sans SC", sans-serif;
+    text-transform: uppercase;           
+    letter-spacing: 1.5px;               
+    text-shadow: 0 0 4px #00ffff, 0 0 8px #0077ff; 
+    font-weight: 500;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 14px;
+}
+
+.nav-right i {
+    margin-right: 5px;
+    color: #00c3ff;
 }
 
 /* 内容区域样式 */
@@ -65,5 +112,42 @@ body {
     text-align: center;
 }
 
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);  /* 两列 */
+    grid-template-rows: repeat(3, 1fr);     /* 三行 */
+    gap: 20px;
+    padding: 20px;
+    height: 80vh; /* 保持在一个视口内展示 */
+}
 
+.grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;  /* 左中右：中间列更宽 */
+    grid-template-rows: 1fr 1fr;         /* 上下两行等高 */
+    grid-template-areas:
+        "area1 area2 area3"
+        "area4 area5 area6";
+    gap: 10px;
+    height: 85vh;
+    padding: 10px;
+}
 
+.grid-item {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(6px);
+    border-radius: 8px;
+    padding: 12px;
+    color: white;
+    font-family: "Orbitron", "Noto Sans SC", sans-serif;
+    font-size: 16px;
+}
+
+/* 对应区域名称设置 */
+.area1 { grid-area: area1; }
+.area2 { grid-area: area2; }
+.area3 { grid-area: area3; }
+.area4 { grid-area: area4; }
+.area5 { grid-area: area5; }
+.area6 { grid-area: area6; }
