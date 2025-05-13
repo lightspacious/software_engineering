@@ -3,23 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>多界面系统</title>
+    <title>智慧海洋牧场可视化系统</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css"> <!-- 图标库 -->
+    <!-- 引入英文 + 中文字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft YaHei", sans-serif;
+            color: white;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #002a5c, #004080);
+            padding: 10px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .nav-left a {
+            color: white;
+            margin-right: 30px;
+            text-decoration: none;
+            font-size: 16px;
+            padding-bottom: 5px;
+        }
+
+        .nav-left a.active {
+            border-bottom: 3px solid #00c3ff;
+            font-weight: bold;
+        }
+
+        .nav-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            flex-grow: 1;
+            color: #ffffff;
+            font-family: "Orbitron", "Noto Sans SC", sans-serif;
+            text-transform: uppercase;           /* 全大写 */
+            letter-spacing: 1.5px;               /* 字间距拉开 */
+            text-shadow: 0 0 4px #00ffff, 0 0 8px #0077ff; /* 电子荧光蓝发光 */
+            font-weight: 500;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+        }
+
+        .nav-right i {
+            margin-right: 5px;
+            color: #00c3ff;
+        }
+
+        .content {
+            padding: 30px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 导航栏 -->
-        <nav class="navbar">
-            <a href="{{ url_for('main_info') }}" class="nav-link {% if request.endpoint == 'main_info' %}active{% endif %}">主要信息</a>
-            <a href="{{ url_for('underwater') }}" class="nav-link {% if request.endpoint == 'underwater' %}active{% endif %}">水下系统</a>
-            <a href="{{ url_for('smart_center') }}" class="nav-link {% if request.endpoint == 'smart_center' %}active{% endif %}">智能中心</a>
-            <a href="{{ url_for('admin') }}" class="nav-link {% if request.endpoint == 'admin' %}active{% endif %}">管理员管理界面</a>
-        </nav>
-        
-        <!-- 内容区域 -->
-        <div class="content">
-            {% block content %}{% endblock %}
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <!-- 左侧菜单 -->
+        <div class="nav-left">
+            <a href="{{ url_for('main_info') }}" class="{% if request.endpoint == 'main_info' %}active{% endif %}">主要信息</a>
+            <a href="{{ url_for('underwater') }}" class="{% if request.endpoint == 'underwater' %}active{% endif %}">水下系统</a>
+            <a href="{{ url_for('smart_center') }}" class="{% if request.endpoint == 'smart_center' %}active{% endif %}">数据中心</a>
+            <a href="{{ url_for('admin') }}" class="{% if request.endpoint == 'admin' %}active{% endif %}">智能中心</a>
+        </div>
+
+        <!-- 中间标题 -->
+        <div class="nav-title">
+            智慧海洋牧场大数据可视化系统
+        </div>
+
+        <!-- 右侧图标信息 -->
+        <div class="nav-right">
+            <div><i class="ri-time-line"></i><span id="time-display">--:--:--</span></div>
+            <div><i class="ri-calendar-line"></i><span id="date-display">----</span></div>
+            <div><i class="ri-thermometer-line"></i>12~14°C</div>
         </div>
     </div>
+
+    <!-- 页面内容区域 -->
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+    function updateTimeAndDate() {
+        const now = new Date();
+
+        // 时间格式 HH:MM:SS
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('time-display').textContent = `${hours}:${minutes}:${seconds}`;
+
+        // 日期格式 YYYY.MM.DD
+        const year = now.getFullYear();
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        document.getElementById('date-display').textContent = `${year}.${month}.${day}`;
+    }
+
+    updateTimeAndDate();             // 初始化一次
+    setInterval(updateTimeAndDate, 1000);  // 每秒刷新
+
+        function updateTime() {
+            const now = new Date();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            const timeStr = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('time-display').textContent = timeStr;
+        }
+    
+        // 初始加载一次
+        updateTime();
+    
+        // 每秒更新时间
+        setInterval(updateTime, 1000);
+    </script>
 </body>
 </html>
