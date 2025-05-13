@@ -93,7 +93,7 @@ body {
 
 /* 内容区域样式 */
 .content {
-    padding: 20px;
+    padding: 5px;
     background: transparent;  /* 强制透明背景 */
     border-radius: 5px;
 }
@@ -112,33 +112,39 @@ body {
     text-align: center;
 }
 
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);  /* 两列 */
-    grid-template-rows: repeat(3, 1fr);     /* 三行 */
-    gap: 20px;
-    padding: 20px;
-    height: 80vh; /* 保持在一个视口内展示 */
-}
-
 .grid-layout {
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;  /* 左中右：中间列更宽 */
+    grid-template-columns: 2fr 3fr 2fr;  /* 左中右：中间列更宽 */
     grid-template-rows: 1fr 1fr;         /* 上下两行等高 */
     grid-template-areas:
         "area1 area2 area3"
         "area4 area5 area6";
     gap: 10px;
-    height: 85vh;
+    height: 89vh;
     padding: 10px;
 }
 
-.grid-item {
-    background: rgba(255, 255, 255, 0.06);
+/* .grid-item {
+    background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px); 
     border-radius: 8px;
-    padding: 12px;
+    padding: 2px;
+    color: white;
+    font-family: "Orbitron", "Noto Sans SC", sans-serif;
+    font-size: 16px;
+} */
+
+.grid-item {
+    background: transparent;
+    /* 青蓝色实线边框 */
+    border: 1px solid #00C3FF;
+    /* 内外两层发光阴影：内侧小光晕 + 外侧大光晕 */
+    box-shadow:
+      0 0 6px rgba(0, 195, 255, 0.8),   /* 紧贴边框的强烈内光 */
+      0 0 20px rgba(0, 195, 255, 0.5);  /* 扩散更远的柔和外光 */
+    border-radius: 8px;
+    padding: 2px;
     color: white;
     font-family: "Orbitron", "Noto Sans SC", sans-serif;
     font-size: 16px;
@@ -151,3 +157,152 @@ body {
 .area4 { grid-area: area4; }
 .area5 { grid-area: area5; }
 .area6 { grid-area: area6; }
+
+/* 鱼群种类占比环形图 */
+/* .species-chart {
+    text-align: center;
+    padding: 10px;
+    color: white;
+  } */
+  
+  .chart-title {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #ffffff;
+    text-shadow: 0 0 3px #00ffff;
+  } 
+
+/* 去掉内边距，只给标题留空间 */
+.species-chart {
+    text-align: center;
+    padding-top: 10px;    /* 只在上方给点空隙 */
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    height: 100%;         /* 确保填满整个 area6 */
+    box-sizing: border-box;
+}
+
+/* 让图表容器真正占满父元素减去标题高度 */
+#speciesPie {
+    width: 100%;
+    height: calc(100% - 10px); /* 标题高度约 30px，可根据实际微调 */
+}
+
+/* 模块3 容器：左右并排 */
+.area3 .panel-container {
+    display: flex;
+    gap: 10px;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  
+  /* 每个信息面板 */
+  .area3 .panel-box {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(6px);
+    border-radius: 8px;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+  
+  /* 面板标题行 */
+  .area3 .panel-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  /* 图标样式 */
+  .area3 .panel-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 6px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 4px #00c3ff);
+  }
+  
+  /* 标题文字 */
+  .area3 .panel-title {
+    font-size: 16px;
+    color: #00c3ff;
+    border: 1px solid #00c3ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+  }
+  
+  /* 信息列表 */
+  .area3 .info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    color: #fff;
+    font-size: 14px;
+  }
+  .area3 .info-list li {
+    margin: 6px 0;
+  }
+
+  /* 时钟 */
+  
+ /* 让 flip-item 横向占满整行 */
+/* 列表项内对齐 */
+/* .area3 .info-list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+  } */
+  
+  /* 标签 */
+  .flip-label {
+    color: #fff;
+    font-size: 14px;
+    min-width: 80px;
+  }
+  
+  /* 数字时钟容器 */
+  .digital-clock {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  /* “天:时:分”统一外观 */
+  .dc-unit {
+    flex: none;           /* 固定宽度 */
+    width: 48px;          /* 固定宽度根据最长数字调整 */
+    height: 32px;
+    line-height: 32px;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    color: #00faff;
+    background: rgba(0,0,0,0.5);
+    border-radius: 4px;
+    text-align: center;
+    box-shadow: 0 0 4px rgba(0,255,255,0.8);
+  }
+  
+  /* 只作用于“冒号” */
+  .separator {
+    flex: none;
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  .dynamic-value {
+    display: inline-block;
+    padding: 1px 1px;
+    border: 1px solid #00c3ff;
+    border-radius: 1px;
+    background: rgba(0, 195, 255, 0.1);
+    color: #bd70e1;
+    font-weight: bold;
+    min-width: 40px;  /* 确保对齐 */
+    text-align: center;
+  }

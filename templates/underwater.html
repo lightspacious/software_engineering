@@ -1,13 +1,472 @@
 {% extends "base.html" %}
 
-
 {% block content %}
 <div class="grid-layout">
     <div class="grid-item area1">模块1：左上</div>
     <div class="grid-item area2">模块2：中上</div>
-    <div class="grid-item area3">模块3：右上</div>
-    <div class="grid-item area4">模块4：左下</div>
-    <div class="grid-item area5">模块5：中下</div>
-    <div class="grid-item area6">模块6：右下</div>
+      <!-- 模块3：硬件面板 -->
+    <div class="grid-item area3">
+        <div class="panel-container">
+        <!-- 左侧：网箱信息 -->
+        <div class="panel-box">
+            <div class="panel-header">
+            <img 
+                src="{{ url_for('static', filename='网箱养殖.png') }}" 
+                alt="网箱图标" 
+                class="panel-icon">
+            <span class="panel-title">网箱信息</span>
+            </div>
+            <ul class="info-list">
+                <li>网箱长度：<span class="dynamic-value">100m</span></li>
+                <li>网箱宽度：<span class="dynamic-value">50m</span></li>
+                <li>网箱深度：<span class="dynamic-value">30m</span></li>
+                <li>网箱经度：<span class="dynamic-value">128.034</span></li>
+                <li>网箱纬度：<span class="dynamic-value">56.123</span></li>
+            </ul>
+        </div>
+        
+        <!-- 右侧：水底传感器信息 -->
+        <!-- <div class="panel-box">
+            <div class="panel-header">
+            <img 
+                src="{{ url_for('static', filename='传感器.png') }}" 
+                alt="传感器图标" 
+                class="panel-icon">
+            <span class="panel-title">水底传感器</span>
+            </div>
+            <ul class="info-list">
+            <li>运行时间：24天13小时43分钟</li>
+            <li>下次检修：35天后</li>
+            <li>保修过期：2035年02月01日</li>
+            </ul>
+        </div> -->
+
+        <div class="panel-box">
+            <div class="panel-header">
+              <img src="{{ url_for('static', filename='传感器.png') }}"
+                   alt="传感器" class="panel-icon">
+              <span class="panel-title">水底传感器</span>
+            </div>
+            <ul class="info-list">
+              <li>
+                <span class="flip-label">运行时间(天/小时/分钟)：</span>
+                <div id="runtimeClock" class="digital-clock">
+                  <span class="dc-unit" id="rt-days">00</span>
+                  <span class="separator">:</span>
+                  <span class="dc-unit" id="rt-hours">00</span>
+                  <span class="separator">:</span>
+                  <span class="dc-unit" id="rt-mins">00</span>
+                </div>
+              </li>
+              <li>
+                <span class="flip-label">下次检修(天/小时/分钟)：</span>
+                <div id="serviceClock" class="digital-clock">
+                    <span class="dc-unit" id="sv-days">00</span><span class="separator">:</span>
+                    <span class="dc-unit" id="sv-hours">00</span><span class="separator">:</span>
+                    <span class="dc-unit" id="sv-mins">00</span>
+                </div>
+              </li>
+              <li>
+                <span class="flip-label">保修到期(天/小时/分钟)：</span>
+                <div id="warrantyClock" class="digital-clock">
+                    <span class="dc-unit" id="wr-days">00</span><span class="separator">:</span>
+                    <span class="dc-unit" id="wr-hours">00</span><span class="separator">:</span>
+                    <span class="dc-unit" id="wr-mins">00</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+          
+        </div>
+    </div>
+
+    <!-- 模块4：流图 -->
+  <div class="grid-item area4" style="position: relative; overflow: hidden;">
+    <!-- 标题 -->
+    <h3 class="chart-title" style="
+         position: absolute;
+         top: 8px;
+         left: 50%;
+         transform: translateX(-50%);
+         color: #fff;
+         z-index: 10;
+    ">
+      鱼群数量历史流图
+    </h3>
+    <!-- 流图容器，下方留出标题高度 -->
+    <div id="streamgraph" style="
+         position: absolute;
+         top: 40px;
+         left: 0;
+         right: 0;
+         bottom: 0;
+    "></div>
+  </div>
+
+      <!-- 模块5：3D 气泡图 + 底部菜单 -->
+    <div class="grid-item area5" style="position: relative; overflow: visible;">
+        <!-- 标题 -->
+        <h3 class="chart-title" 
+            style="position: absolute; top:2px; left:50%; transform: translateX(-50%); z-index:10;">
+        鱼群生长情况气泡图
+        </h3>
+
+       <!-- 侧边垂直菜单 -->
+        <div class="bubble-menu" style="
+        position: absolute;
+        top: 50%;                   /* 垂直方向中间 */
+        right: 15px;                 /* 距离右侧 15px */
+        transform: translateY(-50%);/* 垂直居中校正 */
+        display: flex;
+        flex-direction: column;     /* 改为垂直排列 */
+        gap: 6px;
+        z-index: 10;
+        ">
+        {% for sp in species_list %}
+        <button class="bubble-btn" data-species="{{ sp }}" style="
+            padding:4px 8px;
+            background:#004080;
+            color:#fff;
+            border:none;
+            border-radius:4px;
+            cursor:pointer;
+            font-size:12px;
+        ">
+        {{ sp }}
+        </button>
+        {% endfor %}
+        </div>
+
+        <!-- 3D 图容器 -->
+        <div id="bubble3D" style="width:100%; height:100%;"></div>
+    </div>
+
+  <!-- 模块6：饼图 ... -->
+    <div class="grid-item area6"> 
+        <div class="species-chart">
+            <h3 class="chart-title">鱼群种类占比</h3>
+            <!-- <div id="speciesPie" style="width: 350px; height: 200px; margin: auto;"></div> -->
+             <div id="speciesPie" style="width:100%; height:100%;"></div>
+          </div>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script>
+  // 从后端注入的数据
+  const speciesData  = {{ species_data  | tojson }};
+  const totalCount   = {{ species_total | tojson }};
+
+  const speciesPie = echarts.init(document.getElementById('speciesPie'));
+  speciesPie.setOption({
+    title: [{
+        text: '总数\n' + totalCount,
+      left: 'center',
+      top: 'center',
+      textStyle: { color: '#aaa', fontSize: 20, lineHeight: 28 }
+    }],
+    tooltip: { trigger: 'item', formatter: '{b}<br/>{c} ({d}%)' },
+    legend: { show: false },
+    series: [{
+      name: '鱼群种类',
+      type: 'pie',
+      radius: ['40%', '90%'],
+      avoidLabelOverlap: false,      // 不隐藏任何标签
+      labelLayout: {            // 强制所有标签不重叠隐藏
+        hideOverlap: false
+      },
+      // 最小扇区角度，保证非常小的扇区也能分到空间
+      minAngle: 5,
+      label: {
+        show: true,
+        position: 'inside',
+        formatter: '{b} {c} ({d}%)',
+        color: '#fff',
+        fontSize: 12
+      },
+      labelLine: {
+        show: true,
+        length: 15,
+        length2: 10,
+        lineStyle: { color: '#88cfff' }
+      },
+      data: speciesData,
+      color: ['#f56a42','#e2435f','#fba62f','#1ab394','#8c8cff','#429bf5','#ffcc00','#00ccff']
+    }]
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-gl/dist/echarts-gl.min.js"></script>
+<script>
+  const allFish     = {{ fish_records | tojson }};
+  const speciesList = {{ species_list  | tojson }};
+
+  // 初始化 3D 气泡图
+  const chart3D = echarts.init(document.getElementById('bubble3D'));
+  chart3D.setOption({
+    tooltip: {
+      textStyle: { color: '#fff' },
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      formatter: p =>
+        `Species: ${p.data[3]}<br/>` +
+        `Weight: ${p.data[0].toFixed(1)} g<br/>` +
+        `Length: ${p.data[1].toFixed(1)} cm<br/>` +
+        `Width: ${p.data[2].toFixed(1)} cm`
+    },
+    // 轴线与网格
+    xAxis3D: {
+      name: 'Weight (g)',
+      nameTextStyle: { color: '#fff' },
+      axisLine: { lineStyle: { color: '#fff', width: 2 } },
+      axisLabel: { color: '#fff' },
+      splitLine: { lineStyle: { color: '#888', width: 1, opacity: 0.3 } },
+      axisTick: { lineStyle: { color: '#fff', width: 1 } }
+    },
+    yAxis3D: {
+      name: 'Length (cm)',
+      nameTextStyle: { color: '#fff' },
+      axisLine: { lineStyle: { color: '#fff', width: 2 } },
+      axisLabel: { color: '#fff' },
+      splitLine: { lineStyle: { color: '#888', width: 1, opacity: 0.3 } },
+      axisTick: { lineStyle: { color: '#fff', width: 1 } }
+    },
+    zAxis3D: {
+      name: 'Width (cm)',
+      nameTextStyle: { color: '#fff' },
+      axisLine: { lineStyle: { color: '#fff', width: 2 } },
+      axisLabel: { color: '#fff' },
+      splitLine: { lineStyle: { color: '#888', width: 1, opacity: 0.3 } },
+      axisTick: { lineStyle: { color: '#fff', width: 1 } }
+    },
+    // 3D 场景光照与后期特效
+    grid3D: {
+      viewControl: { autoRotate: false },
+      light: {
+        main: { intensity: 1.2, shadow: true },
+        ambient: { intensity: 0.4 }
+      },
+      postEffect: {
+        enable: true,
+        bloom: { enable: true, bloomIntensity: 0.4 }
+      }
+    },
+    series: [{
+      type: 'scatter3D',
+      shading: 'realistic',               // 开启真实光照材质
+      symbolSize: 12,                     // 气泡再放大
+      realisticMaterial: {
+        roughness: 0.3,                   // 粗糙度
+        metalness: 0.7                    // 金属感
+      },
+      itemStyle: {
+        color: '#00d2ff',
+        opacity: 0.9
+      },
+      data: []                            // 由 updateBubble 填充
+    }]
+  });
+
+  // 更新气泡图数据
+  function updateBubble(species) {
+    const data = allFish
+      .filter(f => f.species === species)
+      .map(f => [
+        f.weight,
+        f.length,
+        f.width,
+        f.species
+      ]);
+    chart3D.setOption({ series: [{ data }] });
+  }
+
+
+  // 3. 菜单按钮绑定
+  document.querySelectorAll('.bubble-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // 重置所有按钮样式
+      document.querySelectorAll('.bubble-btn')
+              .forEach(b => b.style.background = '#004080');
+      btn.style.background = '#00c3ff';
+      // 手动切换后：暂停自动切换 10 秒
+      pauseAuto();
+      const sp = btn.dataset.species;
+      // 找到这个 species 在 speciesList 数组里的下标
+      currentIdx = speciesList.indexOf(sp);
+      updateBubble(btn.dataset.species);
+    });
+  });
+
+  // 4. 自动切换逻辑
+  let currentIdx = 0;
+  let autoTimer  = null;
+  let resumeTimer= null;
+
+  function highlightSpeciesBtn(species) {
+  document.querySelectorAll('.bubble-btn').forEach(btn => {
+    btn.style.background = (btn.dataset.species === species)
+                           ? '#00c3ff'
+                           : '#004080';
+  });
+}
+
+function autoSwitch() {
+  currentIdx = (currentIdx + 1) % speciesList.length;
+  const sp = speciesList[currentIdx];
+  highlightSpeciesBtn(sp);
+  updateBubble(sp);
+}
+
+  function startAuto() {
+    // 每 2 秒自动切换
+    autoTimer = setInterval(autoSwitch, 2000);
+  }
+
+  function pauseAuto() {
+    // 清除当前自动切换
+    clearInterval(autoTimer);
+    clearTimeout(resumeTimer);
+    // 5秒后恢复自动切换
+    resumeTimer = setTimeout(startAuto, 5000);
+  }
+
+  // 5. 页面加载时默认展示第一个，并启动自动切换
+  window.onload = () => {
+    const first = speciesList[0];
+    const btn   = document.querySelector(`.bubble-btn[data-species="${first}"]`);
+    btn.style.background = '#00c3ff';
+    updateBubble(first);
+    // 启动自动切换
+    startAuto();
+  };
+</script>
+
+<script>
+    function pad(v){ return String(v).padStart(2,'0'); }
+  
+    // －－ 运行时间（精确到分钟） －－
+    const startOffsetMin = 24*24 + 13*1 + 43; 
+    const startTimeMs    = Date.now() - startOffsetMin*60*1000;
+    function updateRuntime(){
+      let m = Math.floor((Date.now()-startTimeMs)/60000);
+      const days = Math.floor(m/(60*24)); m %= (60*24);
+      const hrs  = Math.floor(m/60); m %= 60;
+      document.getElementById('rt-days' ).textContent = pad(days);
+      document.getElementById('rt-hours').textContent = pad(hrs);
+      document.getElementById('rt-mins' ).textContent = pad(m);
+    }
+    updateRuntime(); setInterval(updateRuntime,60000);
+  
+    // －－ 下次检修倒计时 －－
+    let svcSec = 35*24*3600;
+    function updateService(){
+      if(svcSec<0) svcSec=0;
+      let t = svcSec;
+      const days = Math.floor(t/86400); t %= 86400;
+      const hrs  = Math.floor(t/3600);  t %= 3600;
+      const mins = Math.floor(t/60);
+      document.getElementById('sv-days' ).textContent = pad(days);
+      document.getElementById('sv-hours').textContent = pad(hrs);
+      document.getElementById('sv-mins' ).textContent = pad(mins);
+      svcSec--;
+    }
+    updateService(); setInterval(updateService,1000);
+  
+    // －－ 保修到期倒计时 －－
+    let wrSec = Math.max(0,
+      Math.floor((new Date(2035,1,1).getTime()-Date.now())/1000)
+    );
+    function updateWarranty(){
+      if(wrSec<0) wrSec=0;
+      let t = wrSec;
+      const days = Math.floor(t/86400); t %= 86400;
+      const hrs  = Math.floor(t/3600);  t %= 3600;
+      const mins = Math.floor(t/60);
+      document.getElementById('wr-days' ).textContent = pad(days);
+      document.getElementById('wr-hours').textContent = pad(hrs);
+      document.getElementById('wr-mins' ).textContent = pad(mins);
+      wrSec--;
+    }
+    updateWarranty(); setInterval(updateWarranty,1000);
+  </script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script>
+(function(){
+  const chart = echarts.init(document.getElementById('streamgraph'));
+
+  // ① 最近 24 个月的 Date 对象数组
+  const times = [];
+  const today = new Date();
+  for (let i = 23; i >= 0; i--) {
+    times.push(new Date(today.getFullYear(), today.getMonth() - i, 1));
+  }
+
+  // ② 七种鱼 & 对应明艳色（不透明）
+  const species = ['Bream','Roach','Whitefish','Parkki','Perch','Pike','Smelt'];
+  const colors  = ['#FF5733','#33FF57','#3357FF','#FF33A8','#33FFF5','#F5FF33','#A833FF'];
+
+  // ③ 构造 riverData，格式 [时间戳, 数量, 鱼种]
+  const riverData = [];
+  species.forEach(name => {
+    times.forEach(d => {
+      riverData.push([
+        d.getTime(),
+        Math.round(20 + Math.random() * 180), 
+        name
+      ]);
+    });
+  });
+
+  // ④ 重新渲染
+  chart.setOption({
+    color: colors,
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' }
+    },
+    legend: {
+      data: species,
+      top: 30,
+      textStyle: { color:'#fff' }
+    },
+    singleAxis: {
+      top: 60,
+      bottom: 60,
+      axisPointer: { animation: true },
+      type: 'time',
+      axisLine: { lineStyle:{ color:'#888' } },
+      axisLabel: { color:'#fff' },
+      data: times
+    },
+    series: [{
+      type: 'themeRiver',
+      singleAxisIndex: 0,
+      data: riverData,
+      itemStyle: { opacity: 1 }
+    }],
+    dataZoom: [{
+      type: 'slider',
+      singleAxisIndex: 0,
+      filterMode: 'weakFilter',
+      top: '85%',
+      start: 0,
+      end: 50,
+      height: 12,
+      handleStyle: { color:'#fff' },
+      backgroundColor: 'rgba(0,0,0,0.3)',
+      fillerColor: 'rgba(255,255,255,0.4)',
+      dataBackground: {
+        lineStyle:{ color:'#555' },
+        areaStyle:{ color:'rgba(255,255,255,0.2)' }
+      }
+    }]
+  });
+
+  window.addEventListener('resize', ()=> chart.resize());
+})();
+</script>
+
 {% endblock %}
+
