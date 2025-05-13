@@ -1,7 +1,511 @@
 {% extends "base.html" %}
 
+
+
 {% block content %}
-<h1>主要信息界面</h1>
-<p>这里是系统的主要信息展示区域。</p>
-<p>您可以在此查看系统的基本状态、统计数据和其他重要信息。</p>
+<div class="main-grid">
+    <!-- 左上方块 -->
+    <div class="card video-section">
+        <div class="section-header">
+            <h2>海洋牧场：一号舱</h2>
+            <div class="real-time" id="full-time-display">2024年04月31日 星期三 21:00:00</div>
+        </div>
+        <div class="video-grid">
+            <div class="video-box">
+                <video width="100%" controls autoplay   muted>
+                    <source src="static\movie\1.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+            <div class="video-box">
+                <video width="100%" controls autoplay   muted>
+                    <source src="static\movie\1.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+            <div class="video-box">
+                <video width="100%" controls autoplay muted>
+                    <source src="static\movie\2.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+            <div class="video-box">
+                <video width="100%" controls autoplay muted>
+                    <source src="static\movie\2.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 右上方块 -->
+    <div class="card data-section">
+        <h3>实时水文气象数据</h3>
+        <table class="sensor-table">
+            <tr>
+                <td>电池电压（V）</td>
+                <td><progress id="voltage-progress" value="25.90" max="30"></progress></td>
+                <td id="voltage">25.90</td>
+            </tr>
+            <tr>
+                <td>盐度（%）</td>
+                <td><progress id="salinity-progress" value="34.16" max="100"></progress></td>
+                <td id="salinity">34.16</td>
+            </tr>
+            <tr>
+                <td>溶解氧（mg/L）</td>
+                <td><progress id="dissolvedOxygen-progress" value="0.00" max="10"></progress></td>
+                <td id="dissolvedOxygen">0.00</td>
+            </tr>
+            <tr>
+                <td>浊度（NTU）</td>
+                <td><progress id="turbidity-progress" value="2.05" max="10"></progress></td>
+                <td id="turbidity">2.05</td>
+            </tr>
+            <tr>
+                <td>pH</td>
+                <td><progress id="ph-progress" value="8.37" max="14"></progress></td>
+                <td id="ph">8.37</td>
+            </tr>
+            <tr>
+                <td>水温（℃）</td>
+                <td><progress id="temperature-progress" value="15" max="30"></progress></td>
+                <td id="temperature">15</td>
+            </tr>
+        </table>
+
+         <!-- 显示上次更新时间 -->
+        <div id="last-updated" style="color: white; margin-top: 10px; font-size: 14px;">
+            上次更新时间: <span id="update-time">--</span>
+        </div>
+    </div>
+
+
+
+    <!-- 中间左侧 -->
+    <div class="card history-section">
+        <div class="history-header">
+            <h3>历史记录</h3>
+            <div class="time-range">
+                统计时间：2023-01-31 21:40 至：2024-01-31 21:40
+            </div>
+        </div>
+        <div class="chart-placeholder">电池电压历史数据图表</div>
+    </div>
+
+    <!-- 中间右侧（地图） -->
+    <div class="card map-section">
+        <h3>海洋牧场位置展示</h3>
+        <div id="map-container" class="map-placeholder"></div>
+        <div class="coordinates">
+        
+            <span>经度：122.2077</span>
+            <span>纬度：29.9853</span>
+        </div>
+    </div>
+
+    <!-- 底部左侧 -->
+    <div class="card control-section">
+        <h3>设备控制</h3>
+        <div class="control-grid">
+            <!-- 第一个列：摄像机 -->
+            <div class="control-item">
+                <h4>摄像机</h4>
+                <div class="device-info">
+                    <div><span>设备ID：</span>6D19C331-4F08-47A1</div>
+                    <div><span>主控状态：</span>正常</div>
+                    <div><span>版本：</span>V0.1.1</div>
+                    <div><span>温度：</span>39.64℃</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="camera-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- 第二列：灯光 -->
+            <div class="control-item">
+                <h4>灯光</h4>
+                <div class="device-info">
+                    <div><span>设备ID：</span>6D19C331-4F08-47A1</div>
+                    <div><span>主控状态：</span>正常</div>
+                    <div><span>版本：</span>V0.1.1</div>
+                    <div><span>温度：</span>39.64℃</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="light-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- 第三列：清洁刷 -->
+            <div class="control-item">
+                <h4>清洁刷</h4>
+                <div class="device-info">
+                    <div><span>设备ID：</span>6D19C331-4F08-47A1</div>
+                    <div><span>主控状态：</span>正常</div>
+                    <div><span>版本：</span>V0.1.1</div>
+                    <div><span>温度：</span>39.64℃</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="brush-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<style>
+.main-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    background: rgba(4, 15, 31, 0.9);
+    border-radius: 8px;
+    padding: 20px;
+    color: white;
+}
+
+.video-section {
+    grid-row: 1;
+    grid-column: 1;
+}
+
+.data-section {
+    grid-row: 1;
+    grid-column: 2;
+}
+
+.history-section {
+    grid-row: 2;
+    grid-column: 1;
+}
+
+.map-section {
+    grid-row: 2;
+    grid-column: 2;
+}
+
+.control-section {
+    grid-row: 3;
+    grid-column: 1 / span 2;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.video-box {
+    aspect-ratio: 16/9;
+    background: #0a2342;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sensor-table {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.sensor-table td {
+    padding: 8px;
+    border-bottom: 1px solid #2d5278;
+}
+
+.sensor-table td[id] {
+    color: black;  /* 数据（数字）颜色为黑色 */
+    font-weight: bold;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.control-buttons button {
+    padding: 8px 20px;
+    background: #1a4b7a;
+    border: none;
+    color: white;
+    border-radius: 4px;
+}
+
+.device-status div {
+    margin: 8px 0;
+    color: #89c3ff;
+}
+
+/* 地图容器样式 */
+#map-container {
+    height: 300px;
+    width: 100%;
+    margin-top: 15px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.coordinates {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #89c3ff;
+    display: flex;
+    gap: 15px;
+}
+
+
+/* 水文数据进度条样式 */
+/* 自定义进度条样式 */
+progress {
+    width: 600%;  /* 使进度条宽度为100% */
+    height: 20px;  /* 设置进度条高度 */
+    border-radius: 10px;  /* 圆角 */
+    background-color: #ddd;  /* 背景色 */
+    -webkit-appearance: none;  /* 去除默认样式 */
+    appearance: none;
+    margin: 5px 0;  /* 上下留一点间距 */
+}
+
+progress::-webkit-progress-bar {
+    background-color: #ddd;
+    border-radius: 20px;
+}
+
+progress::-webkit-progress-value {
+    background-color: #007bff;  /* 蓝色进度条 */
+    border-radius: 10px;
+}
+
+progress::-moz-progress-bar {
+    background-color: #007bff;  /* Firefox 支持的样式 */
+    border-radius: 10px;
+}
+
+
+/* 底部左侧 */
+/* 自定义网格布局 */
+.control-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;  /* 三列布局 */
+    gap: 20px;
+    padding: 20px;
+}
+
+/* 控制项的样式 */
+.control-item {
+    background-color: #1c2c46;  /* 深蓝色背景 */
+    border-radius: 10px;
+    padding: 20px;
+    color: white;
+    text-align: center;
+}
+
+.control-item h4 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #00aaff;  /* 标题蓝色 */
+}
+
+.device-info {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.device-info div {
+    margin-bottom: 10px;
+}
+
+.device-info span {
+    font-weight: bold;
+    color: #00aaff;  /* 信息标签蓝色 */
+}
+
+/* 滑动开关按钮样式 */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 50px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    border-radius: 50px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+}
+
+/* 当checkbox被选中时 */
+input:checked + .slider {
+    background-color: #007bff;  /* 选中时的背景色 */
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);  /* 滑动到右边 */
+}
+
+/* 滑动开关按钮：悬停效果 */
+.switch:hover .slider {
+    background-color: #007bff;
+}
+
+</style>
+
+<script>
+// 完整时间显示（带星期）
+function updateFullTime() {
+    const now = new Date();
+    const weekdays = ["日","一","二","三","四","五","六"];
+    document.getElementById('full-time-display').textContent = 
+        `${now.getFullYear()}年${(now.getMonth()+1).toString().padStart(2,'0')}月${now.getDate().toString().padStart(2,'0')}日 星期${weekdays[now.getDay()]} ` +
+        `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+}
+setInterval(updateFullTime, 1000);
+updateFullTime();
+</script>
+<script>
+function initMap() {
+    // 创建高德地图实例
+    var map = new AMap.Map('map-container', {
+    center: [122.2077, 29.9853], // 设置地图中心点为舟山渔场
+    zoom: 10,  // 设置地图缩放级别
+    scrollWheel: true // 启用滚轮缩放
+    });
+    
+    // 添加比例尺控件
+    map.addControl(new AMap.Scale());
+    
+    // 添加平移缩放控件
+    map.addControl(new AMap.Navigation());
+    
+    // 添加自定义标记
+    var marker = new AMap.Marker({
+        position: [122.7308, 37.5412],  // 设置标记的坐标
+        title: "海洋牧场一号舱"  // 标记的标题
+    });
+    marker.setMap(map);
+    
+    // 信息窗口
+    var infoWindow = new AMap.InfoWindow({
+        content: "海洋牧场一号舱", // 信息窗口的内容
+        offset: new AMap.Pixel(0, -30) // 信息窗口的偏移量
+    });
+    
+    // 添加标记点击事件，打开信息窗口
+    marker.on('click', function() {
+        infoWindow.open(map, marker.getPosition());
+    });
+}
+
+// 在页面加载完成后初始化地图
+// window.onload = function() {
+//     initMap();
+// };
+</script>
+<script>
+    // 创建一个函数来解析CSV文件
+    function parseCSV(csvText) {
+        const rows = csvText.split("\n");
+        const data = [];
+        
+        // 跳过第一行标题，并逐行解析数据
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].split(",");
+            if (cells.length === 6) { // 确保数据格式正确
+                data.push({
+                    voltage: parseFloat(cells[0]),
+                    salinity: parseFloat(cells[1]),
+                    dissolvedOxygen: parseFloat(cells[2]),
+                    turbidity: parseFloat(cells[3]),
+                    ph: parseFloat(cells[4]),
+                    temperature: parseFloat(cells[5])
+                });
+            }
+        }
+        return data;
+    }
+
+    function loadDataFromCSV() {
+        fetch('/static/dataset/水文.csv')  // CSV文件的路径
+            .then(response => response.text())
+            .then(csvText => {
+                const dataSet = parseCSV(csvText);
+
+                // 每30秒随机选择一条数据
+                setInterval(function() {
+                    const randomIndex = Math.floor(Math.random() * dataSet.length);
+                    const data = dataSet[randomIndex];
+
+                    // 更新表格中的每个单元格
+                    document.getElementById('voltage').textContent = data.voltage;
+                    document.getElementById('salinity').textContent = data.salinity;
+                    document.getElementById('dissolvedOxygen').textContent = data.dissolvedOxygen;
+                    document.getElementById('turbidity').textContent = data.turbidity;
+                    document.getElementById('ph').textContent = data.ph;
+                    document.getElementById('temperature').textContent = data.temperature;
+
+                    // 更新进度条
+                    document.getElementById('voltage-progress').value = data.voltage;
+                    document.getElementById('salinity-progress').value = data.salinity;
+                    document.getElementById('dissolvedOxygen-progress').value = data.dissolvedOxygen;
+                    document.getElementById('turbidity-progress').value = data.turbidity;
+                    document.getElementById('ph-progress').value = data.ph;
+                    document.getElementById('temperature-progress').value = data.temperature;
+
+                    // 获取并显示上次更新时间
+                    const now = new Date();
+                    const timeString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+                    document.getElementById('update-time').textContent = timeString;
+
+                }, 30000); // 每30秒更新一次数据
+            })
+            .catch(error => console.error('Error loading CSV file:', error));
+    }
+
+
+
+    // 页面加载时初始化数据
+    window.onload = function() {
+        // initMap();
+
+        loadDataFromCSV();  // 加载并显示数据
+        initMap();
+
+    };
+</script>
 {% endblock %}

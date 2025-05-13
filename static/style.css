@@ -151,3 +151,76 @@ body {
 .area4 { grid-area: area4; }
 .area5 { grid-area: area5; }
 .area6 { grid-area: area6; }
+
+
+
+/*main_info 界面补充 start*/
+/* 按钮样式 */
+.btn {
+    background-color: #00c3ff;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.btn:hover {
+    background-color: #009acd;
+}
+
+.btn:focus {
+    outline: none;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #00c3ff;
+    border-radius: 10px;
+}
+
+/* 图表和地图 */
+.chart-img, .location-map {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* 设备状态 */
+.device-info {
+    font-size: 16px;
+}
+
+.status-ok {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;  /* 一列布局 */
+        grid-template-rows: auto;   /* 自适应高度 */
+    }
+    .nav-title {
+        font-size: 16px;
+        text-align: left;
+        margin-left: 20px;
+    }
+    .nav-left {
+        display: block;
+    }
+    .nav-right {
+        display: block;
+        gap: 10px;
+    }
+}
+
+/*main_info 界面补充 end*/
+
