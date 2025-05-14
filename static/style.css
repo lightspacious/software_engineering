@@ -124,17 +124,6 @@ body {
     padding: 10px;
 }
 
-/* .grid-item {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(6px); 
-    border-radius: 8px;
-    padding: 2px;
-    color: white;
-    font-family: "Orbitron", "Noto Sans SC", sans-serif;
-    font-size: 16px;
-} */
-
 .grid-item {
     background: transparent;
     /* 青蓝色实线边框 */
@@ -476,12 +465,12 @@ body {
   .area3 .info-list {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 1px;
     color: #fff;
     font-size: 14px;
   }
   .area3 .info-list li {
-    margin: 6px 0;
+    margin: 20px 0;
   }
 
   /* 时钟 */
@@ -543,3 +532,225 @@ body {
     min-width: 40px;  /* 确保对齐 */
     text-align: center;
   }
+
+  /* ---- 模块1：水质概览 ---- */
+
+  /* area1 容器里的小标题 */
+.water-overview .overview-title {
+    color: #e0eef2;           /* 发光的蓝色 */
+    font-size: 16px;          /* 字号 */
+    font-weight: bold;        /* 加粗 */
+    text-align: center;       /* 居中 */
+    margin-top: 12px;       /* 标题和仪表盘之间留点空隙 */
+    text-shadow: 0 0 6px rgba(0,195,255,0.8); /* 发光效果 */
+  }
+/* ---- 模块1：水质概览 ---- */
+.water-overview {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;  
+    height:auto; 
+    box-sizing: border-box;
+    padding: 1px;
+    gap: 0px;
+  }
+  
+  .gauge-container {
+    position: absolute;    /* ② 切换到绝对定位 */
+    top: 7px;              /* ③ 距离父容器顶边 8px */
+    height: 300px;
+    width: 280px;
+    margin-bottom: 0;
+  }
+  
+  .refresh-btn {
+    position: absolute;    /* ② 切换到绝对定位 */
+    top: 210px;              /* ③ 距离父容器顶边 8px */
+    margin: 0;
+    padding: 0px 16px;
+    background: #0fcb5e;
+    border: none;
+    border-radius: 20px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(15,203,94,0.5);
+  }
+
+  .refresh-btn:hover {
+    background: #0daa50;
+  }
+  
+  .quality-cards { 
+    position: absolute;    /* ② 切换到绝对定位 */
+    top: 250px;              /* ③ 距离父容器顶边 8px */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;                  /* 缩小一点间距 */
+    width: 100%;
+    flex: 0 0 60%;             /* 让它只占父容器高度的 30% */
+    align-self: flex-start;    /* 顶部对齐，避免居中后卡片漂浮 */
+  }
+
+  .card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 2px;
+    padding: 2px;
+    text-align: center;
+    color: #fff;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center; /* 从左往右排列，可改成 center 居中 */
+    gap: 6px;                 /* 图标和文字之间留 6px */
+  }
+  
+  .card-icon {
+    font-size: 16px;
+    margin-bottom: 0px;
+  }
+  
+  .card-label {
+    font-size: 12px;
+    margin-bottom: 0px;
+  }
+  
+  .card-value {
+    font-size: 10px;
+    font-weight: bold;
+  } 
+
+
+  /* 整个模块2 的容器，用列方向 */
+/* 整体布局 */
+.module2 { display: flex; flex-direction: column; height:100%; gap:16px; padding:12px; }
+
+/* —— 上排三卡片 —— */
+.stats-cards { display: flex; gap:12px; }
+.stat-card {
+  flex: 1;
+  background: rgba(0,20,50,0.6);
+  border: 1px solid #00c3ff;
+  border-radius:8px;
+  padding:12px;
+  box-shadow: 0 0 8px rgba(0,195,255,0.4);
+  color:#fff;
+}
+.stat-card h5 {
+  margin:0 0 8px;
+  font-size:14px;
+  color:#00faff;
+  text-shadow:0 0 6px #00faff;
+}
+/* 主要数据 呼吸发光 + 缩放 */
+.stat-value {
+  margin:0;
+  font-size:24px;
+  font-weight:bold;
+  animation: pulse-neon 2s ease-in-out infinite,
+             scale-neon 3s ease-in-out infinite;
+}
+.stat-sub { display:none; } /* 不再用 */
+
+.stat-badges {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: row;  /* 先小标题，再徽章横排 */
+    align-items: center;
+    gap: 4px;
+}
+
+/* 每个设备的小格子 */
+/* 设备在线卡片内的四格网格 */
+.stat-badges-grid {
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 一行四列 */
+    gap: 12px;
+  }
+
+  
+  /* 设备小格统一等宽等高 */
+  .device-box {
+    background: rgba(0, 195, 255, 0.2);
+    border: 1px solid #00c3ff;
+    border-radius: 8px;
+    padding: 12px 0;
+    text-align: center;
+    color: #0ff;
+    font-size: 12px;
+    width: 70px;     /* 根据需要调小 */
+    height: 20px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  /* 今日新增／死亡 的小标题 */
+  .badge-title {
+    font-size: 12px;
+    color: #a0e0ff;
+    text-shadow: 0 0 4px rgba(0,195,255,0.6);
+}
+
+/* 新增/死亡 徽章 */
+.badge {
+  padding:2px 6px;
+  border-radius:4px;
+  font-size:11px;
+  animation: float-updown 2s ease-in-out infinite;
+}
+.badge.add   { background:rgba(0,255,0,0.2); color:#0f0; }
+.badge.dead  { background:rgba(255,0,0,0.2); color:#f00; }
+/* 设备徽章 和上面同大小 */
+.badge.device {
+  background: rgba(0,195,255,0.2);
+  color: #0ff;
+  animation: pulse-neon 2s infinite;
+}
+
+/* 呼吸发光阴影 */
+@keyframes pulse-neon {
+  0%,100% { text-shadow:0 0 6px rgba(0,195,255,0.6); }
+  50%     { text-shadow:0 0 20px rgba(0,195,255,0.9); }
+}
+/* 轻微放大再恢复 */
+@keyframes scale-neon {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.05); }
+}
+/* 徽章上下漂浮 */
+@keyframes float-updown {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(-4px); }
+}
+
+/* —— 下排翻页时钟 —— */
+.clock-panel {
+  background: transparent;
+  border:none;
+  border-radius:8px;
+  padding:0px;
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+}
+
+
+.clock-title {
+  color:#00faff;
+  font-size:18px;
+  margin:0px;
+  text-shadow:0 0 6px #00faff;
+}
+
+.clock-unit {
+  margin:0px;
+  color:#a0e0ff;
+  font-size:14px;
+}

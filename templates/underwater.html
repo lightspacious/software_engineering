@@ -2,8 +2,88 @@
 
 {% block content %}
 <div class="grid-layout">
-    <div class="grid-item area1">模块1：左上</div>
-    <div class="grid-item area2">模块2：中上</div>
+    <!-- 模块1：水质概览 -->
+<!-- 模块1：水质概览 -->
+<div class="grid-item area1">
+    <div class="water-overview">
+        <div class="overview-title">
+            环境数据评分
+          </div>
+      <!-- 半环形仪表盘 -->
+      <div id="waterQualityGauge" class="gauge-container"></div>
+      <!-- 一键刷新 -->
+      <button id="refreshBtn" class="refresh-btn">重新检测</button>
+      <!-- 4 个指标卡片 -->
+      <div class="quality-cards">
+        <div class="card">
+          <div class="card-icon">🌡️</div>
+          <div class="card-label">水温</div>
+          <div class="card-value" id="tempVal">24°C</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">💧</div>
+          <div class="card-label">溶解氧</div>
+          <div class="card-value" id="doVal">8.5 mg/L</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚗️</div>
+          <div class="card-label">pH 值</div>
+          <div class="card-value" id="phVal">7.2</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🌫️</div>
+          <div class="card-label">浊度</div>
+          <div class="card-value" id="turbVal">4 NTU</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+    <!-- 模块2 -->
+<div class="grid-item area2" style="overflow:hidden;">
+    <div class="module2">
+      <!-- 上排：三张等宽卡片 -->
+      <div class="stats-cards">
+        <!-- 卡片1：鱼群总量 + 新增/死亡 -->
+        <div class="stat-card">
+          <h5>鱼群总量</h5>
+          <p class="stat-value">159 尾</p>
+          <div class="stat-badges">
+            <div class="badge-title">今日新增/死亡:</div>
+            <span class="badge add">+38</span>
+            <span class="badge dead">-6</span>
+          </div>
+        </div>
+  
+        <!-- 卡片2：鱼种概况 -->
+        <div class="stat-card">
+          <h5>鱼种概况</h5>
+          <p class="stat-value">7 种</p>
+        </div>
+  
+        <!-- 卡片3：设备在线 -->
+        <div class="stat-card">
+            <h5>设备在线</h5>
+            <div class="stat-badges-grid">
+              <div class="device-box">摄像头 6</div>
+              <div class="device-box">云台 2</div>
+              <div class="device-box">声呐 1</div>
+              <div class="device-box">传感器 12</div>
+            </div>
+          </div>
+      </div>
+  
+      <!-- 下排：翻页时钟 -->
+      <div class="clock-panel">
+        <div class="clock-title">已保障养殖鱼群:</div>
+        <div id="protectedFishClock"></div>
+        <div class="clock-unit">尾</div>
+      </div>
+    </div>
+  </div>
+  
+      
       <!-- 模块3：硬件面板 -->
     <div class="grid-item area3">
         <div class="panel-container">
@@ -405,7 +485,15 @@ function autoSwitch() {
 
   // ② 七种鱼 & 对应明艳色（不透明）
   const species = ['Bream','Roach','Whitefish','Parkki','Perch','Pike','Smelt'];
-  const colors  = ['#FF5733','#33FF57','#3357FF','#FF33A8','#33FFF5','#F5FF33','#A833FF'];
+  const colors = [
+  '#FF7F50', // Perch（珊瑚橙）
+  '#EC407A', // Bream（粉红）
+  '#FFA726', // Roach（亮黄橙）
+  '#26A69A', // Pike（薄荷青）
+  '#7E57C2', // Smelt（柔和紫）
+  '#29B6F6', // Whitefish（天蓝）
+  '#FFEA00'  // Parkki（明黄）
+];
 
   // ③ 构造 riverData，格式 [时间戳, 数量, 鱼种]
   const riverData = [];
@@ -467,6 +555,150 @@ function autoSwitch() {
   window.addEventListener('resize', ()=> chart.resize());
 })();
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script>
+(function(){
+  // 初始化仪表盘
+  const gaugeChart = echarts.init(
+    document.getElementById('waterQualityGauge')
+  );
+
+  // 默认数据
+  let data = {
+    score: 81,       // 水质得分
+    temp: 24,        // 水温 °C
+    do: 8.5,         // 溶解氧 mg/L
+    ph: 7.2,         // pH 值
+    turb: 4          // 浊度 NTU
+  };
+
+  // 渲染函数
+  function render() {
+    // 更新卡片数值
+    document.getElementById('tempVal').textContent = data.temp + '°C';
+    document.getElementById('doVal').textContent   = data.do   + ' mg/L';
+    document.getElementById('phVal').textContent   = data.ph;
+    document.getElementById('turbVal').textContent = data.turb + ' NTU';
+
+    // 仪表盘配置
+    gaugeChart.setOption({
+      series: [{
+        type: 'gauge',
+        startAngle: 200,
+        endAngle: -20,
+        min: 0,
+        max: 100,
+        axisLine: {
+          lineStyle: {
+            width: 16,
+            color: [
+              [0.3, '#d93b3b'],
+              [0.7, '#f5a623'],
+              [1, '#0fcb5e']
+            ]
+          }
+        },
+        // 刻度文字样式（0,10,20...100）
+        axisLabel: {
+        color: '#ffffff',    // 白色
+        distance: 12,         // 和环的距离
+        fontSize: 12
+        },
+
+        // 小刻度（短线）的样式
+        axisTick: {
+        length: 6,           // 短线长度
+        lineStyle: {
+            color: '#88cfff',  // 浅蓝
+            width: 2
+        }
+        },
+
+        // 大刻度（分段）长线的样式
+        splitLine: {
+        length: 10,          // 长线长度
+        lineStyle: {
+            color: '#00c3ff',  // 发光蓝
+            width: 2
+        }
+        },
+
+        pointer: { show: true },
+        detail: {
+          valueAnimation: true,
+          formatter: '{value} 分',
+          fontSize: 24,
+          color: '#fff',
+          offsetCenter: ['0%', '20%'] 
+        },
+        data: [{ value: data.score }]
+      }]
+    });
+  }
+
+  // 初次渲染
+  render();
+
+  // 点击“刷新”模拟取新数据
+  document.getElementById('refreshBtn').addEventListener('click', ()=>{
+    // 随机生成新数据
+    data = {
+      score: Math.round(60 + Math.random()*40),
+      temp: (18 + Math.random()*10).toFixed(1),
+      do:   (5 + Math.random()*5).toFixed(1),
+      ph:   (6 + Math.random()*2).toFixed(1),
+      turb: Math.round(1 + Math.random()*9)
+    };
+    render();
+  });
+
+  // 自适应
+  window.addEventListener('resize', ()=> gaugeChart.resize());
+})();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.min.js"></script>
+<script>
+    $(function() {
+      const $el    = $('#protectedFishClock');
+      const count  = 159485;                  // 目标值
+      const frames = 50;                      // 初始动画分成 50 帧
+      const duration = 50 * frames;           // 总时长 = 帧数 × 50ms = 2500ms
+      const step   = Math.ceil(count / frames);
+      
+      // 1) 先创建一个从 0 开始的 FlipClock
+      const clock = new FlipClock($el, 0, {
+        clockFace: 'Counter',
+        autoStart: false,
+        minimumDigits: count.toString().length
+      });
+      
+      // 2) 初始动画：分 frames 步，把数字从 0 跑到 count
+      let current = 0, frame = 0;
+      const anim = setInterval(() => {
+        frame++;
+        current += step;
+        if (frame >= frames || current >= count) {
+          clock.setValue(count);
+          clearInterval(anim);
+          // —— 在动画结束后，延迟一下再启动自增 —— //
+          setTimeout(startAutoIncrement, 500);
+        } else {
+          clock.setValue(current);
+        }
+      }, 50);
+    
+      // 3) 定义一个函数：每 10s 自增 1
+      function startAutoIncrement() {
+        setInterval(() => {
+        clock.increment();  // 只 +1
+        }, 10000);
+      }
+    });
+    </script>
+
 
 {% endblock %}
 
