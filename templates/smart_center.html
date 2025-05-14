@@ -1,7 +1,1089 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>智能中心界面</h1>
-<p>这里是系统的智能分析和决策中心。</p>
-<p>您可以在此查看智能分析结果、系统建议和自动化决策。</p>
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<div class="grid-layout">
+    <div class="grid-item smart_area1">
+      
+        <div class="custom-overview-box">
+            <div id="stats-container" class="custom-stats">
+                <!-- 数据动态填充 -->
+            </div>
+        </div>
+
+        <div class="chart">
+          
+            <select id="province">
+                <option value="安徽省">安徽省</option>
+                <option value="北京市">北京市</option>
+                <option value="福建省">福建省</option>
+                <option value="甘肃省">甘肃省</option>
+            </select>
+
+            <label for="basin">流域:</label>
+            <select id="basin">
+                <!-- 流域选项会根据省份动态更新 -->
+            </select>
+
+            <label for="section">截面:</label>
+            <select id="section">
+                <!-- 截面选项会根据流域动态更新 -->
+            </select>
+            <button onclick="fetchData()">获取数据</button>
+            <div id="parameterSelector" class="parameter-selector"></div>
+<!-- 
+            <div id="infoPanel" class="info-panel">
+            <strong>当前信息：</strong><br>
+              请选择参数查看详细信息
+            </div> -->
+            <div class="chart-container" id="mainChart"></div>
+            <div class="chart-container" id="secondaryChart"></div>
+            
+        </div>
+
+        <!-- <div class="exception">
+            <h2>检测到的异常点：</h2>
+            <ul id="anomaly-list"></ul>
+
+        </div> -->
+    </div>
+    <div class="grid-item smart_area2">
+          <div class="weather-data-row">
+            <div class="weather-item">
+                <p id="temperature-range">-- ~ -- °C</p>
+            </div>
+            <div class="weather-item">
+                <p id="wind-direction">--</p>
+                <p class="secondary-text" id="wind-speed">--级</p>
+            </div>
+            <div class="weather-item">
+                <p id="humidity">-- %</p>
+            </div>
+            <div class="weather-item">
+                <p id="aqi-value">--</p>
+                <p class="secondary-text" id="aqi-description">--</p>
+            </div>
+        </div>
+      <div class="video-grid">
+          <div class="video-box">
+              <video width="100%" controls autoplay muted>
+                  <source src="static/movie/1.mp4" type="video/mp4">
+                  您的浏览器不支持视频播放。
+              </video>
+          </div>
+          <div class="video-box">
+              <video width="100%" controls autoplay muted>
+                  <source src="static/movie/2.mp4" type="video/mp4">
+                  您的浏览器不支持视频播放。
+              </video>
+          </div>
+      </div>
+
+      <div class="grid-layout-area5">
+            <div class="grid-item-area5 area5_area1">
+                <div class="label"><i class="ri-numbers-line"></i><span>编号</span></div>
+                <div class="num_value" id="fish-id">fish-9572</div>
+            </div>
+            <div class="grid-item-area5 area5_area2">
+                <div class="label"><i class="ri-star-smile-line"></i><span>鱼种</span></div>
+                <div class="num_value" id="fish-type">moonfish</div>
+            </div>
+            <div class="grid-item-area5 area5_area3">
+                <div class="label"><i class="ri-expand-diagonal-2-line"></i><span>体长</span></div>
+                <div class="num_value" id="fish-length">10寸</div>
+            </div>
+            <div class="grid-item-area5 area5_area4">
+                <div class="label"><i class="ri-weight-line"></i><span>体重</span></div>
+                <div class="num_value" id="fish-weight">5kg</div>
+            </div>
+            <div class="grid-item-area5 area5_area5">
+                <div class="label sick_label"><i class="ri-hard-drive-fill"></i></div>
+                <div class="num_value" id="fish-status">疑似患病</div>
+            </div>
+            <div class="grid-item-area5 area5_area6">
+                <div class="label stange_label"><i class="ri-bootstrap-line"></i></div>
+                <div class="num_value" id="fish-group">鱼群异常</div>
+            </div>
+            <div class="grid-item-area5 area5_area7">
+                <div class="label trace_label"><i class="ri-arrow-go-forward-line"></i></div>
+                <div class="num_value" id="fish-track">轨迹追踪</div>
+            </div>
+            <div class="grid-item-area5 area5_area8">
+                <div class="label analysis_label"><i class="ri-line-chart-line"></i></div>
+                <div class="num_value" id="fish-analysis">轨迹分析</div>
+            </div>
+        </div>
+
+      
+    
+      
+
+    </div>
+    <div class="grid-item smart_area3">
+        <div class="chart">
+            <h2>鱼类整体情况一览</h2>
+            <div id="bubble" style=" left:-15px ;width:450px; height: 340px;"></div>
+
+
+            <h2>PCA 降维</h2>
+            <div id="pca" style="left:-15px ;width: 450px; height: 340px;"></div>
+        </div>
+
+        <div class="exception">
+            <div class="title">警告提示</div>
+            <div id="alertContainer" class="alert-container"></div>
+            
+        </div>
+
+
+
+    </div>
+   
+    
+  
+    <div id="fullscreen-alert">
+        <div id="alert-message">⚠️ 水质异常警告 ⚠️</div>
+        <div id="alert-details"></div>
+        <button id="close-alert">我知道了</button>
+    </div>
+</div>
+
+<!-- 省份/流域/截面初始化 + 默认图表 +切换 -->
+<script>
+  const pro_data = {
+    "安徽省": {
+      basins: ["巢湖流域", "淮河流域"],
+      sections: {
+        "巢湖流域": ["北闸渡口(杭埠河)", "巢湖船厂"],
+        "淮河流域": ["东半湖湖心", "肥西化肥厂下"]
+      }
+    },
+    "北京市": {
+      basins: ["北京流域"],
+      sections: {
+        "北京流域": ["北京市西部", "北京市东部"]
+      }
+    },
+    "福建省": {
+      basins: ["福州流域"],
+      sections: {
+        "福州流域": ["福州市区", "福州市外"]
+      }
+    },
+    // 继续添加更多省份、流域、截面的关系
+  };
+
+  // 获取HTML元素
+  const provinceSelect = document.getElementById("province");
+  const basinSelect = document.getElementById("basin");
+  const sectionSelect = document.getElementById("section");
+
+  // 处理省份变化
+  provinceSelect.addEventListener("change", function() {
+    const province = provinceSelect.value;
+    updateBasins(province);
+    updateSections(province, basinSelect.value); // 更新截面
+  });
+
+  // 处理流域变化
+  basinSelect.addEventListener("change", function() {
+    const province = provinceSelect.value;
+    const basin = basinSelect.value;
+    updateSections(province, basin);
+  });
+
+  // 更新流域选项
+  function updateBasins(province) {
+    const basins = pro_data[province]?.basins || [];
+    basinSelect.innerHTML = basins.map(basin => `<option value="${basin}">${basin}</option>`).join('');
+    // 更新流域后的截面
+    updateSections(province, basins[0] || ''); // 默认选择第一个流域
+  }
+
+  // 更新截面选项
+  function updateSections(province, basin) {
+    const sections = pro_data[province]?.sections[basin] || [];
+    sectionSelect.innerHTML = sections.map(section => `<option value="${section}">${section}</option>`).join('');
+  }
+
+  // 初始化
+  updateBasins(provinceSelect.value);
+  updateSections(provinceSelect.value, basinSelect.value);
+  fetchData();
+
+    // 初始化图表
+  const mainChart = echarts.init(document.getElementById('mainChart'));
+  const secondaryChart = echarts.init(document.getElementById('secondaryChart'));
+    
+    // 可配置参数
+  const config = {
+      mainParameters: ['水温(℃)', 'pH(无量纲)', '溶解氧(mg/L)'],
+      secondaryParameters: ['电导率(μS/cm)', '浊度(NTU)', '高锰酸盐指数(mg/L)'],
+      colors: {
+        normal: '#FFF5E4',
+        maintenance: '#EB5B00',
+        warning: '#BF3131'
+      },
+      animationDuration: 1000
+    };
+    
+    // 全局数据存储
+    let chartData = {
+      rawData: [],
+      timeData: [],
+      parameterData: {},
+      currentMainParam: config.mainParameters[0],
+      currentSecondaryParam: config.secondaryParameters[0]
+    };
+
+    async function fetchData() {
+            const province = document.getElementById('province').value;
+            const basin = document.getElementById('basin').value;
+            const section = document.getElementById('section').value;
+        
+            
+            const response = await fetch(`/get_data?province=${province}&basin=${basin}&section=${section}`);
+            const data = await response.json();
+            console.log(data);
+            processData(data);
+
+            initParameterSelector();
+            updateCharts();
+            updateInfoPanel();
+    }
+    
+    // 数据处理函数
+    function processData(data) {
+      console.log(data);
+      chartData.rawData = data;
+      chartData.timeData = data.map(row => row['监测时间']);
+      
+      // 提取所有参数数据
+      const allParams = Object.keys(data[0]).filter(
+        key => key !== '流域' && key !== '断面名称' && key !== '监测时间' && 
+               key !== '水质类别' && key !== '站点情况'
+      );
+      
+      allParams.forEach(param => {
+        chartData.parameterData[param] = {
+          values: data.map(row => parseFloat(row[param]) || 0),
+          status: data.map(row => row['站点情况'] === '维护' ? 'maintenance' : 
+                                (row['站点情况'] === '警告' ? 'warning' : 'normal'))
+        };
+      });
+    }
+    
+    // 初始化参数选择器
+    function initParameterSelector() {
+        const selector = document.getElementById('parameterSelector');
+        selector.innerHTML = '';
+
+        // 主参数选择下拉框
+        const mainGroup = document.createElement('div');
+        mainGroup.style.marginBottom = '10px';
+        mainGroup.innerHTML = '<strong>主参数:</strong> ';
+        const mainSelect = document.createElement('select');
+        mainSelect.id = 'mainParameterSelect';
+
+        // 添加主参数选项
+        config.mainParameters.forEach(param => {
+          const option = document.createElement('option');
+          option.value = param;
+          option.textContent = param;
+          if (param === chartData.currentMainParam) {
+            option.selected = true; // 设置当前选中的主参数
+          }
+          mainSelect.appendChild(option);
+        });
+
+        // 当主参数变化时更新当前参数并重绘图表
+        mainSelect.addEventListener('change', (event) => {
+          chartData.currentMainParam = event.target.value;
+          updateCharts();
+          updateActiveButtons();
+        });
+
+        mainGroup.appendChild(mainSelect);
+        selector.appendChild(mainGroup);
+
+        // 次要参数选择下拉框
+        const secondaryGroup = document.createElement('div');
+        secondaryGroup.innerHTML = '<strong>次要参数:</strong> ';
+        const secondarySelect = document.createElement('select');
+        secondarySelect.id = 'secondaryParameterSelect';
+
+        // 添加次要参数选项
+        config.secondaryParameters.forEach(param => {
+          const option = document.createElement('option');
+          option.value = param;
+          option.textContent = param;
+          if (param === chartData.currentSecondaryParam) {
+            option.selected = true; // 设置当前选中的次要参数
+          }
+          secondarySelect.appendChild(option);
+        });
+
+        // 当次要参数变化时更新当前参数并重绘图表
+        secondarySelect.addEventListener('change', (event) => {
+          chartData.currentSecondaryParam = event.target.value;
+          updateCharts();
+          updateActiveButtons();
+        });
+
+        secondaryGroup.appendChild(secondarySelect);
+        selector.appendChild(secondaryGroup);
+      }
+
+    
+    // 更新活动按钮状态
+    function updateActiveButtons() {
+      document.querySelectorAll('.parameter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent === chartData.currentMainParam || 
+            btn.textContent === chartData.currentSecondaryParam) {
+          btn.classList.add('active');
+        }
+      });
+    }
+    
+    // 更新图表
+    function updateCharts() {
+      updateMainChart();
+      updateSecondaryChart();
+    }
+    
+    // 更新主图表
+    function updateMainChart() {
+      const param = chartData.currentMainParam;
+      const data = chartData.parameterData[param];
+      console.log('当前绘图数据：', data);
+      console.log('当前绘图数据：', data.values);
+      console.log('当前绘图数据：', Math.max(...data.values) * 1.05);
+      
+
+
+
+      
+      const option = {
+        title: {
+          text: `${param}变化趋势`,
+          left: 'center',
+          textStyle: {
+            color: '#fff', // 改成你想要的颜色，比如白色 '#fff'、蓝色 '#007BFF'
+            fontSize: 15,   // 你也可以顺便调字体大小
+            fontWeight: 'bold'
+          }
+        },
+        tooltip: {
+          trigger: 'axis',
+          formatter: function(params) {
+            const dataIndex = params[0].dataIndex;
+            const rawData = chartData.rawData[dataIndex];
+            let tooltip = `<strong>${rawData['监测时间']}</strong><br>`;
+            tooltip += `${param}: ${params[0].value}<br>`;
+            tooltip += `水质类别: ${rawData['水质类别']}<br>`;
+            tooltip += `站点情况: ${rawData['站点情况']}`;
+            return tooltip;
+          }
+        },
+        grid: {
+          left: '50px',
+          right: '10%',
+          bottom: '60px',
+          top: '60px'
+        },
+        xAxis: {
+          type: 'category',
+          data: chartData.timeData,
+          axisLabel: {
+            rotate: 45
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#4ED7F1'  // 设置y轴线的颜色
+            }
+          },
+        },
+        yAxis: {
+          type: 'value',
+          name: param,
+          min: Math.min(...data.values) * 0.95,
+          max: Math.max(...data.values) * 1.05,
+          axisLabel: {
+            formatter: function (value) {
+              return value.toFixed(2); // 保留两位小数
+            }
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#4ED7F1'  // 设置y轴线的颜色
+            }
+          },
+          splitLine: {
+            lineStyle: {
+              color: '#4ED7F1'   // 设置y轴网格线的颜色
+            }
+          }
+            
+        },
+        dataZoom: [{
+          type: 'slider',
+          start: 0,
+          show: false, // 隐藏滑动条UI
+          end: 100
+        }, {
+          type: 'inside',
+          start: 0,
+          end: 100
+        }],
+        series: [{
+          name: param,
+          type: 'line',
+          data: data.values.map((value, index) => ({
+            value: value,
+            itemStyle: {
+              color: config.colors[data.status[index]]
+            }
+          })),
+          symbol: 'circle',
+          symbolSize: 6,
+          lineStyle: {
+            width: 2,
+            color: '#FFF5E4'
+          },
+          markLine: {
+            silent: true,
+            data: getReferenceLines(param),
+            label: {
+              position: 'end',
+              formatter: '{b}: {c}'
+            },
+            lineStyle: {
+              type: 'dashed',
+              color: '#666'
+            }
+          }
+        }],
+        animationDuration: config.animationDuration
+      };
+      
+      mainChart.setOption(option, true);
+    }
+    
+    // 更新次要图表
+    function updateSecondaryChart() {
+      const param = chartData.currentSecondaryParam;
+      const data = chartData.parameterData[param];
+      
+      const option = {
+        title: {
+          text: `${param}变化趋势`,
+          left: 'center',
+          textStyle: {
+            color: '#fff', // 改成你想要的颜色，比如白色 '#fff'、蓝色 '#007BFF'
+            fontSize: 15,   // 你也可以顺便调字体大小
+            fontWeight: 'bold'
+          }
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        grid: {
+          left: '55px',
+          right: '10%',
+          bottom: '60px',
+          top: '60px'
+        },
+        xAxis: {
+          type: 'category',
+          data: chartData.timeData,
+          axisLabel: {
+            rotate: 45
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#4ED7F1'  // 设置y轴线的颜色
+            }
+          },
+          
+          
+        },
+        yAxis: {
+          type: 'value',
+          name: param,
+          min: Math.min(...data.values) * 0.95,
+          max: Math.max(...data.values) * 1.05,
+          axisLabel: {
+            formatter: function (value) {
+              return value.toFixed(2); // 保留两位小数
+            }
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#4ED7F1'  // 设置y轴线的颜色
+            }
+          },
+          splitLine: {
+            lineStyle: {
+              color: '#4ED7F1'   // 设置y轴网格线的颜色
+            }
+          }
+        },
+        dataZoom: [{
+          type: 'slider',
+          start: 0,
+          show: false, // 隐藏滑动条UI
+          end: 100
+        }, {
+          type: 'inside',
+          start: 0,
+          end: 100
+        }],
+        series: [{
+          name: param,
+          type: 'line',
+          data: data.values.map((value, index) => ({
+            value: value,
+            itemStyle: {
+              color: config.colors[data.status[index]] // 为每个数据点设置颜色
+            }
+          })),
+          symbol: 'circle',
+          symbolSize: 6,
+          lineStyle: {
+            width: 2,
+            color: config.colors.normal
+          }
+        }],
+        animationDuration: config.animationDuration
+      };
+      
+      secondaryChart.setOption(option, true);
+    }
+    
+    // 获取参考线数据（可根据不同参数设置不同标准）
+    function getReferenceLines(param) {
+      const lines = [];
+      
+      if (param === 'pH(无量纲)') {
+        lines.push(
+          { name: '下限', yAxis: 6.5 , lineStyle: { color: '#FFFA8D' }  },
+          { name: '上限', yAxis: 8.5 , lineStyle: { color: '#FFFA8D' }  }
+        );
+      } else if (param === '溶解氧(mg/L)') {
+        lines.push(
+          { name: 'I类标准', yAxis: 7.5 , lineStyle: { color: '#FFFA8D' }},
+          { name: 'III类标准', yAxis: 5 , lineStyle: { color: '#FFFA8D' }}
+        );
+      } else if (param === '水温(℃)') {
+        lines.push(
+          { name: '平均', yAxis: 15 , lineStyle: { color: '#FFFA8D' }}
+        );
+      }
+      console.log(`当前参数: ${param}, 参考线: `, lines);
+      
+      return lines;
+      // return lines.filter(line => line.yAxis < 100 && line.yAxis > -50);
+    }
+    
+    // 窗口大小变化时重新调整图表大小
+    window.addEventListener('resize', function() {
+      mainChart.resize();
+      secondaryChart.resize();
+    });
+
+</script>
+
+<!-- 实时气象api接入 -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    fetchWeatherData();
+    fetchAirQualityData();
+});
+
+const latitude = 39.9042;
+const longitude = 116.4074;
+async function fetchWeatherData() {
+
+  const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&models=cma_grapes_global&timezone=Asia/Shanghai&forecast_days=7`;
+   
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('API Response:', data); 
+
+        updateUI(data);
+
+    } catch (error) {
+        console.error("获取天气数据失败:", error);
+       
+        document.getElementById('temperature-range').textContent = '加载失败';
+        document.getElementById('wind-direction').textContent = '加载失败';
+        document.getElementById('humidity').textContent = '加载失败';
+       
+    }
+}
+
+async function fetchAirQualityData() {
+    const timezone = 'Asia/Shanghai'; // 或者 'auto'
+
+    const airQualityApiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=pm2_5&timezone=${timezone}`;
+
+    try {
+        const response = await fetch(airQualityApiUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Air Quality API Response:', data);
+
+        if (data.current && data.current.pm2_5 !== undefined) {
+            const pm25 = data.current.pm2_5;
+            // 更新UI
+            document.getElementById('aqi-value').textContent = pm25.toFixed(1);
+            document.getElementById('aqi-description').textContent = getAqiDescription(pm25); // 您已有的辅助函数
+            console.log(`Current PM2.5: ${pm25}`);
+        } else {
+            document.getElementById('aqi-value').textContent = '加载失败';
+            console.log('PM2.5 data not available.');
+        }
+
+    } catch (error) {
+        console.error("获取空气质量数据失败:", error);
+    }
+}
+
+function updateUI(data) {
+    // 1. 更新温度 (显示日最高温和最低温)
+    if (data.daily && data.daily.temperature_2m_max && data.daily.temperature_2m_min) {
+        const tempMax = Math.round(data.daily.temperature_2m_max[0]);
+        const tempMin = Math.round(data.daily.temperature_2m_min[0]);
+        document.getElementById('temperature-range').textContent = `${tempMin} ~ ${tempMax}°C`;
+    }
+
+    // 2. 更新风向和风速
+    if (data.current && data.current.wind_speed_10m !== undefined && data.current.wind_direction_10m !== undefined) {
+        const windSpeedKmh = data.current.wind_speed_10m;
+        const windDirectionDegree = data.current.wind_direction_10m;
+
+        document.getElementById('wind-direction').textContent = convertWindDirection(windDirectionDegree);
+        document.getElementById('wind-speed').textContent = convertWindSpeedToBeaufort(windSpeedKmh) + '级';
+        // 或者直接显示风速 document.getElementById('wind-speed').textContent = `${windSpeedKmh.toFixed(1)} km/h`;
+    }
+
+    // 3. 更新湿度
+    if (data.current && data.current.relative_humidity_2m !== undefined) {
+        const humidity = data.current.relative_humidity_2m;
+        document.getElementById('humidity').textContent = `${humidity}%`;
+    }
+
+}
+
+// 将风向角度转换为文字描述
+function convertWindDirection(degrees) {
+    const directions = ['北风', '东北偏北风', '东北风', '东北偏东风', '东风', '东南偏东风', '东南风', '东南偏南风', '南风', '西南偏南风', '西南风', '西南偏西风', '西风', '西北偏西风', '西北风', '西北偏北风'];
+    const index = Math.round((degrees % 360) / 22.5);
+    return directions[index % 16];
+}
+
+// 将风速 (km/h) 转换为蒲福风级 (近似)
+function convertWindSpeedToBeaufort(kmh) {
+    if (kmh < 1) return 0;
+    if (kmh <= 5) return 1;
+    if (kmh <= 11) return 2;
+    if (kmh <= 19) return 3;
+    if (kmh <= 28) return 4;
+    if (kmh <= 38) return 5;
+    if (kmh <= 49) return 6;
+    if (kmh <= 61) return 7;
+    if (kmh <= 74) return 8;
+    if (kmh <= 88) return 9;
+    if (kmh <= 102) return 10;
+    if (kmh <= 117) return 11;
+    return 12;
+}
+
+//根据 PM2.5 数值判断空气质量等级
+function getAqiDescription(pm25) {
+    if (pm25 <= 35) return '优';
+    if (pm25 <= 75) return '良';
+    if (pm25 <= 115) return '轻度污染';
+    if (pm25 <= 150) return '中度污染';
+    if (pm25 <= 250) return '重度污染';
+    return '严重污染';
+}
+</script>
+
+<!-- 鱼类数据绘制 -->
+<script>
+        // Bubble Chart
+    fetch("/get_fish_data")
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        let speciesSet = [...new Set(data.map(d => d.species))];
+        let colorPalette = {
+            "Bream": "#5470C6",
+            "Roach": "#91CC75",
+            "Pike": "#EE6666",
+            "Perch": "#FAC858",
+            "Smelt": "#73C0DE",
+            "Parkki": "#3BA272",
+            "Whitefish": "#FC8452"
+        };
+        let seriesData = speciesSet.map((species, index) => ({
+            name: species,
+            type: 'scatter',
+            data: data.filter(d => d.species === species)
+                      .map(d => [d.length, d.weight, d.width]),
+            symbolSize: function (val) {
+                return val[2] * 2;
+            },
+            itemStyle: {
+                color: colorPalette[index % colorPalette.length]
+            }
+        }));
+
+        let chart = echarts.init(document.getElementById('bubble'));
+        chart.setOption({
+            tooltip: {
+                backgroundColor: '#fff',
+                trigger: 'item',
+                formatter: function (params) {
+                    return `
+                        <strong>物种: ${params.seriesName}</strong><br>
+                        长度: ${params.value[0]} cm<br>
+                        重量: ${params.value[1]} g<br>
+                        宽度: ${params.value[2]} cm
+                    `;
+                }
+            },
+            legend: { 
+              data: speciesSet,
+              textStyle: {
+                  color: '#fff', // 改成你想要的颜色，比如白色 '#fff'、蓝色 '#007BFF'
+                  fontSize: 13,   // 你也可以顺便调字体大小
+                  fontWeight: 'bold'
+              }
+              
+            },
+            grid: {
+              left: '70px',
+              right: '10%',
+              bottom: '60px',
+              top: '60px'
+            },
+            xAxis: { 
+              name: 'Length1 (cm)',
+              nameLocation: 'middle',
+              nameGap: 30,
+              axisLabel: {
+                rotate: 45
+              },
+              axisLine: {
+                lineStyle: {
+                  color: '#4ED7F1'  // 设置y轴线的颜色
+                }
+              },
+
+             },
+            yAxis: { 
+              name: 'Weight (g)',
+              nameLocation: 'middle',
+              nameGap: 50,
+              axisLabel: {
+                  formatter: function (value) {
+                    return value.toFixed(2); // 保留两位小数
+                  }
+                },
+                axisLine: {
+                  lineStyle: {
+                    color: '#4ED7F1'  // 设置y轴线的颜色
+                  }
+                },
+                splitLine: {
+                  lineStyle: {
+                    color: '#4ED7F1'   // 设置y轴网格线的颜色
+                  }
+                }
+                  },
+            series: seriesData
+        });
+    });
+
+
+        // PCA Chart
+        fetch("static/pca_data.json")
+            .then(response => response.json())
+            .then(data => {
+                let speciesSet = [...new Set(data.map(d => d.species))];
+                let seriesData = speciesSet.map(species => ({
+                    name: species,
+                    type: 'scatter',
+                    data: data.filter(d => d.species === species)
+                              .map(d => [d.pc1, d.pc2])
+                }));
+
+                let chart = echarts.init(document.getElementById('pca'));
+                chart.setOption({
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function (params) {
+                            return `
+                                物种: ${params.seriesName}<br>
+                                PC1: ${params.value[0].toFixed(2)}<br>
+                                PC2: ${params.value[1].toFixed(2)}
+                            `;
+                        }
+                    },
+                    legend: { 
+                      data: speciesSet,
+                      textStyle: {
+                          color: '#fff', // 改成你想要的颜色，比如白色 '#fff'、蓝色 '#007BFF'
+                          fontSize: 13,   // 你也可以顺便调字体大小
+                          fontWeight: 'bold'
+                      }
+                    },
+                    grid: {
+                      left: '55px',
+                      right: '10%',
+                      bottom: '60px',
+                      top: '60px'
+                    },
+                    xAxis: { 
+                      name: 'PC1',
+                      nameLocation: 'middle',
+                      nameGap: 30,
+                      axisLabel: {
+                        rotate: 45
+                      },
+                      axisLine: {
+                        lineStyle: {
+                          color: '#4ED7F1'  // 设置y轴线的颜色
+                        }
+                      },
+                    },
+                    yAxis: { 
+                      name: 'PC2',
+                      nameLocation: 'middle',
+                      nameGap: 30,
+                      axisLabel: {
+                        formatter: function (value) {
+                          return value.toFixed(2); // 保留两位小数
+                        }
+                      },
+                      axisLine: {
+                        lineStyle: {
+                          color: '#4ED7F1'  // 设置y轴线的颜色
+                        }
+                      },
+                      splitLine: {
+                        lineStyle: {
+                          color: '#4ED7F1'   // 设置y轴网格线的颜色
+                        }
+                      }
+                    },
+                    
+                    series: seriesData
+                });
+            });
+</script>
+
+<!-- 实时监测 -->
+<script>
+let currentIndex = 0;
+
+setInterval(() => {
+  fetch('static/fish_data.json')
+    .then(res => res.json())
+    .then(data => {
+      const fish = data[currentIndex];  // 取出当前下标的鱼
+
+      document.getElementById('fish-id').innerText = fish.id;
+      document.getElementById('fish-type').innerText = fish.type;
+      document.getElementById('fish-length').innerText = fish.length;
+      document.getElementById('fish-weight').innerText = fish.weight;
+      document.getElementById('fish-status').innerText = fish.status;
+      document.getElementById('fish-group').innerText = fish.group;
+
+      // 更新下标（循环到头就从0开始）
+      currentIndex = (currentIndex + 1) % data.length;
+    })
+    .catch(err => console.error('加载鱼类数据失败:', err));
+}, 5000); // 每5秒刷新一次
+
+</script>
+
+<!-- 鱼类异常 -->
+<script>
+    fetch('static/outliers.json')
+      .then(response => response.json())
+      .then(outliers => {
+        outliers.forEach((outlier, i) => {
+          setTimeout(() => {
+            showAlert(`异常数据点！Species: ${outlier.Species}`);
+          }, i * 2000);
+        });
+      })
+      .catch(err => {
+        showAlert('无法加载异常数据，请检查文件路径是否正确！');
+        console.error(err);
+      });
+   
+    function showAlert(message) {
+      const alertContainer = document.getElementById('alertContainer');
+      const div = document.createElement('div');
+      div.className = 'alert';
+      div.textContent = message;
+      alertContainer.appendChild(div);
+    }
+</script>
+
+<!-- 异常以及警报 -->
+<script>
+        // 模拟数据集
+    let data = [];
+    async function fetchAndRenderData() {
+        const province_a = document.getElementById('province').value;
+        const basin_a = document.getElementById('basin').value;
+        const section_a = document.getElementById('section').value;
+        try {
+            const response = await fetch(`/get_water_quality_data?province=${province_a}&basin=${basin_a}&section=${section_a}`);
+            
+            console.log("异常处理时 ");
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            data = await response.json();
+            console.log("异常处理时 ",data);
+            console.log("fetchandrender",data);
+            renderStats(data);
+        } catch (error) {
+            console.error('获取数据失败:', error);
+        }
+    }
+
+    function renderStats(data) {
+        const total = data.length;
+        const anomalies = data.filter(item => item.is_anomaly).length;
+        const normal = total - anomalies;
+
+        const issueTypes = {
+            '水温异常': 0,
+            'pH异常': 0,
+            '溶解氧过低': 0,
+            '藻密度缺失': 0
+        };
+
+        data.forEach(item => {
+            console.log("item ",item);
+            item.issues.forEach(issue => {
+                if (issue.includes('水温异常')) issueTypes['水温异常']++;
+                if (issue.includes('pH异常')) issueTypes['pH异常']++;
+                if (issue.includes('溶解氧过低')) issueTypes['溶解氧过低']++;
+                if (issue.includes('藻密度缺失')) issueTypes['藻密度缺失']++;
+            });
+        });
+
+        document.getElementById('stats-container').innerHTML = `
+            <div class="stat-item">
+                <h6 style="color: #AFDDFF;font-size=15">数据总量</h6>
+                <h2 class="text-primary">${total}</h2>
+            </div>
+            <div class="stat-item">
+                <h6 style="color: #AFDDFF;font-size=15">异常数据</h6>
+                <h2 class="${anomalies > 0 ? 'text-danger' : 'text-success'}">
+                    ${anomalies} (${Math.round(anomalies / total * 100)}%)
+                </h2>
+            </div>
+            <div>
+                <h6 style="color: #AFDDFF;font-size=15">异常类型分布</h6>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    ${Object.entries(issueTypes).map(([type, count]) => `
+                      <div style="padding: 4px 5px; border: 1px solid #ccc; border-radius: 6px; background-color: ${count > 0 ? '#ffe6e6' : '#e6ffe6'};">
+                        <span style="color: #888;">${type}:</span>
+                        <span style="font-weight: bold; color: ${count > 0 ? '#d9534f' : '#28a745'};">${count}</span>
+                      </div>
+                    `).join('')}
+
+                </div>
+            </div>
+        `;
+    }
+
+     document.addEventListener('DOMContentLoaded', function () {
+        simulateRealTimeMonitoring();
+        console.log("准备开始异常数据");
+        fetchAndRenderData();
+    });
+
+    
+        // const mockData = [
+        //     { time: "08:00", site: "断面A", temp: 25.0, ph: 7.2, oxygen: 6.5, isAnomaly: false, issues: [] },
+        //     { time: "09:00", site: "断面B", temp: 26.0, ph: 7.0, oxygen: 6.8, isAnomaly: false, issues: [] },
+        //     { time: "10:00", site: "断面C", temp: 40.0, ph: 6.0, oxygen: 3.5, isAnomaly: true, issues: ["水温过高: 40℃", "溶解氧过低: 3.5mg/L"] },
+        //     { time: "11:00", site: "断面A", temp: 15.0, ph: 8.5, oxygen: 7.2, isAnomaly: false, issues: [] },
+        //     { time: "12:00", site: "断面B", temp: 12.0, ph: 6.2, oxygen: 4.8, isAnomaly: true, issues: ["水温过低: 12℃", "pH异常: 6.2"] }
+        // ];
+
+        let intervalId = null;
+        let cur_Index = 0;
+        const dataBody = document.getElementById('data-body');
+        const startBtn =true;
+     
+        const alertBox = document.getElementById('fullscreen-alert');
+        const alertMessage = document.getElementById('alert-details');
+        const closeAlertBtn = document.getElementById('close-alert');
+        
+        // 关闭警报
+        closeAlertBtn.addEventListener('click', () => {
+            alertBox.style.display = 'none';
+        });
+
+        function stopMonitoring() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        function simulateRealTimeMonitoring() {
+            intervalId = setInterval(() => {
+              console.log("data的长度",data.length);
+                if (cur_Index >= data.length) {
+                    cur_Index = 0; // 循环数据
+                }
+
+                const data_cur = data[cur_Index];
+                // console.log(data);
+                // addDataToTable(data);
+                
+                // 如果是异常数据，显示全屏警报
+                if (data_cur.is_anomaly) {
+                    console.log("出现异常");
+                    showAlert_Water(data_cur);
+                }
+
+                cur_Index++;
+            }, 3000); // 每3秒更新一次数据
+        }
+
+
+        function showAlert_Water(data) {
+            alertMessage.innerHTML = `
+                <p>监测时间: ${data.监测时间}</p>
+                <p>监测地点: ${data.断面名称}</p>
+                <p>异常问题: ${data.issues.join(', ')}</p>
+            `;
+            alertBox.style.display = 'flex';
+        }
+</script>
+
 {% endblock %}
