@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+<!-- <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet"> -->
 
 
 {% block content %}
@@ -7,42 +8,73 @@
     <!-- 左上方块 -->
     <div class="card video-section">
         <div class="section-header">
-            <h2>海洋牧场：一号舱</h2>
+            <h3>海洋牧场： 
+            
+                <select id="video-selection" onchange="changeVideos()">
+                    <option value="1">一号舱</option>
+                    <option value="2">二号舱</option>
+                    <option value="3">三号舱</option>
+                </select>
+            </h3>
             <div class="real-time" id="full-time-display">2024年04月31日 星期三 21:00:00</div>
         </div>
         <div class="video-grid">
             <div class="video-box">
-                <video width="100%" controls autoplay   muted>
+                <video width="100%" controls autoplay muted loop>
                     <source src="static\movie\1.mp4" type="video/mp4">
                     您的浏览器不支持视频播放。
                 </video>
             </div>
             <div class="video-box">
-                <video width="100%" controls autoplay   muted>
+                <video width="100%" controls autoplay muted loop>
                     <source src="static\movie\1.mp4" type="video/mp4">
                     您的浏览器不支持视频播放。
                 </video>
             </div>
             <div class="video-box">
-                <video width="100%" controls autoplay muted>
+                <video width="100%" controls autoplay muted loop>
                     <source src="static\movie\2.mp4" type="video/mp4">
                     您的浏览器不支持视频播放。
                 </video>
             </div>
             <div class="video-box">
-                <video width="100%" controls autoplay muted>
+                <video width="100%" controls autoplay muted loop>
                     <source src="static\movie\2.mp4" type="video/mp4">
                     您的浏览器不支持视频播放。
                 </video>
             </div>
         </div>
     </div>
-
+    
+    <script>
+        function changeVideos() {
+            var selectedValue = document.getElementById("video-selection").value;
+            var videoSources = [
+                ["static/movie/1.mp4", "static/movie/1.mp4", "static/movie/2.mp4", "static/movie/2.mp4"], // 一号舱
+                ["static/movie/2.mp4", "static/movie/1.mp4", "static/movie/1.mp4", "static/movie/2.mp4"], // 二号舱
+                ["static/movie/1.mp4", "static/movie/2.mp4", "static/movie/1.mp4", "static/movie/2.mp4"]  // 三号舱
+            ];
+    
+            // 获取当前选择的舱位的视频路径
+            var selectedVideos = videoSources[selectedValue - 1];
+    
+            // 更新所有视频源
+            var videoBoxes = document.querySelectorAll('.video-box video');
+            for (var i = 0; i < videoBoxes.length; i++) {
+                videoBoxes[i].src = selectedVideos[i];
+                videoBoxes[i].load(); // 强制刷新视频以确保新的视频源被加载
+            }
+        }
+    </script>
+    
+    
 
     <!-- 右上方块 -->
     <div class="card data-section">
         <h3>实时水文气象数据</h3>
+        <td>地点：北京市，白石桥</td>
         <table class="sensor-table">
+            
             <tr>
                 <td>电池电压（V）</td>
                 <td><progress id="voltage-progress" value="25.90" max="30"></progress></td>
@@ -76,23 +108,68 @@
         </table>
 
          <!-- 显示上次更新时间 -->
-        <div id="last-updated" style="color: white; margin-top: 10px; font-size: 14px;">
+        <div id="last-updated" style="color: #89c3ff; margin-top: 10px; font-size: 14px;">
             上次更新时间: <span id="update-time">--</span>
         </div>
     </div>
 
 
-
-    <!-- 中间左侧 -->
+    <!-- 中间左侧（图表） -->
     <div class="card history-section">
         <div class="history-header">
             <h3>历史记录</h3>
             <div class="time-range">
-                统计时间：2023-01-31 21:40 至：2024-01-31 21:40
+                统计时间：2021-04-01 4:00 至：2021-04-05 12:00
             </div>
         </div>
-        <div class="chart-placeholder">电池电压历史数据图表</div>
+        <!-- 选择折线图字段的下拉框 -->
+        <!-- 水温(℃),pH(无量纲),溶解氧(mg/L),电导率(μS/cm),浊度(NTU), -->
+         
+        <div>
+            <label for="line-field-selection">选择折线图字段:
+            <select id="line-field-selection" onchange="updateChart()">
+                <option value="水温">水温（℃）</option>
+                <option value="pH">pH</option>
+                <option value="溶解氧">溶解氧（mg/L）</option>
+                <option value="电导率">电导率（μS/cm）</option>
+                <option value="浊度">浊度（NTU）</option>
+            </select></label>
+        </div>
+        <!-- 选择柱形图字段的下拉框 -->
+        <div>
+             <!-- 高锰酸盐指数(mg/L),氨氮(mg/L),总磷(mg/L),总氮(mg/L),叶绿素α(mg/L),藻密度(cells/L) -->
+            <label for="bar-field-selection">选择柱形图字段:
+            <select id="bar-field-selection" onchange="updateChart()">
+                <option value="高锰酸盐">高锰酸盐指数（mg/L）</option>
+                <option value="氨氮">氨氮（mg/L）</option>
+                <option value="总磷">总磷（mg/L）</option>
+                <option value="总氮">总氮（mg/L）</option>
+                <option value="叶绿素α">叶绿素α（mg/L）</option>
+                <option value="藻密度">藻密度（cells/L）</option>
+            </select></label>
+        </div>
+        <!-- 选择省份的下拉框 -->
+        <div>
+            <label for="province-selection">选择省份:
+            <select id="province-selection" onchange="updateChart()">
+                <option value="北京市">北京市</option>
+                <option value="上海市">上海市</option>
+                <option value="广东省">广东省</option>
+                <option value="江苏省">江苏省</option>
+                <option value="河北省">河北省</option>
+                <!-- 添加更多省份 -->
+            </select></label>
+        </div>
+        <canvas id="historyChart"></canvas>
+        <div id="chart-info">
+            <p>省份：<span id="province">加载中...</span></p>
+            <p>流域：<span id="watershed">加载中...</span></p>
+            <p>断面名称：<span id="sectionName">加载中...</span></p>
+        </div>
+        
     </div>
+    
+
 
     <!-- 中间右侧（地图） -->
     <div class="card map-section">
@@ -105,56 +182,58 @@
         </div>
     </div>
 
-    <!-- 底部左侧 -->
-    <div class="card control-section">
-        <h3>设备控制</h3>
-        <div class="control-grid">
-            <!-- 第一个列：摄像机 -->
-            <div class="control-item">
-                <h4>摄像机</h4>
-                <div class="device-info">
-                    <div><span>设备ID：</span>6D19C331-4F08-47A1</div>
-                    <div><span>主控状态：</span>正常</div>
-                    <div><span>版本：</span>V0.1.1</div>
-                    <div><span>温度：</span>39.64℃</div>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" id="camera-toggle">
-                    <span class="slider"></span>
-                </label>
+ <!-- 底部左侧 -->
+<div class="card control-section">
+    <h3>设备控制</h3>
+    <div class="control-grid">
+        <!-- 第一个列：摄像机 -->
+        <div class="control-item">
+            <h4>摄像机</h4>
+            <div class="device-info">
+                <div><span>设备ID：</span>7E22A110-9B01-432F-9C97</div>
+                <div><span>主控状态：</span><span id="camera-status">正常</span></div>
+                <div><span>版本：</span>V2.3.4</div>
+                <div><span>温度：</span>42.12℃</div>
             </div>
+            <label class="switch">
+                <input type="checkbox" id="camera-toggle" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
 
-            <!-- 第二列：灯光 -->
-            <div class="control-item">
-                <h4>灯光</h4>
-                <div class="device-info">
-                    <div><span>设备ID：</span>6D19C331-4F08-47A1</div>
-                    <div><span>主控状态：</span>正常</div>
-                    <div><span>版本：</span>V0.1.1</div>
-                    <div><span>温度：</span>39.64℃</div>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" id="light-toggle">
-                    <span class="slider"></span>
-                </label>
+        <!-- 第二列：灯光 -->
+        <div class="control-item">
+            <h4>灯光</h4>
+            <div class="device-info">
+                <div><span>设备ID：</span>3B9FBD34-54F0-426A-A231</div>
+                <div><span>主控状态：</span><span id="light-status">关闭</span></div>
+                <div><span>版本：</span>V1.2.0</div>
+                <div><span>温度：</span>30.50℃</div>
             </div>
+            <label class="switch">
+                <input type="checkbox" id="light-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
 
-            <!-- 第三列：清洁刷 -->
-            <div class="control-item">
-                <h4>清洁刷</h4>
-                <div class="device-info">
-                    <div><span>设备ID：</span>6D19C331-4F08-47A1</div>
-                    <div><span>主控状态：</span>正常</div>
-                    <div><span>版本：</span>V0.1.1</div>
-                    <div><span>温度：</span>39.64℃</div>
-                </div>
-                <label class="switch">
-                    <input type="checkbox" id="brush-toggle">
-                    <span class="slider"></span>
-                </label>
+        <!-- 第三列：清洁刷 -->
+        <div class="control-item">
+            <h4>清洁刷</h4>
+            <div class="device-info">
+                <div><span>设备ID：</span>9A5C3F8D-12D0-4F9A-9D85</div>
+                <div><span>主控状态：</span><span id="brush-status">正常</span></div>
+                <div><span>版本：</span>V4.0.1</div>
+                <div><span>温度：</span>36.98℃</div>
             </div>
+            <label class="switch">
+                <input type="checkbox" id="brush-toggle" checked>
+                <span class="slider"></span>
+            </label>
         </div>
     </div>
+</div>
+
+
 
 
 </div>
@@ -168,10 +247,35 @@
 }
 
 .card {
-    background: rgba(4, 15, 31, 0.9);
+    background: rgba(4, 15, 31, 0.2);
     border-radius: 8px;
     padding: 20px;
     color: white;
+}
+
+.history-section {
+    background: rgba(4, 15, 31, 0.7);
+    border-radius: 8px;
+    padding: 20px;
+    color: white;
+}
+
+h3 {
+    background: linear-gradient(to right, #00c6ff, #0072ff); /* 蓝色渐变背景 */
+    -webkit-background-clip: text; /* 只将渐变应用于文本 */
+    background-clip: text; /* 标准属性 */
+    color: transparent; /* 使文本本身透明 */
+    font-weight: bold;
+    text-shadow: 2px 2px 5px rgba(0, 114, 255, 0.7); /* 蓝色阴影效果 */
+    font-size: 1.5em;
+    padding: 5px;
+    transition: all 0.3s ease;
+}
+
+/* 鼠标悬停时增加动画效果 */
+h3:hover {
+    text-shadow: 0px 0px 20px rgba(0, 114, 255, 1), 0px 0px 30px rgba(0, 114, 255, 0.6); /* 发光效果 */
+    transform: scale(1.1); /* 放大效果 */
 }
 
 .video-section {
@@ -250,7 +354,7 @@
 
 /* 地图容器样式 */
 #map-container {
-    height: 300px;
+    height: 400px; /* 设置地图高度 */
     width: 100%;
     margin-top: 15px;
     border-radius: 6px;
@@ -305,7 +409,7 @@ progress::-moz-progress-bar {
 
 /* 控制项的样式 */
 .control-item {
-    background-color: #1c2c46;  /* 深蓝色背景 */
+    background-color: rgba(28, 44, 70, 0.8);  /* 深蓝色背景 */
     border-radius: 10px;
     padding: 20px;
     color: white;
@@ -384,6 +488,70 @@ input:checked + .slider:before {
     background-color: #007bff;
 }
 
+/*  */
+
+
+/* 图表绘制 */
+#chart-info {
+    margin-top: 10px;
+    color: white;
+}
+#chart-info p {
+    margin: 5px 0;
+}
+
+/* 更小且颜色更暗的炫酷下拉框样式 */
+#video-selection, #line-field-selection, #bar-field-selection, #province-selection {
+    background: linear-gradient(45deg, #004d7a, #005c99); /* 更暗的蓝色渐变 */
+    border: 2px solid #003f61; /* 更深的蓝色边框 */
+    color: #e0e0e0; /* 更浅的字体颜色 */
+    font-size: 12px; /* 更小的字体 */
+    font-family: 'Arial', sans-serif; /* 字体 */
+    padding: 6px 10px; /* 更小的内边距 */
+    border-radius: 18px; /* 更小的圆角边框 */
+    width: 160px; /* 更小的宽度 */
+    cursor: pointer; /* 鼠标指针变为点击手型 */
+    transition: all 0.3s ease-in-out; /* 平滑过渡 */
+    box-shadow: 0 4px 6px rgba(0, 63, 97, 0.5); /* 更深的阴影 */
+}
+
+/* 鼠标悬停时的效果 */
+#video-selection:hover, #line-field-selection:hover, #bar-field-selection:hover, #province-selection:hover {
+    background: linear-gradient(45deg, #005c99, #004d7a); /* 悬停时颜色反转 */
+    box-shadow: 0 6px 12px rgba(0, 63, 97, 0.7); /* 强化阴影效果 */
+    transform: scale(1.05); /* 放大效果 */
+}
+
+/* 下拉框的选项 */
+#video-selection option, #line-field-selection option, #bar-field-selection option, #province-selection option {
+    background-color: #fff; /* 选项背景 */
+    color: #333; /* 选项字体颜色 */
+}
+
+/* 下拉框的标签 */
+div label {
+    font-weight: bold;
+    color: #ffffff;
+    font-size: 14px; /* 标签字体稍大 */
+    margin-bottom: 6px; /* 增加标签与下拉框之间的间距 */
+    display: block;
+}
+
+
+/* 地图悬停 */
+.info-window {
+    padding: 8px;
+    min-width: 180px;
+}
+.info-window h4 {
+    margin: 0 0 5px 0;
+    color: #1890ff;
+}
+.info-window p {
+    margin: 0;
+    font-size: 12px;
+}
+
 </style>
 
 <script>
@@ -399,37 +567,92 @@ setInterval(updateFullTime, 1000);
 updateFullTime();
 </script>
 <script>
+// function initMap() {
+//     // 创建高德地图实例
+//     var map = new AMap.Map('map-container', {
+//     center: [122.2077, 29.9853], // 设置地图中心点为舟山渔场
+//     zoom: 10,  // 设置地图缩放级别
+//     scrollWheel: true // 启用滚轮缩放
+//     });
+    
+//     // 添加比例尺控件
+//     map.addControl(new AMap.Scale());
+    
+//     // 添加平移缩放控件
+//     map.addControl(new AMap.Navigation());
+    
+//     // 添加自定义标记
+//     var marker = new AMap.Marker({
+//         position: [122.7308, 37.5412],  // 设置标记的坐标
+//         title: "海洋牧场一号舱"  // 标记的标题
+//     });
+//     marker.setMap(map);
+    
+//     // 信息窗口
+//     var infoWindow = new AMap.InfoWindow({
+//         content: "海洋牧场一号舱", // 信息窗口的内容
+//         offset: new AMap.Pixel(0, -30) // 信息窗口的偏移量
+//     });
+    
+//     // 添加标记点击事件，打开信息窗口
+//     marker.on('click', function() {
+//         infoWindow.open(map, marker.getPosition());
+//     });
+// }
 function initMap() {
     // 创建高德地图实例
     var map = new AMap.Map('map-container', {
-    center: [122.2077, 29.9853], // 设置地图中心点为舟山渔场
-    zoom: 10,  // 设置地图缩放级别
-    scrollWheel: true // 启用滚轮缩放
+        center: [122.2077, 29.9853], // 设置地图中心点为舟山渔场
+        zoom: 10,  // 初始缩放级别
+        scrollWheel: true
     });
-    
-    // 添加比例尺控件
+
+    // 添加地图控件
     map.addControl(new AMap.Scale());
-    
-    // 添加平移缩放控件
     map.addControl(new AMap.Navigation());
-    
-    // 添加自定义标记
-    var marker = new AMap.Marker({
-        position: [122.7308, 37.5412],  // 设置标记的坐标
-        title: "海洋牧场一号舱"  // 标记的标题
+
+    // 更合理的标记坐标（全部集中在舟山附近）
+    var markersData = [
+        { position: [122.2077, 29.9853], title: "主养殖区", info: "智能养殖舱 - 大黄鱼养殖区" },
+        { position: [122.1800, 29.9500], title: "育苗基地", info: "鱼苗培育与科研中心" },
+        { position: [122.2300, 30.0200], title: "加工平台", info: "海上加工与物流中转站" },
+        { position: [122.2500, 29.8900], title: "生态保护区", info: "海洋生态修复示范区" }
+    ];
+
+    // 创建标记并添加到地图
+    var markers = [];
+    markersData.forEach(function(data) {
+        console.log("Adding marker at position:", data.position);
+        var marker = new AMap.Marker({
+            position: data.position,
+            title: data.title,
+            map: map,
+            icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png', // 使用蓝色图标
+            offset: new AMap.Pixel(-13, -30) // 调整图标位置
+        });
+
+        // 添加信息窗口
+        var infoWindow = new AMap.InfoWindow({
+            content: `<div class="info-window">
+                        <h4>${data.title}</h4>
+                        <p>${data.info}</p>
+                      </div>`,
+            offset: new AMap.Pixel(0, -40)
+        });
+
+        // 绑定点击事件
+        marker.on('click', function() {
+            infoWindow.open(map, marker.getPosition());
+        });
+
+        markers.push(marker);
+        console.log("Marker added finish:", data.title);
     });
-    marker.setMap(map);
-    
-    // 信息窗口
-    var infoWindow = new AMap.InfoWindow({
-        content: "海洋牧场一号舱", // 信息窗口的内容
-        offset: new AMap.Pixel(0, -30) // 信息窗口的偏移量
-    });
-    
-    // 添加标记点击事件，打开信息窗口
-    marker.on('click', function() {
-        infoWindow.open(map, marker.getPosition());
-    });
+
+    // 自动调整地图视野显示所有标记
+    map.setFitView(markers);
+
+    console.log("地图初始化完成，共添加", markers.length, "个养殖区域标记");
 }
 
 // 在页面加载完成后初始化地图
@@ -499,7 +722,7 @@ function initMap() {
 
 
 
-    // 页面加载时初始化数据
+    // // 页面加载时初始化数据
     window.onload = function() {
         // initMap();
 
@@ -508,4 +731,246 @@ function initMap() {
 
     };
 </script>
+
+<script>
+    // 用于解析CSV数据
+    function parseCSV2(csvText) {
+    const rows = csvText.split("\n");
+    const data = [];
+    
+    // 跳过标题行，逐行解析数据
+    for (let i = 1; i < rows.length; i++) {
+        const cells = rows[i].split(",");
+        
+        if (cells.length > 1) {
+            // 将 CSV 列映射为对象，键名中文化并与示例对齐
+            const item = {
+                省份: cells[0],                  // 第1列
+                流域: cells[1],                  // 第2列
+                断面名称: cells[2],              // 第3列
+                time: cells[3],                 // 第4列（示例中用 time）
+                水质类别: cells[4],              // 第5列
+                水温: parseFloat(cells[5]),     // 第6列（示例中的"水温"）
+                pH: parseFloat(cells[6]),       // 第7列
+                溶解氧: parseFloat(cells[7]),    // 第8列
+                电导率: parseFloat(cells[8]),    // 第9列
+                浊度: parseFloat(cells[9]),     // 第10列
+                高锰酸盐: parseFloat(cells[10]), // 第11列（示例中的"高锰酸盐"）
+                氨氮: parseFloat(cells[11]),    // 第12列
+                总磷: parseFloat(cells[12]),    // 第13列
+                总氮: parseFloat(cells[13]),    // 第14列
+                叶绿素α: parseFloat(cells[14]), // 第15列
+                藻密度: parseFloat(cells[15]),   // 第16列
+                站点情况: cells[16]             // 第17列
+            };
+            data.push(item);
+        }
+    }
+    return data;
+}
+
+
+    async function fetchCSVData(filePath) {
+        try {
+            console.log("Fetching CSV file from:", filePath);  // 打印文件路径
+            const response = await fetch(filePath);  // 获取文件内容
+        
+            const csvText = await response.text();  // 将响应转换为文本
+            const data = parseCSV2(csvText);  // 解析CSV数据
+            // console.log(data);  // 输出解析后的数据
+            return data;  // 返回数据
+        } catch (error) {
+            console.error('Error fetching CSV file:', error);
+            return null;  // 如果出错返回null
+        }
+    }
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script> <!-- Moment.js 适配器 -->
+
+<script>
+    // 直接定义数据集
+    // const dataset = [
+    //     { time: "04-01 08:00", 水温: 15.6, 高锰酸盐: 4.22 },
+    //     { time: "04-01 12:00", 水温: 15.5, 高锰酸盐: 4.41 },
+    //     { time: "04-01 16:00", 水温: 15.5, 高锰酸盐: 4.41 },
+    //     { time: "04-01 20:00", 水温: 15.6, 高锰酸盐: 4.59 },
+    //     // 更多数据...
+    // ];
+       
+    //     // 调用示例：从服务器指定路径加载CSV
+    // const dataset= fetchCSVData('/static/dataset/白石桥.csv');
+    // // dataset=dataset.promise
+    // console.log(dataset);  // 输出解析后的数据
+    // // 获取时间标签
+    // const labels = dataset.map(item => item.time);
+ 
+    // fetchCSVData('/static/dataset/白石桥.csv')
+    //     .then(dataset => {
+    //         if (Array.isArray(dataset) && dataset[0]?.time) {
+    //             const labels = dataset.map(item => item.time);
+    //             console.log("时间标签:", labels);
+    //         } else {
+    //             console.error("数据格式错误");
+    //         }
+    //     })
+    //     .catch(error => console.error("出错:", error));
+
+    async function loadData(filePath) {
+        try {
+            const dataset = await fetchCSVData(filePath); // 等待数据解析
+ 
+            // console.log("解析后的数据:", dataset); 
+
+            // 确保 dataset 是数组且包含 time 字段
+            if (Array.isArray(dataset) ) {
+                const labels = dataset.map(item => item.time);
+                // console.log("时间标签:", labels);
+                return labels,dataset;
+            } else {
+                console.error("数据格式错误：非数组或缺少 time 字段");
+                return [];
+            }
+        } catch (error) {
+            console.error("加载数据失败:", error);
+            return [];
+        }
+    }
+
+// 定义一个全局变量来存储 Chart 实例
+let historyChart = null;
+
+// 定义异步函数来加载数据并绘制图表
+async function renderChart(lineField , barField , province ) {
+    // 根据省份选择不同的文件路径
+    const datasetPath = `/static/dataset/history/${province}.csv`; // 假设每个省份的数据文件以省份名称命名
+
+    try {
+        // 销毁现有的图表实例（如果有的话）
+        if (historyChart) {
+            historyChart.destroy(); // 销毁旧的图表实例
+        }
+
+        // 调用 loadData 函数，获取数据
+        const dataset = await loadData(datasetPath);
+        // console.log("数据集:", dataset);  // 打印数据集，确认是否正确
+        
+        // 获取时间标签
+        const labels = dataset.map(item => item.time);
+        // console.log("时间标签:", labels);  // 打印时间标签，确认是否正确
+
+        // 获取字段数据的函数
+        function getData(field) {
+            return dataset.map(item => item[field]);
+        }
+
+        // 获取折线图数据和柱形图数据
+        const lineData = getData(lineField);  // 获取折线图数据
+        const barData = getData(barField);    // 获取柱形图数据
+
+        // console.log("折线图数据:", lineData);  // 打印折线图数据
+        // console.log("柱形图数据:", barData);   // 打印柱形图数据
+
+            // 获取并更新 chart-info 内容，基于数据集第一条数据
+        const firstData = dataset[0];  // 获取数据集中的第一条数据
+        document.getElementById('province').textContent = firstData.省份 || '未知省份';
+        document.getElementById('watershed').textContent = firstData.流域 || '未知流域';
+        document.getElementById('sectionName').textContent = firstData.断面名称 || '未知断面';
+
+        // 获取图表容器
+        const ctx = document.getElementById('historyChart').getContext('2d');
+        
+        // 创建新的 Chart 实例并赋值给 historyChart
+        historyChart = new Chart(ctx, {
+            type: 'line', // 默认使用折线图
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: `${lineField} 数据 (折线图)`,
+                        data: lineData,
+                        borderColor: 'rgba(75, 192, 192, 1)',  // 折线图的颜色
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',  // 折线图的背景填充色
+                        borderWidth: 1,
+                        yAxisID: 'y1',  // 关联左边Y轴
+                        tension: 0.4  // 设置折线的曲线程度
+                    },
+                    {
+                        label: `${barField} 数据 (柱形图)`,
+                        data: barData,
+                        backgroundColor: 'rgba(153, 102, 255, 0.6)',  // 柱形图的背景色
+                        borderWidth: 1,
+                        type: 'bar', // 设置为柱形图
+                        yAxisID: 'y2'  // 关联右边Y轴
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '时间'  // X轴标题
+                        }
+                    },
+                    y1: {
+                        position: 'left',  // 设置左边的Y轴
+                        title: {
+                            display: true,
+                            text: `${lineField} 数据`  // 左侧Y轴的标题
+                        },
+                        min: 0  // 设置最小值
+                    },
+                    y2: {
+                        position: 'right',  // 设置右边的Y轴
+                        title: {
+                            display: true,
+                            text: `${barField} 数据 (柱形图)`  // 右侧Y轴的标题
+                        },
+                        min: 0  // 设置最小值
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error loading data:', error);
+    }
+}
+
+// 更新图表，根据选择的字段
+function updateChart() {
+    const lineField = document.getElementById('line-field-selection').value; // 获取折线图字段
+    const barField = document.getElementById('bar-field-selection').value; // 获取柱形图字段
+    const provinceField = document.getElementById('province-selection').value; // 获取柱形图字段
+    renderChart(lineField, barField,provinceField); // 重新渲染图表
+}
+
+// 页面加载时默认渲染水温数据
+renderChart("水温", "高锰酸盐","北京市");
+
+
+</script>
+<script>
+    // 监听 checkbox 的变化，动态更新主控状态
+document.getElementById("camera-toggle").addEventListener("change", function() {
+    var status = this.checked ? "正常" : "关闭";
+    document.getElementById("camera-status").textContent = status; // 更新摄像机状态
+});
+
+document.getElementById("light-toggle").addEventListener("change", function() {
+    var status = this.checked ? "正常" : "关闭";
+    document.getElementById("light-status").textContent = status; // 更新灯光状态
+});
+
+document.getElementById("brush-toggle").addEventListener("change", function() {
+    var status = this.checked ? "正常" : "关闭";
+    document.getElementById("brush-status").textContent = status; // 更新清洁刷状态
+});
+
+</script>>
 {% endblock %}
+
