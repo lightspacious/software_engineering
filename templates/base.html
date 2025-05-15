@@ -77,15 +77,15 @@
             {% endif %}
 
             {% if session.identity == '2' or session.identity == '1' %}
-                <a href="{{ url_for('smart_center') }}" class="{% if request.endpoint == 'smart_center' %}active{% endif %}">数据中心</a>
+                <a href="{{ url_for('smart_center') }}" class="{% if request.endpoint == 'smart_center' %}active{% endif %}">智能中心</a>
             {% else %}
-                <a href="#" onclick="noAccess()">数据中心</a>
+                <a href="#" onclick="noAccess()">智能中心</a>
             {% endif %}
 
             {% if session.identity == '2' %}
-                <a href="{{ url_for('admin') }}" class="{% if request.endpoint == 'admin' %}active{% endif %}">智能中心</a>
+                <a href="{{ url_for('admin') }}" class="{% if request.endpoint == 'admin' %}active{% endif %}">管理员中心</a>
             {% else %}
-                <a href="#" onclick="noAccess()">智能中心</a>
+                <a href="#" onclick="noAccess()">管理员中心</a>
             {% endif %}
         </div>
 

@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.secret_key = '123456789'
 
 # 配置 MySQL 数据库连接
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:001108@localhost/ocean user'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/ocean_user'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -174,13 +174,112 @@ def admin():
         return redirect(url_for('login'))
     if session['identity'] != '2':  # 仅管理员可以访问
         return "<script>alert('您无权限访问该页面！');window.history.back();</script>"
-    return render_template('admin.html')
 
+    # 查询所有用户数据
+    users = User.query.all()
+    return render_template('admin.html', users=users)
+
+# 获取用户信息
+@app.route('/get_user', methods=['GET'])
+def get_user():
+    try:
+        user_id = request.args.get('userid')
+        if not user_id:
+            return jsonify({'success': False, 'message': '缺少用户ID参数'})
+
+        # 查找用户
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'success': False, 'message': '用户不存在'})
+
+        # 返回用户信息（不包括密码）
+        return jsonify({
+            'success': True,
+            'user': {
+                'userid': user.userid,
+                'username': user.username,
+                'identity': user.identity,
+                'mail': user.mail
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'获取用户信息失败: {str(e)}'})
+
+
+# 编辑用户
+@app.route('/edit_user', methods=['POST'])
+def edit_user():
+    try:
+        data = request.form
+        user_id = data.get('userid')
+        username = data.get('username')
+        identity = data.get('identity')
+
+        # 查找用户
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'success': False, 'message': '用户不存在'})
+
+        print(user.username, user.identity)
+        # 更新用户信息
+        user.username = username
+        user.identity = identity
+        print(user.username,user.identity)
+
+        db.session.commit()
+        return jsonify({'success': True, 'message': '用户信息更新成功'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'更新用户信息失败: {str(e)}'})
+
+
+# 删除用户
+@app.route('/delete_user', methods=['POST'])
+def delete_user():
+    try:
+        user_id = request.form.get('userid')
+
+        # 查找用户
+        user = User.query.get(user_id)
+        if not user:
+            return jsonify({'success': False, 'message': '用户不存在'})
+
+        # 删除用户
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'success': True, 'message': '用户删除成功'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'删除用户失败: {str(e)}'})
+
+
+def generate_dummy_devices():
+    """生成模拟设备数据"""
+    devices = []
+    device_types = ['摄像机', '灯光', '清洁刷', '传感器']
+    for i in range(4):
+        devices.append({
+            'type': device_types[i],
+            'device_id': ''.join(random.choices(string.ascii_uppercase + string.digits, k=12)),
+            'status': '正常' if random.random() > 0.1 else '异常',
+            'version': f'V0.1.{random.randint(1, 5)}',
+            'temperature': f'{round(random.uniform(35.0, 45.0), 2)}℃'
+        })
+    return devices
 #smart_center app.py修改部分开始
 
 
 @app.route('/logout')
 def logout():
+    if 'username' in session:
+        # 获取当前用户
+        username = session['username']
+        # 查找用户并设置在线状态为 False
+        user = User.query.filter_by(username=username).first()
+        if user:
+            user.online = False
+            db.session.commit()
+    # 清除会话
     session.clear()
     return redirect(url_for('login'))
 
@@ -344,6 +443,10 @@ def get_pca_data():
             "success": False,
             "error": str(e)
         }), 500
+
+
+
+
 
 #smart_center app.py修改部分结束
 
