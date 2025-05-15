@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.secret_key = '123456789'
 
 # 配置 MySQL 数据库连接
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/ocean_user'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:001108@localhost/ocean user'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -378,6 +378,7 @@ def get_data():
 
     # 构造文件路径
     file_path = os.path.join("static\dataset\水质数据\data_smart", province, basin, section, month, file_name)
+    print(file_path)
     
     # 检查文件是否存在
     if os.path.exists(file_path):

@@ -3054,6 +3054,10 @@ h1, h2 {
             const basin = document.getElementById('basin').value;
             const section = document.getElementById('section').value;
         
+            console.log("province ",province);
+
+            console.log("basin ",basin);
+            console.log("section ",section);
             
             const response = await fetch(`/get_data?province=${province}&basin=${basin}&section=${section}`);
             const response_ab = await fetch(`/get_water_quality_data?province=${province}&basin=${basin}&section=${section}`);
