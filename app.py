@@ -1,15 +1,9 @@
-<<<<<<< HEAD
-from flask import Flask, render_template, jsonify,request
-from flask_cors import CORS # 用于处理跨域请求
 from sklearn.decomposition import PCA
 # from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
-
-=======
 from flask import Flask, render_template, request, redirect, url_for,flash,session,abort, jsonify
 #from flask import Flask, render_template, jsonify,request
 from flask_cors import CORS # 用于处理跨域请求，开发时可能需要
->>>>>>> f42d126a8e7a16f317714f21f176cdfe1c02ce78
 import os
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
@@ -182,15 +176,13 @@ def admin():
         return "<script>alert('您无权限访问该页面！');window.history.back();</script>"
     return render_template('admin.html')
 
-<<<<<<< HEAD
 #smart_center app.py修改部分开始
-=======
+
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('login'))
->>>>>>> f42d126a8e7a16f317714f21f176cdfe1c02ce78
 
 #异常检测逻辑
 def detect_anomalies_with_data(df):
