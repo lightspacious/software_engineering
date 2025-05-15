@@ -45,7 +45,7 @@ def login():
             db.session.commit()  # 保存状态
             return redirect(url_for('main_info')) 
         else:
-            return render_template('login.html', error="Invalid username or password")
+            return render_template('login.html', error="账号不存在或密码错误")
     return render_template('login.html')
 
 #跳转注册页面

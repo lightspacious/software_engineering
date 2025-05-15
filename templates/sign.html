@@ -86,6 +86,42 @@
             margin-top: 15px;  
             color: red;  
         }  
+        .error-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff4f4;
+        border: 1px solid #ff4d4f;
+        color: #a8071a;
+        padding: 10px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-family: "Microsoft YaHei", "微软雅黑", "Arial", sans-serif;
+        max-width: 800px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+        }
+
+        .error-icon {
+        margin-right: 8px;
+        font-weight: bold;
+        font-size: 16px;
+        }
+
+        @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        }
     </style>
 </head>
 <body>
@@ -122,6 +158,12 @@
             </div>
             <button type="submit">注册</button>
         </form>
+        {% if error %}
+            <div class="error-box">
+                <span class="error-icon">✖</span>
+                <span class="error-message">{{ error }}</span>
+            </div>
+        {% endif %}
         <div id="message"></div>
     </div>
 
@@ -176,6 +218,20 @@
         message.textContent = ""; // 清除错误信息
         return true; // 允许提交
     }
+
+    // 等待页面加载完毕
+    window.addEventListener('DOMContentLoaded', (event) => {
+        const errorBox = document.querySelector('.error-box');
+        if (errorBox) {
+        // 设置 3 秒后淡出并移除
+        setTimeout(() => {
+            errorBox.style.transition = 'opacity 0.5s ease';
+            errorBox.style.opacity = '0';
+            // 0.5秒后从DOM中移除
+            setTimeout(() => errorBox.remove(), 500);
+        }, 1500); // 3 秒后开始淡出
+        }
+    });
 </script>
 </body>
 </html>

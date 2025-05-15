@@ -26,6 +26,43 @@
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.min.css"
     />
+    <style>
+        .error-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff4f4;
+        border: 1px solid #ff4d4f;
+        color: #a8071a;
+        padding: 10px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        max-width: 800px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+        }
+
+        .error-icon {
+        margin-right: 8px;
+        font-weight: bold;
+        font-size: 16px;
+        }
+
+        @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        }
+    </style>
 </head>
 <body>
     <!-- 顶部导航栏 -->
@@ -63,11 +100,15 @@
             <div><i class="ri-calendar-line"></i><span id="date-display">----</span></div>
             <div><i class="ri-thermometer-line"></i>12~14°C</div>
             <div onclick="logout()" style="cursor: pointer;" title="退出登录">
-                <i class="ri-logout-box-line"></i>
+                <i class="ri-logout-box-line"></i><span id="exit">退出登录</span>
             </div>
 
         </div>
+        
     </div>
+
+    <!-- 页面级提示框容器 -->
+    <div id="alert-box" class="error-box" style="display: none;"></div>
 
     <!-- 页面内容区域 -->
     <div class="content">
@@ -110,7 +151,22 @@
     setInterval(updateTime, 1000);
 
     function noAccess() {
-        alert("您无权限访问该页面！");
+        showAlert("您无权限访问该页面！");
+    }
+
+    function showAlert(message) {
+        const alertBox = document.getElementById("alert-box");
+        alertBox.textContent = message;
+        alertBox.style.display = "block";
+        alertBox.style.opacity = "1";
+        alertBox.style.fontWeight = "bold";
+
+        // 3秒后自动淡出并移除
+        setTimeout(() => {
+            alertBox.style.transition = 'opacity 0.5s ease';
+            alertBox.style.opacity = '0';
+            setTimeout(() => alertBox.style.display = 'none', 500);
+        }, 3000);
     }
     
     function logout() {
