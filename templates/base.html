@@ -33,9 +33,23 @@
         <!-- 左侧菜单 -->
         <div class="nav-left">
             <a href="{{ url_for('main_info') }}" class="{% if request.endpoint == 'main_info' %}active{% endif %}">主要信息</a>
-            <a href="{{ url_for('underwater') }}" class="{% if request.endpoint == 'underwater' %}active{% endif %}">水下系统</a>
-            <a href="{{ url_for('smart_center') }}" class="{% if request.endpoint == 'smart_center' %}active{% endif %}">数据中心</a>
-            <a href="{{ url_for('admin') }}" class="{% if request.endpoint == 'admin' %}active{% endif %}">智能中心</a>
+            {% if session.identity == '2' or session.identity == '1' %}
+                <a href="{{ url_for('underwater') }}" class="{% if request.endpoint == 'underwater' %}active{% endif %}">水下系统</a>
+            {% else %}
+                <a href="#" onclick="noAccess()">水下系统</a>
+            {% endif %}
+
+            {% if session.identity == '2' or session.identity == '1' %}
+                <a href="{{ url_for('smart_center') }}" class="{% if request.endpoint == 'smart_center' %}active{% endif %}">数据中心</a>
+            {% else %}
+                <a href="#" onclick="noAccess()">数据中心</a>
+            {% endif %}
+
+            {% if session.identity == '2' %}
+                <a href="{{ url_for('admin') }}" class="{% if request.endpoint == 'admin' %}active{% endif %}">智能中心</a>
+            {% else %}
+                <a href="#" onclick="noAccess()">智能中心</a>
+            {% endif %}
         </div>
 
         <!-- 中间标题 -->
@@ -48,6 +62,10 @@
             <div><i class="ri-time-line"></i><span id="time-display">--:--:--</span></div>
             <div><i class="ri-calendar-line"></i><span id="date-display">----</span></div>
             <div><i class="ri-thermometer-line"></i>12~14°C</div>
+            <div onclick="logout()" style="cursor: pointer;" title="退出登录">
+                <i class="ri-logout-box-line"></i>
+            </div>
+
         </div>
     </div>
 
@@ -76,20 +94,30 @@
     updateTimeAndDate();             // 初始化一次
     setInterval(updateTimeAndDate, 1000);  // 每秒刷新
 
-        function updateTime() {
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const seconds = now.getSeconds().toString().padStart(2, '0');
-            const timeStr = `${hours}:${minutes}:${seconds}`;
-            document.getElementById('time-display').textContent = timeStr;
+    function updateTime() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        const timeStr = `${hours}:${minutes}:${seconds}`;
+        document.getElementById('time-display').textContent = timeStr;
+    }
+
+    // 初始加载一次
+    updateTime();
+
+    // 每秒更新时间
+    setInterval(updateTime, 1000);
+
+    function noAccess() {
+        alert("您无权限访问该页面！");
+    }
+    
+    function logout() {
+        if (confirm("确定要退出登录吗？")) {
+            window.location.href = "{{ url_for('logout') }}";
         }
-    
-        // 初始加载一次
-        updateTime();
-    
-        // 每秒更新时间
-        setInterval(updateTime, 1000);
+    }
     </script>
 </body>
 </html>
