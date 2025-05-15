@@ -1,7 +1,648 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>管理员管理界面</h1>
-<p>这里是系统管理员的专用界面。</p>
-<p>您可以在此进行系统配置、用户管理和高级设置。</p>
+<style>
+    /* 添加这些样式到你的CSS中 */
+    body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden; /* 防止出现滚动条 */
+    }
+
+    .container {
+        width: 100vw;
+        height: 100vh;
+        padding: 0;
+        margin: 0;
+    }
+
+    .grid-layout {
+        display: grid;
+        grid-template-columns: 3fr 4fr; /* 调整为左侧1份，右侧2份 */
+        grid-template-rows: 1fr; /* 单行 */
+        width: 100%;
+        height: 100%;
+        gap: 0; /* 移除网格间隙 */
+    }
+
+    .grid-item {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        overflow: auto; /* 如果内容过多可以滚动 */
+    }
+
+    .panel-container {
+        background-color: rgba(0, 0, 0, 0.3);
+        width: 100%;
+        height: 100%;
+        padding: 15px;
+        box-sizing: border-box; /* 确保内边距不影响总尺寸 */
+    }
+
+    .chart-title {
+        text-align: center;
+    }
+
+    /* 用户管理面板样式 */
+    .user-management-panel {
+        display: flex;
+        flex-direction: column;
+        height: calc(100% - 30px);
+    }
+
+    .user-list-panel {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+        padding: 12px;
+        height: 100%;
+        flex: 1;
+    }
+
+    .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .panel-title {
+        color: #00c3ff;
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .action-btn {
+        padding: 5px 10px;
+        background-color: #2c3e50;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        margin-left: 5px;
+    }
+
+    .action-btn:hover {
+        background-color: #34495e;
+    }
+
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .user-table th, .user-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .user-table th {
+        background-color: rgba(0, 123, 255, 0.5);
+        color: white;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: #2c3e50;
+        padding: 20px;
+        border-radius: 5px;
+        width: 400px;
+        max-width: 90%;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .modal-title {
+        color: #00c3ff;
+        margin: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #e0e0e0;
+    }
+
+    .form-group input, .form-group select {
+        width: 100%;
+        padding: 8px;
+        background-color: #34495e;
+        border: none;
+        color: white;
+        border-radius: 3px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    /* 特权码验证模态框样式 */
+    .privilege-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 1001;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .privilege-modal-content {
+        background-color: #2c3e50;
+        padding: 20px;
+        border-radius: 5px;
+        width: 300px;
+        max-width: 90%;
+    }
+
+    .privilege-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .privilege-modal-title {
+        color: #00c3ff;
+        margin: 0;
+    }
+
+    /* 其他现有样式保持不变 */
+</style>
+
+<div class="container">
+    <div class="grid-layout">
+        <!-- 左侧用户管理面板 -->
+        <div class="grid-item area1">
+            <h2 class="chart-title">用户管理</h2>
+            <div class="user-management-panel">
+                <!-- 用户列表面板 -->
+                <div class="user-list-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title">用户列表</h3>
+                    </div>
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>用户ID</th>
+                                <th>用户名</th>
+                                <th>身份</th>
+                                <th>在线</th>
+                                <th>邮箱</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.userid }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    {% if user.identity == '0' %}
+                                    普通用户
+                                    {% elif user.identity == '1' %}
+                                    养殖户
+                                    {% else %}
+                                    管理员
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.online %}
+                                    <span style="color: #2ecc71; font-weight: bold;">在线</span>
+                                    {% else %}
+                                    <span style="color: #95a5a6; font-weight: bold;">离线</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.mail }}</td>
+                                <td>
+                                    <button class="action-btn edit-btn" data-userid="{{ user.userid }}">编辑</button>
+                                    <button class="action-btn delete-btn" data-userid="{{ user.userid }}">删除</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧养殖场监控面板 -->
+        <div class="grid-item area2" style="grid-column: span 1;">
+            <h2 class="chart-title">养殖场硬件信息概览</h2>
+            <div class="panel-container" style="flex-direction: column; gap: 15px;">
+                <!-- 标题、按钮和下拉选择框容器 -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 37.8px;">
+                    <h3 style="color: #00c3ff; margin: 0; font-size: 18px;" id="farmTitle">1号养殖场</h3>
+                    <div style="display: flex; gap: 37.8px;">
+                        <a href="{{ url_for('main_info') }}" class="btn" style="padding: 8px 16px; font-size: 14px;">
+                            查看实时数据
+                        </a>
+                        <select id="farmSelector" class="btn" style="padding: 8px 16px; width: 200px; background: #2c3e50; color: #fff; border: none; cursor: pointer;">
+                            {% for i in range(1,7) %}
+                            <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}号养殖场</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 养殖场信息面板 -->
+                <div class="panel-box" style="padding: 15px;">
+                    <div class="panel-header">
+                        <!-- 这里的标题会被 JavaScript 动态更新 -->
+                    </div>
+
+                    <!-- 设备信息网格布局 -->
+                    <div id="farmPanel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <!-- 这里的内容将通过JavaScript动态更新 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑用户模态框 -->
+<div id="userModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle">编辑用户信息</h3>
+            <button class="close-btn">&times;</button>
+        </div>
+        <form id="userForm">
+            <input type="hidden" id="editUserId">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" required>
+                <small class="form-text" id="usernameHelp" style="color: #e74c3c; display: none;">用户名不能为空</small>
+            </div>
+            <div class="form-group">
+                <label for="identity">身份</label>
+                <select id="identity" required>
+                    <option value="0">普通用户</option>
+                    <option value="1">养殖户</option>
+                    <option value="2">管理员</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="action-btn" id="cancelBtn">取消</button>
+                <button type="button" class="action-btn" id="submitEdit">提交</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 特权码验证模态框（用于编辑用户） -->
+<div id="privilegeModalEdit" class="privilege-modal">
+    <div class="privilege-modal-content">
+        <div class="privilege-modal-header">
+            <h3 class="privilege-modal-title">身份确认</h3>
+            <button class="close-privilege-btn">&times;</button>
+        </div>
+        <div class="form-group">
+            <label for="privilegeCodeEdit">请输入管理员特权码</label>
+            <input type="password" id="privilegeCodeEdit" required>
+            <small class="form-text" id="privilegeHelpEdit" style="color: #e74c3c; display: none;">特权码错误</small>
+        </div>
+        <div class="form-actions">
+            <button type="button" class="action-btn" id="cancelPrivilegeEdit">取消</button>
+            <button type="button" class="action-btn" id="confirmPrivilegeEdit">确认</button>
+        </div>
+    </div>
+</div>
+
+<!-- 特权码验证模态框（用于删除用户） -->
+<div id="privilegeModalDelete" class="privilege-modal">
+    <div class="privilege-modal-content">
+        <div class="privilege-modal-header">
+            <h3 class="privilege-modal-title">特权码验证</h3>
+            <button class="close-privilege-delete-btn">&times;</button>
+        </div>
+        <div class="form-group">
+            <label for="privilegeCodeDelete">请输入特权码</label>
+            <input type="password" id="privilegeCodeDelete" required>
+            <small class="form-text" id="privilegeHelpDelete" style="color: #e74c3c; display: none;">特权码错误</small>
+        </div>
+        <div class="form-actions">
+            <button type="button" class="action-btn" id="cancelPrivilegeDelete">取消</button>
+            <button type="button" class="action-btn" id="confirmPrivilegeDelete">确认</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 模拟不同养殖场的数据
+    const farmData = {
+        1: {
+            camera: { id: "CAM-001", status: "正常", resolution: "1080P" },
+            light: { id: "LIGHT-001", status: "开启", brightness: "75%" },
+            cleaner: { id: "CLEAN-001", status: "待机", lastClean: "2023-05-15 10:30" },
+            sensor: { id: "SENSOR-001", status: "正常", temperature: "25.6°C", humidity: "68%" }
+        },
+        2: {
+            camera: { id: "CAM-002", status: "正常", resolution: "720P" },
+            light: { id: "LIGHT-002", status: "关闭", brightness: "30%" },
+            cleaner: { id: "CLEAN-002", status: "运行中", lastClean: "2023-05-16 14:15" },
+            sensor: { id: "SENSOR-002", status: "正常", temperature: "26.1°C", humidity: "72%" }
+        },
+        3: {
+            camera: { id: "CAM-003", status: "维护中", resolution: "1080P" },
+            light: { id: "LIGHT-003", status: "开启", brightness: "90%" },
+            cleaner: { id: "CLEAN-003", status: "待机", lastClean: "2023-05-14 09:20" },
+            sensor: { id: "SENSOR-003", status: "警告", temperature: "28.3°C", humidity: "85%" }
+        },
+        4: {
+            camera: { id: "CAM-004", status: "正常", resolution: "4K" },
+            light: { id: "LIGHT-004", status: "开启", brightness: "60%" },
+            cleaner: { id: "CLEAN-004", status: "运行中", lastClean: "2023-05-17 11:45" },
+            sensor: { id: "SENSOR-004", status: "正常", temperature: "24.8°C", humidity: "65%" }
+        },
+        5: {
+            camera: { id: "CAM-005", status: "离线", resolution: "720P" },
+            light: { id: "LIGHT-005", status: "关闭", brightness: "10%" },
+            cleaner: { id: "CLEAN-005", status: "待机", lastClean: "2023-05-13 16:30" },
+            sensor: { id: "SENSOR-005", status: "正常", temperature: "23.5°C", humidity: "60%" }
+        },
+        6: {
+            camera: { id: "CAM-006", status: "正常", resolution: "1080P" },
+            light: { id: "LIGHT-006", status: "开启", brightness: "80%" },
+            cleaner: { id: "CLEAN-006", status: "运行中", lastClean: "2023-05-18 08:10" },
+            sensor: { id: "SENSOR-006", status: "正常", temperature: "25.2°C", humidity: "70%" }
+        }
+    };
+
+    // 更新养殖场面板内容的函数
+    function updateFarmPanel(farmNumber) {
+        const farm = farmData[farmNumber];
+        const panel = document.getElementById('farmPanel');
+
+        // 更新标题
+        document.getElementById('farmTitle').textContent = farmNumber + '号养殖场';
+
+        // 创建新的面板内容
+        panel.innerHTML = `
+            <!-- 第一行：摄像机和灯光 -->
+            <div style="padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;background-color: rgba(0, 0, 139, 0.5);">
+                <h6 style="margin: 0 0 8px 0; color: #fff;font-size: 16px;">摄像机</h6>
+                <p style="margin: 4px 0; color: #e0e0e0;">设备ID: <span style="color: #00c3ff;">${farm.camera.id}</span></p>
+                <p style="margin: 4px 0; color: #e0e0e0;">状态:
+                    <span style="color: ${farm.camera.status === '正常' ? '#2ecc71' :
+                            farm.camera.status === '维护中' ? '#f39c12' : '#e74c3c'}; font-weight: bold;">${farm.camera.status}</span>
+                </p>
+                <p style="margin: 4px 0; color: #e0e0e0;">分辨率: <span style="color: #00c3ff;">${farm.camera.resolution}</span></p>
+            </div>
+            <div style="padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;background-color: rgba(0, 0, 139, 0.5);">
+                <h6 style="margin: 0 0 8px 0; color: #fff;font-size: 16px;">灯光控制</h6>
+                <p style="margin: 4px 0; color: #e0e0e0;">设备ID: <span style="color: #00c3ff;">${farm.light.id}</span></p>
+                <p style="margin: 4px 0; color: #e0e0e0;">状态:
+                    <span style="color: ${farm.light.status === '开启' ? '#2ecc71' : '#e74c3c'}; font-weight: bold;">${farm.light.status}</span>
+                </p>
+                <p style="margin: 4px 0; color: #e0e0e0;">亮度: <span style="color: #00c3ff;">${farm.light.brightness}</span></p>
+            </div>
+
+            <!-- 第二行：清洁刷和传感器 -->
+            <div style="padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;background-color: rgba(0, 0, 139, 0.5);">
+                <h6 style="margin: 0 0 8px 0; color: #fff;font-size: 16px;">清洁刷</h6>
+                <p style="margin: 4px 0; color: #e0e0e0;">设备ID: <span style="color: #00c3ff;">${farm.cleaner.id}</span></p>
+                <p style="margin: 4px 0; color: #e0e0e0;">状态:
+                    <span style="color: ${farm.cleaner.status === '运行中' ? '#2ecc71' :
+                            farm.cleaner.status === '待机' ? '#f39c12' : '#e74c3c'}; font-weight: bold;">${farm.cleaner.status}</span>
+                </p>
+                <p style="margin: 4px 0; color: #e0e0e0;">最后清洁: <span style="color: #00c3ff;">${farm.cleaner.lastClean}</span></p>
+            </div>
+            <div style="padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;background-color: rgba(0, 0, 139, 0.5);">
+                <h6 style="margin: 0 0 8px 0; color: #fff;font-size: 16px;">环境传感器</h6>
+                <p style="margin: 4px 0; color: #e0e0e0;">设备ID: <span style="color: #00c3ff;">${farm.sensor.id}</span></p>
+                <p style="margin: 4px 0; color: #e0e0e0;">状态:
+                    <span style="color: ${farm.sensor.status === '正常' ? '#2ecc71' :
+                            farm.sensor.status === '警告' ? '#f39c12' : '#e74c3c'}; font-weight: bold;">${farm.sensor.status}</span>
+                </p>
+                <p style="margin: 4px 0; color: #e0e0e0;">温度: <span style="color: #00c3ff;">${farm.sensor.temperature}</span></p>
+                <p style="margin: 4px 0; color: #e0e0e0;">湿度: <span style="color: #00c3ff;">${farm.sensor.humidity}</span></p>
+            </div>
+        `;
+    }
+
+    // 初始化显示第一个养殖场
+    updateFarmPanel(1);
+
+    // 添加下拉选择框事件监听
+    document.getElementById('farmSelector').addEventListener('change', function() {
+        const selectedFarm = parseInt(this.value);
+        updateFarmPanel(selectedFarm);
+    });
+
+
+    // 用户管理功能
+    const userModal = document.getElementById('userModal');
+    const privilegeModalEdit = document.getElementById('privilegeModalEdit');
+    const privilegeModalDelete = document.getElementById('privilegeModalDelete');
+    const modalTitle = document.getElementById('modalTitle');
+    const editUserId = document.getElementById('editUserId');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const userForm = document.getElementById('userForm');
+    const usernameHelp = document.getElementById('usernameHelp');
+    const submitEditBtn = document.getElementById('submitEdit');
+    let currentAction = null; // 用于跟踪当前操作类型
+
+    // 关闭模态框
+    document.querySelector('.close-btn').addEventListener('click', function() {
+        userModal.style.display = 'none';
+    });
+
+    // 取消按钮
+    cancelBtn.addEventListener('click', function() {
+        userModal.style.display = 'none';
+    });
+
+    // 特权码验证模态框关闭按钮（编辑）
+    document.querySelector('.close-privilege-btn').addEventListener('click', function() {
+        privilegeModalEdit.style.display = 'none';
+    });
+
+    // 特权码验证模态框取消按钮（编辑）
+    document.getElementById('cancelPrivilegeEdit').addEventListener('click', function() {
+        privilegeModalEdit.style.display = 'none';
+    });
+
+    // 特权码验证模态框关闭按钮（删除）
+    document.querySelector('.close-privilege-delete-btn').addEventListener('click', function() {
+        privilegeModalDelete.style.display = 'none';
+    });
+
+    // 特权码验证模态框取消按钮（删除）
+    document.getElementById('cancelPrivilegeDelete').addEventListener('click', function() {
+        privilegeModalDelete.style.display = 'none';
+    });
+
+    // 编辑用户按钮
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = this.getAttribute('data-userid');
+            modalTitle.textContent = '编辑用户信息';
+            editUserId.value = userId;
+
+            // 从服务器获取用户数据
+            fetch(`/get_user?userid=${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const user = data.user;
+                        document.getElementById('username').value = user.username;
+                        document.getElementById('identity').value = user.identity;
+                        userModal.style.display = 'flex';
+                    } else {
+                        alert('获取用户信息失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('获取用户信息时出错');
+                });
+        });
+    });
+
+    // 提交编辑按钮
+    submitEditBtn.addEventListener('click', function() {
+        // 显示特权码验证模态框
+        currentAction = 'edit';
+        privilegeModalEdit.style.display = 'flex';
+    });
+
+    // 确认特权码（编辑）
+    document.getElementById('confirmPrivilegeEdit').addEventListener('click', function() {
+        const privilegeCode = document.getElementById('privilegeCodeEdit').value;
+
+        if (privilegeCode === '02468') {
+            // 特权码正确，提交表单
+            let isValid = true;
+
+            // 重置错误提示
+            usernameHelp.style.display = 'none';
+
+            // 验证用户名
+            const username = document.getElementById('username').value;
+            if (!username.trim()) {
+                usernameHelp.style.display = 'block';
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            const identity = document.getElementById('identity').value;
+
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('identity', identity);
+            formData.append('userid', editUserId.value);
+
+            fetch('/edit_user', {
+                method: 'POST',
+                body: new URLSearchParams(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    userModal.style.display = 'none';
+                    privilegeModalEdit.style.display = 'none';
+                    // 刷新页面或更新表格
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('操作失败，请重试');
+            });
+        } else {
+            // 特权码错误
+            document.getElementById('privilegeHelpEdit').style.display = 'block';
+        }
+    });
+
+    // 删除用户按钮
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = this.getAttribute('data-userid');
+            currentAction = 'delete';
+            privilegeModalDelete.style.display = 'flex';
+        });
+    });
+
+    // 确认特权码（删除）
+    document.getElementById('confirmPrivilegeDelete').addEventListener('click', function() {
+        const privilegeCode = document.getElementById('privilegeCodeDelete').value;
+
+        if (privilegeCode === '1') {
+            // 特权码正确，执行删除操作
+            const userId = document.querySelector('.delete-btn[data-userid]').getAttribute('data-userid');
+
+            if (confirm(`确定要删除用户ID为 ${userId} 的用户吗？\n此操作不可撤销！`)) {
+                fetch('/delete_user', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `userid=${encodeURIComponent(userId)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        privilegeModalDelete.style.display = 'none';
+                        // 刷新页面或更新表格
+                        location.reload();
+                    } else {
+                        alert('删除用户失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除用户时出错');
+                });
+            }
+        } else {
+            // 特权码错误
+            document.getElementById('privilegeHelpDelete').style.display = 'block';
+        }
+    });
+</script>
 {% endblock %}
