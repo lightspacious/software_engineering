@@ -1,0 +1,82 @@
+[
+  {
+    "id": "fish-9572",
+    "type": "moonfish",
+    "length": "10寸",
+    "weight": "5kg",
+    "status": "疑似患病",
+    "group": "鱼群异常"
+  },
+  {
+    "id": "fish-8234",
+    "type": "salmon",
+    "length": "12寸",
+    "weight": "6kg",
+    "status": "健康",
+    "group": "正常"
+  },
+  {
+    "id": "fish-3311",
+    "type": "tuna",
+    "length": "15寸",
+    "weight": "7kg",
+    "status": "疑似患病",
+    "group": "鱼群异常"
+  },
+  {
+    "id": "fish-6642",
+    "type": "goldfish",
+    "length": "5寸",
+    "weight": "1kg",
+    "status": "健康",
+    "group": "正常"
+  },
+  {
+    "id": "fish-7789",
+    "type": "bass",
+    "length": "8寸",
+    "weight": "3kg",
+    "status": "轻微异常",
+    "group": "注意监测"
+  },
+  {
+    "id": "fish-1023",
+    "type": "catfish",
+    "length": "13寸",
+    "weight": "5.5kg",
+    "status": "疑似患病",
+    "group": "鱼群异常"
+  },
+  {
+    "id": "fish-5555",
+    "type": "carp",
+    "length": "11寸",
+    "weight": "4kg",
+    "status": "健康",
+    "group": "正常"
+  },
+  {
+    "id": "fish-4198",
+    "type": "bream",
+    "length": "9寸",
+    "weight": "2.8kg",
+    "status": "轻微异常",
+    "group": "注意监测"
+  },
+  {
+    "id": "fish-3912",
+    "type": "trout",
+    "length": "14寸",
+    "weight": "6.2kg",
+    "status": "疑似患病",
+    "group": "鱼群异常"
+  },
+  {
+    "id": "fish-8888",
+    "type": "snapper",
+    "length": "7寸",
+    "weight": "2kg",
+    "status": "健康",
+    "group": "正常"
+  }
+]
