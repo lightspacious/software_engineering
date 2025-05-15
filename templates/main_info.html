@@ -183,6 +183,7 @@
     </div>
 
  <!-- 底部左侧 -->
+{% if session.identity != '0' %}
 <div class="card control-section">
     <h3>设备控制</h3>
     <div class="control-grid">
@@ -232,8 +233,12 @@
         </div>
     </div>
 </div>
-
-
+{% else %}
+<div class="card control-section">
+    <h3>设备控制</h3>
+    <p style="color: #ccc;">您没有控制权限。</p>
+</div>
+{% endif %}
 
 
 </div>
