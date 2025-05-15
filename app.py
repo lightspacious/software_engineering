@@ -1,5 +1,8 @@
 from flask import Flask, render_template, jsonify,request
-from flask_cors import CORS # 用于处理跨域请求，开发时可能需要
+from flask_cors import CORS # 用于处理跨域请求
+from sklearn.decomposition import PCA
+# from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
 
 import os
 import pandas as pd
@@ -54,6 +57,8 @@ def smart_center():
 @app.route('/admin')
 def admin():
     return render_template('admin.html')
+
+#smart_center app.py修改部分开始
 
 #异常检测逻辑
 def detect_anomalies_with_data(df):
@@ -170,6 +175,53 @@ def get_fish_data():
         'length1': 'length'
     })
     return jsonify(df.to_dict(orient='records'))
+
+@app.route('/get_pca_data')
+def get_pca_data():
+    try:
+        # 1. 读取CSV文件
+        csv_path = "Fish.csv"
+        df = pd.read_csv(csv_path, encoding='utf-8-sig', sep=',')
+
+        # 2. PCA数据准备
+        features = ['Weight(g)', 'Length1(cm)', 'Length2(cm)', 'Length3(cm)', 'Height(cm)', 'Width(cm)']
+        df_pca = df.dropna(subset=features).copy()
+        
+        # 3. 数据标准化和PCA降维
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(df_pca[features])
+        
+        pca = PCA(n_components=2)
+        X_pca = pca.fit_transform(X_scaled)
+
+        # 4. 构建返回数据
+        pca_data = []
+        for i, row in df_pca.iterrows():
+            pca_data.append({
+                "species": row['Species'],
+                "pc1": float(X_pca[i, 0]),
+                "pc2": float(X_pca[i, 1])
+            })
+
+        # # 5. 异常检测
+        # dbscan = DBSCAN(eps=0.5, min_samples=5)
+        # labels = dbscan.fit_predict(X_pca)
+        # outliers = df_pca[labels == -1].to_dict('records')
+
+        return jsonify({
+            "success": True,
+            "pca_data": pca_data,
+            # "outliers": outliers,
+            "explained_variance": pca.explained_variance_ratio_.tolist()
+        })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+#smart_center app.py修改部分结束
 
 if __name__ == '__main__':
     app.run(debug=True)

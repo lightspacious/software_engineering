@@ -118,9 +118,10 @@
     border: 1px solid #ccc;
     padding: 12px 16px;
     border-radius: 8px;
+    width: 390px;
     /* flex:3;   */
     font-family: Arial, sans-serif;
-     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     text-align: center; /* 使标题居中 */
    
 }
@@ -156,49 +157,6 @@
     justify-content: center; 
     gap: 5px;
     color: #d0d4da;
-}
-
-.notice_wangxiang {
-    display: flex;
-    position: relative;
-    left: 20px;
-    font-size: 16px; 
-    text-align: center;
-    justify-content: center; 
-    gap: 5px;
-    font-weight: bold;
-    color: #da0909;
-}
-
-.notice_wangxiang div {
-    display: flex;
-    align-items: center; 
-}
-
-.notice_wangxiang i {
-    margin-right: 2px; 
-}
-
-/* 网箱预警时间 */
-#date-display1 {
-    font-family: monospace;
-    width: 100px;
-    display: inline-block;
-    text-align: center;
-}
-
-#time-display2 {
-    font-family: monospace;      /* 等宽字体 */
-    display: inline-block;
-    width: 80px;                 /* 预留足够空间固定宽度 */
-    text-align: center;
-}
-
-#date-display2 {
-    font-family: monospace;
-    width: 100px;
-    display: inline-block;
-    text-align: center;
 }
 
 /*第5part*/
@@ -405,7 +363,7 @@
   align-items: center;      /* 垂直居中 */
 }
 
-.label{
+.label_5{
     display: flex;
     align-items: center;
     gap: 10px;
@@ -426,9 +384,10 @@
     align-items: flex-start; /* 顶部对齐 */
     margin-bottom: 25px;
     gap:10px;
-    height: 70px;
-    width: 490px;
-    transform: translateX(15px);
+    height: 100px;
+    width: 505px;
+    transform: translateX(20px);
+    /* transform: translateY(45px); */
     
     
 }
@@ -501,38 +460,13 @@
 }
 
 
-/* AI决策 */
-.forest_result {
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    background-color: #3a5f8a;
-    font-size: 12px;
-    line-height: 1.8;
-}
-.forest_result div {
-    margin-bottom: 2px;
-}
-
-h1, h2 {
-      color: #e1dbdb;
-      text-align: center;
-      font-size: 13px;
-}
 .chart-container {
       width: 100%;
       height: 300px;
       margin-bottom: 30px;
 }
 
-.info-panel {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: #a9c6df;
-      border-radius: 5px;
-      border-left: 4px solid #4e79a7;
 
-}
 .parameter-selector {
       display: flex;
       justify-content: center;
@@ -583,7 +517,7 @@ h1, h2 {
 
 .alert-container {
   width: 400px;
-  max-height: 150px;  /* 控制容器最大高度 */
+  max-height: 200px;  /* 控制容器最大高度 */
   overflow-y: auto;   /* 超出时出现滚动条 */
   /* border: 1px solid #ccc; */
   padding: 10px;
@@ -615,7 +549,7 @@ h1, h2 {
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 12px 16px;
-    width: 370px;
+    width: 390px;
     font-size: 14px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 999;
@@ -695,6 +629,76 @@ h1, h2 {
     border-radius: 5px;
     cursor: pointer;
 }
+
+
+  /* 紧凑海洋主题 */
+  .compact-ocean-form {
+    max-width: 600px;
+    margin: 10px auto;
+    padding: 15px;
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(64, 169, 255, 0.15);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    border: 1px solid #4fc3f7;
+  }
+
+ .compact-row {
+    display: flex;
+    margin-bottom: 10px;
+    justify-content: space-between; /* 均匀分布 */
+  }
+
+  .compact-group {
+    width: calc((100% - 16px) / 3); /* 精确计算宽度 */
+    flex-shrink: 0; /* 禁止收缩 */
+    box-sizing: border-box;
+  }
+
+  /* 保持海洋风格的小型选择框 */
+  .compact-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #4fc3f7;
+    border-radius: 4px;
+    background-color:#4fc3f7b0;
+    font-size: 13px;
+  }
+
+  /* 确保三个元素永远不换行 */
+  @media (max-width: 500px) {
+    .compact-row {
+      flex-wrap: nowrap;
+      overflow-x: auto; /* 超小屏幕横向滚动 */
+    }
+    .compact-group {
+      min-width: 120px; /* 保持最小可操作宽度 */
+    }
+  }
+
+  /* 小型标签 */
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 15px;
+    color: #e1dbdb;
+    font-weight: 500;
+  }
+  /* 小型按钮 */
+  .compact-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    /* margin-top: 10px; */
+    background: #4fc3f7b0;
+    border: #4fc3f7;
+    border-radius: 6%;
+  }
+
+h1, h2 {
+    color: #e1dbdb;
+    text-align: center;
+    font-size: 17px;
+}
 </style>
 
 <div class="grid-layout-smart">
@@ -707,8 +711,7 @@ h1, h2 {
         </div>
 
         <div class="chart">
-          
-            <select id="province">
+            <!-- <select id="province">
                 <option value="安徽省">安徽省</option>
                 <option value="北京市">北京市</option>
                 <option value="福建省">福建省</option>
@@ -744,14 +747,64 @@ h1, h2 {
 
             <label for="basin">流域:</label>
             <select id="basin">
-                <!-- 流域选项会根据省份动态更新 -->
+              
             </select>
 
             <label for="section">截面:</label>
             <select id="section">
-                <!-- 截面选项会根据流域动态更新 -->
-            </select>
-            <button onclick="fetchData()">获取数据</button>
+               
+            </select> 
+            
+            <button onclick="fetchData()">获取数据</button> -->
+            <div class="compact-ocean-form">
+                <div class="compact-row">
+                  <div class="compact-group">
+                    <label for="province">省份:</label>
+                    <select id="province">
+                        <option value="安徽省">安徽省</option>
+                        <option value="北京市">北京市</option>
+                        <option value="福建省">福建省</option>
+                        <option value="甘肃省">甘肃省</option>
+                        <option value="广东省">广东省</option>
+                        <option value="广西壮族自治区">广西壮族自治区</option>
+                        <option value="贵州省">贵州省</option>
+                        <option value="海南省">海南省</option>
+                        <option value="河北省">河北省</option>
+                        <option value="河南省">河南省</option>
+                        <option value="黑龙江省">黑龙江省</option>
+                        <option value="湖北省">湖北省</option>
+                        <option value="湖南省">湖南省</option>
+                        <option value="吉林省">吉林省</option>
+                        <option value="江苏省">江苏省</option>
+                        <option value="江西省">江西省</option>
+                        <option value="辽宁省">辽宁省</option>
+                        <option value="内蒙古自治区">内蒙古自治区</option>
+                        <option value="宁夏回族自治区">宁夏回族自治区</option>
+                        <option value="青海省">青海省</option>
+                        <option value="山东省">山东省</option>
+                        <option value="山西省">山西省</option>
+                        <option value="陕西省">陕西省</option>
+                        <option value="上海市">上海市</option>
+                        <option value="四川省">四川省</option>
+                        <option value="天津市">天津市</option>
+                        <option value="西藏自治区">西藏自治区</option>
+                        <option value="新疆维吾尔自治区">新疆维吾尔自治区</option>
+                        <option value="云南省">云南省</option>
+                        <option value="浙江省">浙江省</option>
+                        <option value="重庆市">重庆市</option>
+                    </select>
+                  </div>
+                  <div class="compact-group">
+                    <label for="basin">流域:</label>
+                    <select id="basin"><option>选择流域</option></select>
+                  </div>
+                  <div class="compact-group">
+                    <label for="section">截面:</label>
+                    <select id="section"><option>选择截面</option></select>
+                  </div>
+                </div>
+                <button class="compact-btn" onclick="fetchData()">获取数据</button>
+              </div>
             <div id="parameterSelector" class="parameter-selector"></div>
 
             <div class="chart-container" id="mainChart"></div>
@@ -795,35 +848,35 @@ h1, h2 {
 
       <div class="grid-layout-area5">
             <div class="grid-item-area5 area5_area1">
-                <div class="label"><i class="ri-numbers-line"></i><span>编号</span></div>
+                <div class="label_5"><i class="ri-numbers-line"></i><span>编号</span></div>
                 <div class="num_value" id="fish-id">fish-9572</div>
             </div>
             <div class="grid-item-area5 area5_area2">
-                <div class="label"><i class="ri-star-smile-line"></i><span>鱼种</span></div>
+                <div class="label_5"><i class="ri-star-smile-line"></i><span>鱼种</span></div>
                 <div class="num_value" id="fish-type">moonfish</div>
             </div>
             <div class="grid-item-area5 area5_area3">
-                <div class="label"><i class="ri-expand-diagonal-2-line"></i><span>体长</span></div>
+                <div class="label_5"><i class="ri-expand-diagonal-2-line"></i><span>体长</span></div>
                 <div class="num_value" id="fish-length">10寸</div>
             </div>
             <div class="grid-item-area5 area5_area4">
-                <div class="label"><i class="ri-weight-line"></i><span>体重</span></div>
+                <div class="label_5"><i class="ri-weight-line"></i><span>体重</span></div>
                 <div class="num_value" id="fish-weight">5kg</div>
             </div>
             <div class="grid-item-area5 area5_area5">
-                <div class="label sick_label"><i class="ri-hard-drive-fill"></i></div>
+                <div class="label_5 sick_label"><i class="ri-hard-drive-fill"></i></div>
                 <div class="num_value" id="fish-status">疑似患病</div>
             </div>
             <div class="grid-item-area5 area5_area6">
-                <div class="label stange_label"><i class="ri-bootstrap-line"></i></div>
+                <div class="label_5 stange_label"><i class="ri-bootstrap-line"></i></div>
                 <div class="num_value" id="fish-group">鱼群异常</div>
             </div>
             <div class="grid-item-area5 area5_area7">
-                <div class="label trace_label"><i class="ri-arrow-go-forward-line"></i></div>
+                <div class="label_5 trace_label"><i class="ri-arrow-go-forward-line"></i></div>
                 <div class="num_value" id="fish-track">轨迹追踪</div>
             </div>
             <div class="grid-item-area5 area5_area8">
-                <div class="label analysis_label"><i class="ri-line-chart-line"></i></div>
+                <div class="label_5 analysis_label"><i class="ri-line-chart-line"></i></div>
                 <div class="num_value" id="fish-analysis">轨迹分析</div>
             </div>
         </div>
@@ -836,11 +889,11 @@ h1, h2 {
     <div class="grid-item-smart smart_area3">
         <div class="chart">
             <h2>鱼类整体情况一览</h2>
-            <div id="bubble" style=" left:-15px ;width:450px; height: 340px;"></div>
+            <div id="bubble" style=" left:-15px ;width:455px; height: 370px;"></div>
 
 
             <h2>PCA 降维</h2>
-            <div id="pca" style="left:-15px ;width: 450px; height: 340px;"></div>
+            <div id="pca" style="left:-15px ;width: 455px; height: 370px;"></div>
         </div>
 
         <div class="exception">
@@ -853,8 +906,6 @@ h1, h2 {
 
     </div>
    
-    
-  
     <div id="fullscreen-alert">
         <div id="alert-message">⚠️ 水质异常警告 ⚠️</div>
         <div id="alert-details"></div>
@@ -2973,6 +3024,7 @@ h1, h2 {
 
     // 初始化图表
   const mainChart = echarts.init(document.getElementById('mainChart'));
+  
   const secondaryChart = echarts.init(document.getElementById('secondaryChart'));
     
     // 可配置参数
@@ -3039,67 +3091,127 @@ h1, h2 {
       });
     }
     
-    // 初始化参数选择器
+   // 初始化参数选择器（带海洋风格）
     function initParameterSelector() {
         const selector = document.getElementById('parameterSelector');
         selector.innerHTML = '';
+        
+        // 应用海洋主题容器样式
+        selector.style.background = 'linear-gradient(135deg, #1a6fc9, #0d47a1)';
+        selector.style.padding = '15px';
+        selector.style.borderRadius = '8px';
+        selector.style.boxShadow = '0 4px 12px rgba(0, 107, 148, 0.3)';
+        selector.style.marginBottom = '20px';
 
-        // 主参数选择下拉框
+        // 主参数选择组
         const mainGroup = document.createElement('div');
-        mainGroup.style.marginBottom = '10px';
-        mainGroup.innerHTML = '<strong>主参数:</strong> ';
+        mainGroup.style.marginBottom = '12px';
+        mainGroup.style.display = 'flex';
+        mainGroup.style.alignItems = 'center';
+        mainGroup.style.gap = '10px';
+        
+        // 主参数标签
+        const mainLabel = document.createElement('span');
+        mainLabel.textContent = '主参数:';
+        mainLabel.style.color = '#e1dbdb';
+        mainLabel.style.fontWeight = '400';
+        mainLabel.style.minWidth = '60px';
+        mainGroup.appendChild(mainLabel);
+
+        // 主参数下拉框
         const mainSelect = document.createElement('select');
         mainSelect.id = 'mainParameterSelect';
-
-        // 添加主参数选项
-        config.mainParameters.forEach(param => {
-          const option = document.createElement('option');
-          option.value = param;
-          option.textContent = param;
-          if (param === chartData.currentMainParam) {
-            option.selected = true; // 设置当前选中的主参数
-          }
-          mainSelect.appendChild(option);
+        mainSelect.style.flex = '1';
+        mainSelect.style.padding = '8px 12px';
+        mainSelect.style.borderRadius = '4px';
+        mainSelect.style.border = '1px solid rgba(255,255,255,0.3)';
+        mainSelect.style.backgroundColor = '#4fc3f7b0';
+        mainSelect.style.color = '#083779';
+        mainSelect.style.cursor = 'pointer';
+        
+        // 悬停效果
+        mainSelect.addEventListener('mouseenter', () => {
+            mainSelect.style.boxShadow = '0 0 0 2px rgba(0, 150, 255, 0.5)';
+        });
+        mainSelect.addEventListener('mouseleave', () => {
+            mainSelect.style.boxShadow = 'none';
         });
 
-        // 当主参数变化时更新当前参数并重绘图表
+        // 添加选项
+        config.mainParameters.forEach(param => {
+            const option = document.createElement('option');
+            option.value = param;
+            option.textContent = param;
+            if (param === chartData.currentMainParam) {
+                option.selected = true;
+            }
+            mainSelect.appendChild(option);
+        });
+
+        // 事件监听
         mainSelect.addEventListener('change', (event) => {
-          chartData.currentMainParam = event.target.value;
-          updateCharts();
-          updateActiveButtons();
+            chartData.currentMainParam = event.target.value;
+            updateCharts();
+            updateActiveButtons();
         });
 
         mainGroup.appendChild(mainSelect);
         selector.appendChild(mainGroup);
 
-        // 次要参数选择下拉框
+        // 次要参数选择组
         const secondaryGroup = document.createElement('div');
-        secondaryGroup.innerHTML = '<strong>次要参数:</strong> ';
+        secondaryGroup.style.display = 'flex';
+        secondaryGroup.style.alignItems = 'center';
+        secondaryGroup.style.gap = '10px';
+        
+        // 次要参数标签
+        const secondaryLabel = document.createElement('span');
+        secondaryLabel.textContent = '次要参数:';
+        secondaryLabel.style.color = '#e1dbdb';
+        secondaryLabel.style.fontWeight = '400';
+        secondaryLabel.style.minWidth = '60px';
+        secondaryGroup.appendChild(secondaryLabel);
+
+        // 次要参数下拉框
         const secondarySelect = document.createElement('select');
         secondarySelect.id = 'secondaryParameterSelect';
-
-        // 添加次要参数选项
-        config.secondaryParameters.forEach(param => {
-          const option = document.createElement('option');
-          option.value = param;
-          option.textContent = param;
-          if (param === chartData.currentSecondaryParam) {
-            option.selected = true; // 设置当前选中的次要参数
-          }
-          secondarySelect.appendChild(option);
+        secondarySelect.style.flex = '1';
+        secondarySelect.style.padding = '8px 12px';
+        secondarySelect.style.borderRadius = '4px';
+        secondarySelect.style.border = '1px solid rgba(255,255,255,0.3)';
+        secondarySelect.style.backgroundColor = '#4fc3f7b0';
+        secondarySelect.style.color = '#083779';
+        secondarySelect.style.cursor = 'pointer';
+        
+        // 悬停效果
+        secondarySelect.addEventListener('mouseenter', () => {
+            secondarySelect.style.boxShadow = '0 0 0 2px rgba(0, 150, 255, 0.5)';
+        });
+        secondarySelect.addEventListener('mouseleave', () => {
+            secondarySelect.style.boxShadow = 'none';
         });
 
-        // 当次要参数变化时更新当前参数并重绘图表
+        // 添加选项
+        config.secondaryParameters.forEach(param => {
+            const option = document.createElement('option');
+            option.value = param;
+            option.textContent = param;
+            if (param === chartData.currentSecondaryParam) {
+                option.selected = true;
+            }
+            secondarySelect.appendChild(option);
+        });
+
+        // 事件监听
         secondarySelect.addEventListener('change', (event) => {
-          chartData.currentSecondaryParam = event.target.value;
-          updateCharts();
-          updateActiveButtons();
+            chartData.currentSecondaryParam = event.target.value;
+            updateCharts();
+            updateActiveButtons();
         });
 
         secondaryGroup.appendChild(secondarySelect);
         selector.appendChild(secondaryGroup);
-      }
-
+    }
     
     // 更新活动按钮状态
     function updateActiveButtons() {
@@ -3443,7 +3555,7 @@ h1, h2 {
             }
 
             cur_Index++;
-        }, 3000); // 每3秒更新一次数据
+        }, 6000); // 每6秒更新一次数据
     }
    closeAlertBtn.addEventListener('click', () => {
       alertBox.style.display = 'none';
@@ -3681,80 +3793,84 @@ function getAqiDescription(pm25) {
 
 
         // PCA Chart
-        fetch("static/dataset/pca_data.json")
-            .then(response => response.json())
-            .then(data => {
-                let speciesSet = [...new Set(data.map(d => d.species))];
-                let seriesData = speciesSet.map(species => ({
-                    name: species,
-                    type: 'scatter',
-                    data: data.filter(d => d.species === species)
-                              .map(d => [d.pc1, d.pc2])
-                }));
+    fetch("/get_pca_data")
+    .then(response => response.json())
+    .then(responseData => { 
+      if (responseData.success) {
+            // console.log(data);
+            const pca_data = responseData.pca_data;  // 访问pca_data数组
+            // const outliers = responseData.outliers;
+            let speciesSet = [...new Set(pca_data.map(d => d.species))];
+            let seriesData = speciesSet.map(species => ({
+                name: species,
+                type: 'scatter',
+                data: pca_data.filter(d => d.species === species)
+                          .map(d => [d.pc1, d.pc2])
+            }));
 
-                let chart = echarts.init(document.getElementById('pca'));
-                chart.setOption({
-                    tooltip: {
-                        trigger: 'item',
-                        formatter: function (params) {
-                            return `
-                                物种: ${params.seriesName}<br>
-                                PC1: ${params.value[0].toFixed(2)}<br>
-                                PC2: ${params.value[1].toFixed(2)}
-                            `;
-                        }
-                    },
-                    legend: { 
-                      data: speciesSet,
-                      textStyle: {
-                          color: '#fff', // 改成你想要的颜色，比如白色 '#fff'、蓝色 '#007BFF'
-                          fontSize: 13,   // 你也可以顺便调字体大小
-                          fontWeight: 'bold'
-                      }
-                    },
-                    grid: {
-                      left: '55px',
-                      right: '10%',
-                      bottom: '60px',
-                      top: '60px'
-                    },
-                    xAxis: { 
-                      name: 'PC1',
-                      nameLocation: 'middle',
-                      nameGap: 30,
-                      axisLabel: {
-                        rotate: 45
-                      },
-                      axisLine: {
-                        lineStyle: {
-                          color: '#4ED7F1'  // 设置y轴线的颜色
-                        }
-                      },
-                    },
-                    yAxis: { 
-                      name: 'PC2',
-                      nameLocation: 'middle',
-                      nameGap: 30,
-                      axisLabel: {
-                        formatter: function (value) {
-                          return value.toFixed(2); // 保留两位小数
-                        }
-                      },
-                      axisLine: {
-                        lineStyle: {
-                          color: '#4ED7F1'  // 设置y轴线的颜色
-                        }
-                      },
-                      splitLine: {
-                        lineStyle: {
-                          color: '#4ED7F1'   // 设置y轴网格线的颜色
-                        }
-                      }
-                    },
-                    
-                    series: seriesData
-                });
+            let chart = echarts.init(document.getElementById('pca'));
+            chart.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function (params) {
+                        return `
+                            物种: ${params.seriesName}<br>
+                            PC1: ${params.value[0].toFixed(2)}<br>
+                            PC2: ${params.value[1].toFixed(2)}
+                        `;
+                    }
+                },
+                legend: { 
+                  data: speciesSet,
+                  textStyle: {
+                      color: '#fff', 
+                      fontSize: 13,   
+                      fontWeight: 'bold'
+                  }
+                },
+                grid: {
+                  left: '55px',
+                  right: '10%',
+                  bottom: '60px',
+                  top: '60px'
+                },
+                xAxis: { 
+                  name: 'PC1',
+                  nameLocation: 'middle',
+                  nameGap: 30,
+                  axisLabel: {
+                    rotate: 45
+                  },
+                  axisLine: {
+                    lineStyle: {
+                      color: '#4ED7F1'  // 设置x轴线的颜色
+                    }
+                  },
+                },
+                yAxis: { 
+                  name: 'PC2',
+                  nameLocation: 'middle',
+                  nameGap: 30,
+                  axisLabel: {
+                    formatter: function (value) {
+                      return value.toFixed(2); // 保留两位小数
+                    }
+                  },
+                  axisLine: {
+                    lineStyle: {
+                      color: '#4ED7F1'  // 设置y轴线的颜色
+                    }
+                  },
+                  splitLine: {
+                    lineStyle: {
+                      color: '#4ED7F1'   // 设置y轴网格线的颜色
+                    }
+                  }
+                },
+                
+                series: seriesData
             });
+        }});
 </script>
 
 <!-- 实时监测 -->
@@ -3806,8 +3922,5 @@ setInterval(() => {
       alertContainer.appendChild(div);
     }
 </script>
-
-
-
 
 {% endblock %}
