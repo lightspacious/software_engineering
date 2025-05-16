@@ -13,6 +13,13 @@ import string
 app = Flask(__name__)
 app.secret_key = '123456789'
 
+# 设置管理员身份###############################
+@app.before_request
+def fake_login_as_admin():
+    session['username'] = '1'
+    session['identity'] = '1'
+# 用于避开登陆界面并获得管理员权限##################
+
 # 配置 MySQL 数据库连接
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/ocean_user'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -33,6 +40,7 @@ CORS(app)
 # @app.route('/')
 # def index():
 #     return redirect(url_for('login')) 
+
 
 # 登录路由
 @app.route('/login', methods=['GET', 'POST'])
@@ -458,9 +466,6 @@ def get_pca_data():
             "success": False,
             "error": str(e)
         }), 500
-
-
-
 
 
 #smart_center app.py修改部分结束
