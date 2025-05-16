@@ -78,17 +78,18 @@
     min-height: 0; /* 允许内容被压缩 */
 }
 
-/*地图容器大小*/
+/*地图容器大小 begin*/
     #map-container {
         width: 495px;
         height: 310px;
         /* left:-10px; */
     }
+/* 地图 end */
 </style>
 
-<!-- 地图数据 -->
+<!-- 地图数据 begin-->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-
+<!-- 地图数据 end -->
 <div class="container">
     <!-- 左侧大面板 -->
     <div class="left-panel">
@@ -103,7 +104,7 @@
             <div class="module">
                 <div class="module-title">数据中心分布</div>
                 <!-- <p>内容区域 A2</p> -->
-                
+                <!-- 地图 -->
                 <div id="map-container"></div>
             </div>
         </div>
@@ -124,277 +125,266 @@
     </div>
 </div>
 
+<!-- 地图part绘制 -->
 <script>
-        fetch('https://geo.datav.aliyun.com/areas/bound/geojson?code=100000_full')
-            .then(res => res.json())
-            .then(geoJson => {
-                echarts.registerMap('china', geoJson);
+    fetch('https://geo.datav.aliyun.com/areas/bound/geojson?code=100000_full')
+        .then(res => res.json())
+        .then(geoJson => {
+            echarts.registerMap('china', geoJson);
+            var myChart = echarts.init(document.getElementById('map-container'));
 
-                var myChart = echarts.init(document.getElementById('map-container'));
-
-                var points = [
-                    {
-                        name: '杭州',
-                        value: [120.15, 30.28, parseFloat((30+ Math.random() * 4 - 2).toFixed(2))],
-                        provider: '阿里云',
-                        info: '数据中心',
-                        itemStyle: {
-                            color: '#00FF99'  // 红色
-                        }
-                    },
-                    {
-                        name: '北京',
-                        value: [116.46, 39.92, parseFloat((25 + Math.random() * 4 - 2).toFixed(2))],
-                        provider: '百度云',
-                        info: '北方节点',
-                        itemStyle: {
-                            color: '#FFC300'  // 红色
-                        }
-                    },
-                    {
-                        name: '广州',
-                        value: [113.23, 23.16, parseFloat((20+ Math.random() * 4 - 2).toFixed(2))],
-                        provider: '腾讯云',
-                        info: '南方节点',
-                        itemStyle: {
-                            color: '#D966FF'  
-                        }
-                    },
-                    {
-                        name: '重庆',
-                        value: [106.55, 29.57, parseFloat((22 + Math.random() * 4 - 2).toFixed(2))],  
-                        provider: '华为云',
-                        info: '西南节点',
-                        itemStyle: {
-                            color: ' #FF3366' 
-                        }
+            var points = [
+                {
+                    name: '杭州',
+                    value: [120.15, 30.28, parseFloat((30+ Math.random() * 4 - 2).toFixed(2))],
+                    provider: '阿里云',
+                    info: '数据中心',
+                    itemStyle: {
+                        color: '#00FF99'  // 红色
                     }
-                ];
+                },
+                {
+                    name: '北京',
+                    value: [116.46, 39.92, parseFloat((25 + Math.random() * 4 - 2).toFixed(2))],
+                    provider: '百度云',
+                    info: '北方节点',
+                    itemStyle: {
+                        color: '#FFC300'  // 红色
+                    }
+                },
+                {
+                    name: '广州',
+                    value: [113.23, 23.16, parseFloat((20+ Math.random() * 4 - 2).toFixed(2))],
+                    provider: '腾讯云',
+                    info: '南方节点',
+                    itemStyle: {
+                        color: '#D966FF'  
+                    }
+                },
+                {
+                    name: '重庆',
+                    value: [106.55, 29.57, parseFloat((22 + Math.random() * 4 - 2).toFixed(2))],  
+                    provider: '华为云',
+                    info: '西南节点',
+                    itemStyle: {
+                        color: ' #FF3366' 
+                    }
+                }
+            ];
 
+            var defaultPoint = points[0];
+            var infoText = `数据中心\n地点：${defaultPoint.name}\n服务商：${defaultPoint.provider}\n连接：${defaultPoint.value[2]}ms`;          
 
-                var defaultPoint = points[0];
-                var infoText = `数据中心\n地点：${defaultPoint.name}\n服务商：${defaultPoint.provider}\n连接：${defaultPoint.value[2]}ms`;
-              
-
-                var option = {
-                        // backgroundColor: 'transparent', 
-                        
-                        //   title: {
-                        //       text: '中国地图点交互示例',
-                        //       textStyle: {
-                        //           color: '#ffffff' 
-                        //       }
-                        //   },
-                        
-                        tooltip: {
-                            trigger: 'item',
-                            show: false
+            var option = {
+                    tooltip: {
+                        trigger: 'item',
+                        show: false
+                    },
+                    
+                    geo: {
+                        map: 'china',
+                        roam: false,
+                        zoom: 1.63,
+                        center: [113.6, 35.0],
+                        label: {
+                            show: false,
+                            
                         },
-                        
-                        geo: {
-                            map: 'china',
-                            roam: false,
-                            zoom: 1.63,
-                            center: [113.6, 35.0],
+                        itemStyle: {//边界线
+                            areaColor: 'transparent',   
+                            borderColor: '#39A7FF',     
+                            borderWidth: 1              
+                        },
+                        emphasis: {
                             label: {
                                 show: false,
-                                
                             },
-                            itemStyle: {//边界线
-                                areaColor: 'transparent',   
-                                borderColor: '#39A7FF',     
-                                borderWidth: 1              
+                            itemStyle: {
+                                areaColor: 'transparent'
+                            }
+                        }
+                    },
+                    
+                    series: [
+                        {
+                            name: '城市',
+                            type: 'scatter',
+                            coordinateSystem: 'geo',
+                            data: points,
+                            // symbol: 'pin',
+                            symbol: 'path://M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z', 
+                            // symbolSize: function (val) {
+                            //     return val[2] ;
+                            // },
+                            symbolSize: function(val) {
+                                return [val[2] * 0.75, val[2]];  // 宽度是高度的60%
+                            },
+                            symbolKeepAspect: false,
+                            label: {
+                                formatter: '{b}',
+                                position: 'right',
+                                show: false,
+                                fontSize: 10,         
+                                color: '#ffffff'     
                             },
                             emphasis: {
                                 label: {
-                                    show: false,
-                                },
-                                itemStyle: {
-                                    areaColor: 'transparent'
+                                    show: true,
+                                    fontSize: 20,
+                                    color:'#ffffff'
                                 }
                             }
                         },
-                        
-                        series: [
-                            {
-                                name: '城市',
-                                type: 'scatter',
-                                coordinateSystem: 'geo',
-                                data: points,
-                                // symbol: 'pin',
-                                symbol: 'path://M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z', 
-                                // symbolSize: function (val) {
-                                //     return val[2] ;
-                                // },
-                                symbolSize: function(val) {
-                                    return [val[2] * 0.75, val[2]];  // 宽度是高度的60%
-                                },
-                                symbolKeepAspect: false,
-                                label: {
-                                    formatter: '{b}',
-                                    position: 'right',
-                                    show: false,
-                                    fontSize: 10,         
-                                    color: '#ffffff'     
-                                },
-                                emphasis: {
-                                    label: {
-                                        show: true,
-                                        fontSize: 20,
-                                        color:'#ffffff'
-                                    }
-                                }
+                        {
+                            name: '连接线',
+                            type: 'lines',
+                            coordinateSystem: 'geo',
+                            zlevel: 2,
+                            effect: {
+                                show: true,
+                                period: 6,
+                                trailLength: 0.2,
+                                color: '#fff',
+                                symbol: 'arrow',
+                                symbolSize: 6
                             },
-                            {
-                                name: '连接线',
-                                type: 'lines',
-                                coordinateSystem: 'geo',
-                                zlevel: 2,
-                                effect: {
-                                    show: true,
-                                    period: 6,
-                                    trailLength: 0.2,
-                                    color: '#fff',
-                                    symbol: 'arrow',
-                                    symbolSize: 6
-                                },
-                                lineStyle: {
-                                    color: '#00FFFF',
-                                    width: 1,
-                                    opacity: 0.6,
-                                    curveness: 0.2
-                                },
-                                data: [
-                                    {
-                                        coords: [points[1].value, points[0].value] 
-                                    },
-                                    {
-                                        coords: [points[3].value, points[0].value]  
-                                    },
-                                    {
-                                        coords: [points[3].value, points[1].value]  
-                                    },
-                                    {
-                                        coords: [points[3].value, points[2].value]  
-                                    }
-                                ]
-                            }
-                        ],         
-
-                        graphic: [
+                            lineStyle: {
+                                color: '#00FFFF',
+                                width: 1,
+                                opacity: 0.6,
+                                curveness: 0.2
+                            },
+                            data: [
                                 {
-                                    type: 'group',     
-                                    id: 'infoCard',  
-                                    left: '65%',       
-                                    top: '37%',     
-                                    children: [     
-                                    {
-                                        type: 'rect', 
-                                        z: 100,     
-                                        left: -90,
-                                        top:-5,
-                                        shape: { width: 170, height: 100 }, 
-                                        style: {
-                                            fill: 'rgba(11, 61, 145, 0.85)',  
-                                            stroke: '#39A7FF',               
-                                            lineWidth: 1,                    
-                                            shadowBlur: 10,               
-                                            shadowColor: '#000'             
-                                        }
-                                    },
-                                    {
-                                        id: 'infoText',   
-                                        type: 'text',      
-                                        // left: 'center',
-                                        left:-80,
-                                        z: 200,   
-                                        style: {
-                                            text:infoText,
-                                            font: '14px Microsoft YaHei',
-                                            lineHeight: 21,
-                                            // align: 'center',
-                                            fill: '#E6F7FF',
-                                            stroke: '#39A7FF',
-                                            lineWidth: 0.3
-                                            // shadowBlur: 15,
-                                            // shadowColor: 'rgba(0, 255, 255, 0.6)',
-                                            
-                                   
-                                    }
-                                    }
-                                    ]
-                                }
-                                ]
-                    };
-
-                myChart.setOption(option);
-
-                function updateValue() {
-
-                    defaultPoint.value[2] = parseFloat((point.value[2] + (Math.random() * 4 - 2)).toFixed(2));
-
-                    infoText = `数据中心\n地点：${defaultPoint.name}\n服务商：${defaultPoint.provider}\n连接：${defaultPoint.value[2]}ms`;
-                           
-                    myChart.setOption({
-                        graphic: {
-                            elements: [
+                                    coords: [points[1].value, points[0].value] 
+                                },
                                 {
-                                    id: 'infoText',
-                                    type: 'text',      
-                                    // left: 'center', 
-                                    left:-80,
-                                    style: {
-                                        text: infoText,
-                                        font: '14px Microsoft YaHei',
-                                        lineHeight: 21,
-                                        fill: '#E6F7FF',
-                                        stroke: '#39A7FF',
-                                        lineWidth: 0.3,
-                                    }
+                                    coords: [points[3].value, points[0].value]  
+                                },
+                                {
+                                    coords: [points[3].value, points[1].value]  
+                                },
+                                {
+                                    coords: [points[3].value, points[2].value]  
                                 }
                             ]
                         }
-                    });
-                }       
+                    ],         
 
-                // 启动定时器
-                // console.log("kaishi一次完成");
-                setInterval(updateValue, 10000);
-                // console.log("执行一次完成");
-                
-
-                myChart.on('click', function (params) {
-                        if (params.seriesType === 'scatter') {
-                            defaultPoint = params.data;
-                            infoText = `数据中心\n地点：${defaultPoint.name}\n服务商：${defaultPoint.provider}\n连接：${defaultPoint.value[2]}ms`;
-                           
-                            myChart.setOption({
-                                graphic: {
-                                    elements: [
-                                        {
-                                            id: 'infoText',
-                                            type: 'text',      
-                                            // left: 'center', 
-                                            left:-80,
-                                            style: {
-                                                text: infoText,
-                                                font: '14px Microsoft YaHei',
-                                                lineHeight: 21,
-                                                fill: '#E6F7FF',
-                                                stroke: '#39A7FF',
-                                                lineWidth: 0.3,
-                                            }
-                                        }
-                                    ]
+                    graphic: [
+                            {
+                                type: 'group',     
+                                id: 'infoCard',  
+                                left: '65%',       
+                                top: '37%',     
+                                children: [     
+                                {
+                                    type: 'rect', 
+                                    z: 100,     
+                                    left: -90,
+                                    top:-5,
+                                    shape: { width: 170, height: 100 }, 
+                                    style: {
+                                        fill: 'rgba(11, 61, 145, 0.85)',  
+                                        stroke: '#39A7FF',               
+                                        lineWidth: 1,                    
+                                        shadowBlur: 10,               
+                                        shadowColor: '#000'             
+                                    }
+                                },
+                                {
+                                    id: 'infoText',   
+                                    type: 'text',      
+                                    // left: 'center',
+                                    left:-80,
+                                    z: 200,   
+                                    style: {
+                                        text:infoText,
+                                        font: '14px Microsoft YaHei',
+                                        lineHeight: 21,
+                                        // align: 'center',
+                                        fill: '#E6F7FF',
+                                        stroke: '#39A7FF',
+                                        lineWidth: 0.3
+                                        // shadowBlur: 15,
+                                        // shadowColor: 'rgba(0, 255, 255, 0.6)',
+                                        
+                                
                                 }
-                            });
-                        }
-                });
+                                }
+                                ]
+                            }
+                            ]
+                };
 
-                window.addEventListener('resize', function() {
-                        myChart.resize();
-                    });
+            myChart.setOption(option);
+
+            function updateValue() {
+
+                defaultPoint.value[2] = parseFloat((point.value[2] + (Math.random() * 4 - 2)).toFixed(2));
+
+                infoText = `数据中心\n地点：${defaultPoint.name}\n服务商：${defaultPoint.provider}\n连接：${defaultPoint.value[2]}ms`;
+                        
+                myChart.setOption({
+                    graphic: {
+                        elements: [
+                            {
+                                id: 'infoText',
+                                type: 'text',      
+                                // left: 'center', 
+                                left:-80,
+                                style: {
+                                    text: infoText,
+                                    font: '14px Microsoft YaHei',
+                                    lineHeight: 21,
+                                    fill: '#E6F7FF',
+                                    stroke: '#39A7FF',
+                                    lineWidth: 0.3,
+                                }
+                            }
+                        ]
+                    }
+                });
+            }       
+
+            // 启动定时器
+            // console.log("kaishi一次完成");
+            setInterval(updateValue, 10000);
+            // console.log("执行一次完成");
             
+
+            myChart.on('click', function (params) {
+                    if (params.seriesType === 'scatter') {
+                        defaultPoint = params.data;
+                        infoText = `数据中心\n地点：${defaultPoint.name}\n服务商：${defaultPoint.provider}\n连接：${defaultPoint.value[2]}ms`;
+                        
+                        myChart.setOption({
+                            graphic: {
+                                elements: [
+                                    {
+                                        id: 'infoText',
+                                        type: 'text',      
+                                        // left: 'center', 
+                                        left:-80,
+                                        style: {
+                                            text: infoText,
+                                            font: '14px Microsoft YaHei',
+                                            lineHeight: 21,
+                                            fill: '#E6F7FF',
+                                            stroke: '#39A7FF',
+                                            lineWidth: 0.3,
+                                        }
+                                    }
+                                ]
+                            }
+                        });
+                    }
             });
-    </script>
+
+            window.addEventListener('resize', function() {
+                    myChart.resize();
+                });
+        
+        });
+</script>
 {% endblock %}
