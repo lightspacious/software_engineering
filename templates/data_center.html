@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* 重置所有元素的margin和padding */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* 确保html和body元素占满整个视口 */
+    html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    /* 主容器占满整个父元素 */
+    .container {
+        display: grid;
+        grid-template-columns: 3fr 1fr; /* 左2/3，右1/3 */
+        width: 100%;
+        height: 100vh; /* 使用视口高度单位 */
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .left-panel {
+        display: grid;
+        grid-template-rows: 7fr 4fr; /* 上下等分 */
+        gap: 10px;
+        height: 100%; /* 确保高度占满父容器 */
+    }
+
+    .left-top {
+        display: grid;
+        grid-template-columns: 3fr 4fr; /* 左右等分 */
+        gap: 10px;
+        height: 100%; /* 确保高度占满父容器 */
+    }
+
+    .module {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 5px;
+    color: white;
+    height: 100%; /* 确保高度占满父容器 */
+    overflow: auto; /* 修改为 auto 以显示滚动条 */
+}
+
+
+    .module-title {
+        text-align: center;
+        color: #00c3ff;
+        margin-bottom: 10px;
+        font-size: 18px;
+    }
+
+    .right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: calc(100% - 20px); /* 减去 padding 和 gap 的影响 */
+    padding: 10px 0; /* 只保留垂直方向的 padding */
+}
+
+.combined-module {
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 5px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* 确保高度占满父容器 */
+    overflow: auto; /* 修改为 auto 以显示滚动条 */
+    flex: 1; /* 确保模块填满可用空间 */
+    min-height: 0; /* 允许内容被压缩 */
+}
+</style>
+
+<div class="container">
+    <!-- 左侧大面板 -->
+    <div class="left-panel">
+        <!-- 左上小面板，分为左右两部分 -->
+        <div class="left-top">
+            <!-- 模块A1 -->
+            <div class="module">
+                <div class="module-title">硬件信息统计</div>
+                <p>内容区域 A1</p>
+            </div>
+            <!-- 模块A2 -->
+            <div class="module">
+                <div class="module-title">数据中心分布</div>
+                <p>内容区域 A2</p>
+            </div>
+        </div>
+        <!-- 左下模块B -->
+        <div class="module">
+            <div class="module-title">数据类型统计</div>
+            <p>内容区域 B</p>
+        </div>
+    </div>
+
+    <!-- 右侧小面板 -->
+    <div class="right-panel">
+        <!-- 模块C -->
+        <div class="combined-module">
+            <div class="module-title">传感器信息+数据库交互统计</div>
+            <p>内容区域 C</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

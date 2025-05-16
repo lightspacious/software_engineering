@@ -14,7 +14,7 @@ app = Flask(__name__)
 app.secret_key = '123456789'
 
 # 配置 MySQL 数据库连接
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:001108@localhost/ocean user'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/ocean_user'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -167,6 +167,14 @@ def smart_center():
     if session['identity'] not in ['1', '2']:  # 普通用户无权访问
         return "<script>alert('您无权限访问该页面！');window.history.back();</script>"
     return render_template('smart_center.html')
+
+@app.route('/data_center')
+def data_center():
+    if 'identity' not in session:
+        return redirect(url_for('login'))
+    if session['identity'] not in ['1', '2']:  # 普通用户无权访问
+        return "<script>alert('您无权限访问该页面！');window.history.back();</script>"
+    return render_template('data_center.html')
 
 @app.route('/admin')
 def admin():
