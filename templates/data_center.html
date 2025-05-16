@@ -169,7 +169,7 @@
     <!-- 右侧小面板 -->
     <div class="right-panel">
         <div class="combined-module">
-            <div class="module-title4">传感器信息区块</div>
+            <div class="module-title">传感器信息区块</div>
             <div class="time-metrics4">
                 <div class="metric-item4">
                     <span class="metric-label4">平均传输时长</span>
@@ -209,7 +209,7 @@
                 
             </div>
             
-            <div class="module-title4">数据库信息</div>
+            <div class="module-title">数据库信息</div>
             <div class="database-stats4">
                 <div class="stats-item4">
                     <span class="icon database-icon4">💾</span> <!-- 数据库图标 -->
@@ -223,6 +223,10 @@
                     <span class="icon time-icon4">⏱️</span> <!-- 时钟图标 -->
                     <span id="avg-query-time4">平均耗时：4.67s</span>
                 </div>
+            </div>
+                     <!-- 显示上次更新时间 -->
+            <div id="last-updated" style="color: #89c3ff; margin-top: 10px; font-size: 14px;">
+                上次更新时间: <span id="update-time">--</span>
             </div>
             
     </div>
@@ -584,6 +588,11 @@ document.addEventListener("DOMContentLoaded", updateFishPriceChart);
         // 更新平均查询耗时
         const avgQueryTime = getRandomTime();
         document.getElementById('avg-query-time4').textContent = `平均耗时：${avgQueryTime}s`;
+        
+        // 获取并显示上次更新时间
+        const now = new Date();
+        const timeString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        document.getElementById('update-time').textContent = timeString;
     }
 
     // 模拟获取随机时间
@@ -619,7 +628,7 @@ document.addEventListener("DOMContentLoaded", updateFishPriceChart);
 <style>
 
     .sensor-info4 {
-        background: rgba(26, 43, 60, 0.85); /* 明亮的深色透明背景 */
+        background: rgba(26, 43, 60, 0.3); /* 明亮的深色透明背景 */
         padding: 8px; /* 更小的内边距 */
         margin: 4px; /* 更小的外边距 */
         border-radius: 6px; /* 更圆润的边角 */
@@ -633,9 +642,9 @@ document.addEventListener("DOMContentLoaded", updateFishPriceChart);
 
     /* 数据库统计区块 */
     .database-stats4 {
-        background: rgba(26, 43, 60, 0.85); /* 明亮的深色透明背景 */
-        padding: 10px;
-        margin: 10px;
+        background: rgba(26, 43, 60, 0.5); /* 明亮的深色透明背景 */
+        padding: 12px;
+        margin: 12px;
         border-radius: 8px; /* 更圆润的边角 */
         color: #ecf0f1; /* 更亮的文字颜色 */
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* 增强阴影效果，提升层次感 */
@@ -703,7 +712,7 @@ document.addEventListener("DOMContentLoaded", updateFishPriceChart);
     .table-row4 {
         display: grid;
         grid-template-columns: 2fr 2fr 1fr; /* 调整列宽，确保内容更紧凑 */
-        padding: 8px; /* 减小内边距 */
+        padding: 10px; /* 减小内边距 */
         border-bottom: 1px solid rgba(52, 152, 219, 0.5); /* 更亮的分隔线 */
         transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, background-image 0.3s ease; /* 添加渐变过渡效果 */
     }
@@ -716,23 +725,13 @@ document.addEventListener("DOMContentLoaded", updateFishPriceChart);
     }
 
 
-    /* 数据库信息区块 */
-    .database-stats4 {
-        background: rgba(26, 43, 60, 0.85); /* 背景颜色 */
-        padding: 12px 16px; /* 调整内边距 */
-        margin: 8px; /* 减少外边距 */
-        border-radius: 6px; /* 圆角效果 */
-        color: #ecf0f1; /* 文字颜色 */
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* 阴影效果 */
-        backdrop-filter: blur(4px); /* 背景模糊效果 */
-    }
 
     /* 单个数据项的样式 */
     .stats-item4 {
         display: flex;
         align-items: center;
         margin-bottom: 8px; /* 减少每项之间的间距 */
-        font-size: 14px; /* 调整字体大小 */
+        font-size: 16px; /* 调整字体大小 */
         transition: background-color 0.3s ease, transform 0.3s ease; /* 动画效果 */
     }
 

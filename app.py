@@ -37,9 +37,9 @@ class User(db.Model):
     # farm = db.Column(db.Integer)
 CORS(app)
 
-@app.route('/')
-def index():
-    return redirect(url_for('login')) 
+# @app.route('/')
+# def index():
+#     return redirect(url_for('login')) 
 
 
 # 登录路由
@@ -120,7 +120,7 @@ def signinsign_up():
         return redirect(url_for('login'))
     return render_template('sign.html')
 
-# @app.route('/')
+@app.route('/')
 @app.route('/main_info')
 def main_info():
    
