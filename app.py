@@ -37,9 +37,9 @@ class User(db.Model):
     # farm = db.Column(db.Integer)
 CORS(app)
 
-# @app.route('/')
-# def index():
-#     return redirect(url_for('login')) 
+@app.route('/')
+def index():
+    return redirect(url_for('login')) 
 
 
 # 登录路由
@@ -124,8 +124,8 @@ def signinsign_up():
 @app.route('/main_info')
 def main_info():
    
-    # if 'identity' not in session:
-    #     return redirect(url_for('login'))
+    if 'identity' not in session:
+        return redirect(url_for('login'))
     return render_template('main_info.html')
 
 @app.route('/underwater')
@@ -134,8 +134,8 @@ def underwater():
    
     if 'identity' not in session:
         return redirect(url_for('login'))
-    # if session['identity'] not in ['1', '2']:  # 普通用户无权访问
-    #     return "<script>alert('您无权限访问该页面！');window.history.back();</script>"
+    if session['identity'] not in ['1', '2']:  # 普通用户无权访问
+        return "<script>alert('您无权限访问该页面！');window.history.back();</script>"
 
     # 1. 读取 CSV 数据
     df = pd.read_csv('Fish.csv')
@@ -184,10 +184,10 @@ def smart_center():
 def data_center():
 
 
-    # if 'identity' not in session:
-    #     return redirect(url_for('login'))
-    # if session['identity'] not in ['1', '2']:  # 普通用户无权访问
-    #     return "<script>alert('您无权限访问该页面！');window.history.back();</script>"
+    if 'identity' not in session:
+        return redirect(url_for('login'))
+    if session['identity'] not in ['1', '2']:  # 普通用户无权访问
+        return "<script>alert('您无权限访问该页面！');window.history.back();</script>"
     return render_template('data_center.html')
 
 @app.route('/admin')
