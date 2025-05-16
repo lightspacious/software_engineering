@@ -3909,20 +3909,21 @@ setInterval(() => {
       .then(outliers => {
         outliers.forEach((outlier, i) => {
           setTimeout(() => {
-            showAlert(`异常数据点！Species: ${outlier.Species}`);
+            showAlert_fish(`异常数据点！Species: ${outlier.Species}`);
           }, i * 2000);
         });
       })
       .catch(err => {
-        showAlert('无法加载异常数据，请检查文件路径是否正确！');
+        showAlert_fish('无法加载异常数据，请检查文件路径是否正确！');
         console.error(err);
       });
    
-    function showAlert(message) {
+    function showAlert_fish(message) {
       const alertContainer = document.getElementById('alertContainer');
       const div = document.createElement('div');
       div.className = 'alert';
       div.textContent = message;
+      console.log("当前message",message);
       alertContainer.appendChild(div);
     }
 </script>
