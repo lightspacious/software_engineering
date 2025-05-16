@@ -168,11 +168,63 @@
     </div>
     <!-- 右侧小面板 -->
     <div class="right-panel">
-        <!-- 模块C -->
         <div class="combined-module">
-            <div class="module-title">传感器信息+数据库交互统计</div>
-            <p>内容区域 C</p>
-        </div>
+            <div class="module-title4">传感器信息区块</div>
+            <div class="time-metrics4">
+                <div class="metric-item4">
+                    <span class="metric-label4">平均传输时长</span>
+                    <span class="metric-value blue-text4" id="avg-transmission-time4">02:45s</span>
+                </div>
+                <div class="metric-item4">
+                    <span class="metric-label4">平均处理时长</span>
+                    <span class="metric-value blue-text4" id="avg-processing-time4">00:02s</span>
+                </div>
+            </div>
+            <div class="sensor-info4">         
+                <div class="device-table4">
+                    <div class="table-header4">
+                        <span>类型</span>
+                        <span>编号</span>
+                        <span>大小</span>
+                    </div>
+                    <div class="table-row4">
+                        <span>水底摄像头</span><span>video-1</span><span>4Mb</span>
+                    </div>
+                    <div class="table-row4">
+                        <span>4CIF摄像头</span><span>video-2</span><span>128kb</span>
+                    </div>
+                    <div class="table-row4">
+                        <span>网络摄像头</span><span>video-3</span><span>100kb</span>
+                    </div>
+                    <div class="table-row4">
+                        <span>音响设备</span><span>sonar-1</span><span>10kb</span>
+                    </div>
+                    <div class="table-row4">
+                        <span>传感器设备</span><span>sensor-1</span><span>2kb</span>
+                    </div>
+                    <div class="table-row4">
+                        <span>气象站</span><span>meteor-1</span><span>500b</span>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <div class="module-title4">数据库信息</div>
+            <div class="database-stats4">
+                <div class="stats-item4">
+                    <span class="icon database-icon4">💾</span> <!-- 数据库图标 -->
+                    <span id="db-type4">MySQL，HBase</span>
+                </div>
+                <div class="stats-item4">
+                    <span class="icon query-icon4">🔍</span> <!-- 查询图标 -->
+                    <span id="query-success4">查询/成功：869次</span>
+                </div>
+                <div class="stats-item4">
+                    <span class="icon time-icon4">⏱️</span> <!-- 时钟图标 -->
+                    <span id="avg-query-time4">平均耗时：4.67s</span>
+                </div>
+            </div>
+            
     </div>
 </div>
 
@@ -508,4 +560,214 @@ document.addEventListener("DOMContentLoaded", updateFishPriceChart);
         });
 </script>
 
+<!-- tww's script  start-->
+<script>
+    function updateSensorData() {
+        // 更新传输时长
+        const avgTransmissionTime = getRandomTime();
+        document.getElementById('avg-transmission-time4').textContent = `${avgTransmissionTime}s`;
+
+        // 更新处理时长
+        const avgProcessingTime = getRandomTime();
+        document.getElementById('avg-processing-time4').textContent = `${avgProcessingTime}s`;
+    }
+
+    function updateDatabaseStats() {
+        // // 更新数据库类型
+        const dbType = getRandomDbType();
+        document.getElementById('db-type4').textContent = dbType;
+
+        // 更新查询成功次数
+        const querySuccess = getRandomQueryCount();
+        document.getElementById('query-success4').textContent = `查询/成功：${querySuccess}次`;
+
+        // 更新平均查询耗时
+        const avgQueryTime = getRandomTime();
+        document.getElementById('avg-query-time4').textContent = `平均耗时：${avgQueryTime}s`;
+    }
+
+    // 模拟获取随机时间
+    function getRandomTime() {
+        const min = 1; 
+        const max = 10; 
+        const randomTime = (Math.random() * (max - min) + min).toFixed(2); // 保留两位小数
+        return randomTime;
+    }
+
+    // 模拟获取随机数据库类型
+    function getRandomDbType() {
+        const dbTypes = ['MySQL, HBase', 'MongoDB, Redis', 'PostgreSQL, Cassandra'];
+        const randomIndex = Math.floor(Math.random() * dbTypes.length);
+        return dbTypes[randomIndex];
+    }
+
+    // 模拟获取随机查询成功次数
+    function getRandomQueryCount() {
+        return Math.floor(Math.random() * 1000);
+    }
+
+    // 每5秒更新一次数据
+    setInterval(() => {
+        updateSensorData();
+        updateDatabaseStats();
+    }, 50000); // 每5000毫秒（即5秒）更新一次
+
+
+</script>
+<!-- tww's script  end-->
+<!-- tww's style start-->
+<style>
+
+    .sensor-info4 {
+        background: rgba(26, 43, 60, 0.85); /* 明亮的深色透明背景 */
+        padding: 8px; /* 更小的内边距 */
+        margin: 4px; /* 更小的外边距 */
+        border-radius: 6px; /* 更圆润的边角 */
+        color: #ecf0f1; /* 更亮的文字颜色 */
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2); /* 增强阴影效果，提升层次感 */
+        backdrop-filter: blur(4px); /* 背景模糊，增强层次感 */
+        /* transition: background 0.3s ease, box-shadow 0.3s ease; 添加动态过渡效果 */
+    }
+
+
+
+    /* 数据库统计区块 */
+    .database-stats4 {
+        background: rgba(26, 43, 60, 0.85); /* 明亮的深色透明背景 */
+        padding: 10px;
+        margin: 10px;
+        border-radius: 8px; /* 更圆润的边角 */
+        color: #ecf0f1; /* 更亮的文字颜色 */
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* 增强阴影效果，提升层次感 */
+        backdrop-filter: blur(4px); /* 背景模糊，增强层次感 */
+        transition: background 0.3s ease, box-shadow 0.3s ease; /* 添加动态过渡效果 */
+    }
+
+    /* 动态效果：鼠标悬停时改变背景和阴影 */
+    .database-stats4:hover {
+        background: rgba(7, 80, 128, 0.9); /* 更亮的背景颜色 */
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); /* 增强阴影效果 */
+    }
+
+    .time-metrics4 {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .metric-item4 {
+        background: rgba(58, 83, 106, 0.85); /* 提亮的透明卡片背景 */
+        text-align: center;
+        flex: 1;
+        padding: 16px;
+        border-radius: 10px; /* 更大圆角 */
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* 更加明显的阴影效果 */
+        transition: background 0.3s ease, transform 0.3s ease; /* 添加动态效果 */
+    }
+
+    /* metric-label 样式调整（蓝色调） */
+    .metric-label4 {
+        font-size: 16px;
+        font-weight: bold;
+        color: #3498db; /* 亮蓝色字体 */
+        background: linear-gradient(to right, #74bded, #deb3f1); /* 蓝色渐变背景 */
+        -webkit-background-clip: text; /* 背景渐变应用于文本 */
+        background-clip: text; /* 标准属性 */
+        color: transparent; /* 使文本本身透明 */
+        text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.3); /* 强化文本阴影效果 */
+        transition: color 0.3s ease, text-shadow 0.3s ease; /* 平滑过渡 */
+    }
+
+    /* 鼠标悬停时的动态效果 */
+    .metric-label4:hover {
+        color: #cca3ef; /* 鼠标悬停时改变颜色为蓝绿色 */
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5); /* 增强文本阴影 */
+    }
+
+
+
+    .table-header4 {
+        background: rgba(52, 152, 219, 0.9); /* 更亮的表头背景 */
+        display: grid;
+        grid-template-columns: 2fr 2fr 1fr;
+        color: #fff;
+        padding: 8px;
+        border-radius: 8px;
+        font-weight: bold;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影效果 */
+        transition: background 0.3s ease; 
+    }
+
+
+
+    .table-row4 {
+        display: grid;
+        grid-template-columns: 2fr 2fr 1fr; /* 调整列宽，确保内容更紧凑 */
+        padding: 8px; /* 减小内边距 */
+        border-bottom: 1px solid rgba(52, 152, 219, 0.5); /* 更亮的分隔线 */
+        transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, background-image 0.3s ease; /* 添加渐变过渡效果 */
+    }
+
+    /* 鼠标悬停时的动态效果 */
+    .table-row4:hover {
+        background-image: linear-gradient(to right, rgba(161, 208, 239, 0.1), rgba(52, 152, 219, 0.3)); /* 渐变背景效果 */
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* 添加阴影效果 */
+        transform: translateY(-5px); /* 悬浮效果：元素向上移动 */
+    }
+
+
+    /* 数据库信息区块 */
+    .database-stats4 {
+        background: rgba(26, 43, 60, 0.85); /* 背景颜色 */
+        padding: 12px 16px; /* 调整内边距 */
+        margin: 8px; /* 减少外边距 */
+        border-radius: 6px; /* 圆角效果 */
+        color: #ecf0f1; /* 文字颜色 */
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* 阴影效果 */
+        backdrop-filter: blur(4px); /* 背景模糊效果 */
+    }
+
+    /* 单个数据项的样式 */
+    .stats-item4 {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px; /* 减少每项之间的间距 */
+        font-size: 14px; /* 调整字体大小 */
+        transition: background-color 0.3s ease, transform 0.3s ease; /* 动画效果 */
+    }
+
+    /* 图标样式 */
+    .icon4 {
+        font-size: 18px; /* 调整图标的大小 */
+        margin-right: 8px; /* 减少图标与文本之间的间距 */
+    }
+
+    /* 为不同的图标指定颜色 */
+    .database-icon4 {
+        color: #2980b9; /* 蓝色 */
+    }
+
+    .query-icon4 {
+        color: #27ae60; /* 绿色 */
+    }
+
+    .time-icon4 {
+        color: #f39c12; /* 黄色 */
+    }
+
+    /* 鼠标悬停时的数据项效果 */
+    .stats-item4:hover {
+        background-color: rgba(183, 214, 234, 0.2); /* 鼠标悬停时的背景颜色 */
+        transform: translateX(5px); /* 向右移动效果 */
+    }
+
+    /* 模块标题样式 */
+    .module-title4 {
+        font-size: 18px;
+        /* font-weight: bold; */
+        color: #3498db;
+        margin-bottom: 10px; /* 减少标题与内容之间的间距 */
+    }
+</style>
+<!-- tww's style start-->
 {% endblock %}
