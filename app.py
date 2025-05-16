@@ -13,6 +13,13 @@ import string
 app = Flask(__name__)
 app.secret_key = '123456789'
 
+# 设置管理员身份###############################
+@app.before_request
+def fake_login_as_admin():
+    session['username'] = '1'
+    session['identity'] = '1'
+# 用于避开登陆界面并获得管理员权限##################
+
 # 配置 MySQL 数据库连接
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/ocean_user'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -30,9 +37,10 @@ class User(db.Model):
     # farm = db.Column(db.Integer)
 CORS(app)
 
-@app.route('/')
-def index():
-    return redirect(url_for('login')) 
+# @app.route('/')
+# def index():
+#     return redirect(url_for('login')) 
+
 
 # 登录路由
 @app.route('/login', methods=['GET', 'POST'])
@@ -112,11 +120,11 @@ def signinsign_up():
         return redirect(url_for('login'))
     return render_template('sign.html')
 
-#@app.route('/')
+@app.route('/')
 @app.route('/main_info')
 def main_info():
-    if 'identity' not in session:
-        return redirect(url_for('login'))
+    # if 'identity' not in session:
+    #     return redirect(url_for('login'))
     return render_template('main_info.html')
 
 @app.route('/underwater')
@@ -168,6 +176,7 @@ def smart_center():
         return "<script>alert('您无权限访问该页面！');window.history.back();</script>"
     return render_template('smart_center.html')
 
+@app.route('/')
 @app.route('/data_center')
 def data_center():
     if 'identity' not in session:
@@ -452,9 +461,6 @@ def get_pca_data():
             "success": False,
             "error": str(e)
         }), 500
-
-
-
 
 
 #smart_center app.py修改部分结束
