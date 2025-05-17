@@ -79,8 +79,8 @@
 
 /*地图容器大小 begin*/
     #map-container {
-        width: 495px;
-        height: 310px;
+        width: 705px;
+        height: 460px;
         /* left:-10px; */
     }
 /* 地图 end */
@@ -562,8 +562,8 @@ document.addEventListener("DOMContentLoaded", updateFishPriceChart);
                     geo: {
                         map: 'china',
                         roam: false,
-                        zoom: 1.63,
-                        center: [113.6, 35.0],
+                        zoom: 1.7,
+                        center: [110.6, 35.9],
                         label: {
                             show: false,
                             
@@ -595,7 +595,7 @@ document.addEventListener("DOMContentLoaded", updateFishPriceChart);
                             //     return val[2] ;
                             // },
                             symbolSize: function(val) {
-                                return [val[2] * 0.75, val[2]];  // 宽度是高度的60%
+                                return [val[2] * 0.95, val[2]*1.2];  // 宽度是高度的60%
                             },
                             symbolKeepAspect: false,
                             label: {
@@ -653,13 +653,13 @@ document.addEventListener("DOMContentLoaded", updateFishPriceChart);
                             {
                                 type: 'group',     
                                 id: 'infoCard',  
-                                left: '65%',       
-                                top: '37%',     
+                                left: '71%',       
+                                top: '39%',     
                                 children: [     
                                 {
                                     type: 'rect', 
                                     z: 100,     
-                                    left: -90,
+                                    left: 0,
                                     top:-5,
                                     shape: { width: 170, height: 100 }, 
                                     style: {
@@ -674,7 +674,7 @@ document.addEventListener("DOMContentLoaded", updateFishPriceChart);
                                     id: 'infoText',   
                                     type: 'text',      
                                     // left: 'center',
-                                    left:-80,
+                                    left:20,
                                     z: 200,   
                                     style: {
                                         text:infoText,

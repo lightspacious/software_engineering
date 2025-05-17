@@ -246,6 +246,8 @@ def edit_user():
         # 更新用户信息
         user.username = username
         user.identity = identity
+        session['identity'] = identity
+        session['username'] = username
         print(user.username,user.identity)
 
         db.session.commit()
