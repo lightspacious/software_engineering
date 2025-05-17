@@ -1,4 +1,16 @@
-# software_engineering
+如果您想运行本系统，首先请将user.sql导入您的MySQL，并将app.py中第25行的如下命令改为您自己的用户名、密码和数据库名：
 
-GitHub地址：https://github.com/lightspacious/software_engineering
+```bash
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://您的用户名:您的MySQL密码@localhost/您的数据库名'
+```
+
+数据库中有三种用户类型可选，以下是相应的用户名、密码和权限：
+
+| 用户名  | 密码      | 权限                                       |
+| ------- | --------- | ------------------------------------------ |
+| admin   | 123456789 | 高级（所有界面都可以查看，可控制设备）     |
+| fishman | 123654    | 中级（只有管理员界面不可查看，可控制设备） |
+| visitor | 1456      | 低级（只可查看主要界面，不可以控制设备）   |
+
+
 
