@@ -483,16 +483,16 @@ def get_hardstatus():
         'gpu': gpu_percent
     })
 
-@app.route('/offline', methods=['POST'])
-def offline():
-    if 'username' in session:
-        username = session['username']
-        user = User.query.filter_by(username=username).first()
-        if user:
-            user.online = False
-            db.session.commit()
-        return '', 204
-    return '', 401
+# @app.route('/offline', methods=['POST'])
+# def offline():
+#     if 'username' in session:
+#         username = session['username']
+#         user = User.query.filter_by(username=username).first()
+#         if user:
+#             user.online = False
+#             db.session.commit()
+#         return '', 204
+#     return '', 401
 
 
 
