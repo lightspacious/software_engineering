@@ -413,7 +413,7 @@ def get_data():
 @app.route('/get_fish_data')
 def get_fish_data():
     df = pd.read_csv('Fish.csv')  # 确保文件路径正确
-    # print(df.columns)
+    # print(df.columns
 
     df.columns = [col.lower().strip().replace('(g)', '').replace('(cm)', '').replace(' ', '') for col in df.columns]
     df = df[['species', 'length1', 'weight', 'width']]
@@ -480,6 +480,18 @@ def get_hardstatus():
         'mem': mem_percent,
         'gpu': gpu_percent
     })
+
+@app.route('/offline', methods=['POST'])
+def offline():
+    if 'username' in session:
+        username = session['username']
+        user = User.query.filter_by(username=username).first()
+        if user:
+            user.online = False
+            db.session.commit()
+        return '', 204
+    return '', 401
+
 
 
 #smart_center app.py修改部分结束

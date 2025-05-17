@@ -122,6 +122,10 @@
     </div>
 
     <script>
+    window.addEventListener('beforeunload', function () {
+        navigator.sendBeacon('/offline');
+    });
+
     function updateTimeAndDate() {
         const now = new Date();
 
