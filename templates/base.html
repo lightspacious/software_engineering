@@ -82,11 +82,11 @@
                 <a href="#" onclick="noAccess()">智能中心</a>
             {% endif %}
 
-            <!-- {% if session.identity == '2' or session.identity == '1' %} -->
+            {% if session.identity == '2' or session.identity == '1' %}
                 <a href="{{ url_for('data_center') }}" class="{% if request.endpoint == 'data_center' %}active{% endif %}">数据中心</a>
-            <!-- {% else %} -->
+            {% else %}
                 <a href="#" onclick="noAccess()">数据中心</a>
-            <!-- {% endif %} -->
+            {% endif %}
 
             {% if session.identity == '2' %}
                 <a href="{{ url_for('admin') }}" class="{% if request.endpoint == 'admin' %}active{% endif %}">管理界面</a>

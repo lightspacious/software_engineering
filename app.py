@@ -2,26 +2,27 @@ from sklearn.decomposition import PCA
 # from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
 from flask import Flask, render_template, request, redirect, url_for,flash,session,abort, jsonify
-#from flask import Flask, render_template, jsonify,request
 from flask_cors import CORS # 用于处理跨域请求，开发时可能需要
 import os
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 import random
 import string
+import psutil
 
 app = Flask(__name__)
 app.secret_key = '123456789'
 
 # 设置管理员身份###############################
-@app.before_request
-def fake_login_as_admin():
-    session['username'] = '1'
-    session['identity'] = '1'
+# @app.before_request
+# def fake_login_as_admin():
+#     session['username'] = '1'
+#     session['identity'] = '1'
 # 用于避开登陆界面并获得管理员权限##################
 
 # 配置 MySQL 数据库连接
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/ocean_user'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/ocean_user'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:001108@localhost/ocean user'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -37,9 +38,9 @@ class User(db.Model):
     # farm = db.Column(db.Integer)
 CORS(app)
 
-# @app.route('/')
-# def index():
-#     return redirect(url_for('login')) 
+@app.route('/')
+def index():
+    return redirect(url_for('login')) 
 
 
 # 登录路由
@@ -53,7 +54,7 @@ def login():
             user.online = True  # 设置为在线
             session['username'] = uname
             session['identity'] = user.identity  # 传递身份
-            # db.session.commit()  # 保存状态
+            db.session.commit()  # 保存状态
             return redirect(url_for('main_info')) 
         else:
             return render_template('login.html', error="账号不存在或密码错误")
@@ -120,12 +121,11 @@ def signinsign_up():
         return redirect(url_for('login'))
     return render_template('sign.html')
 
-@app.route('/')
+# @app.route('/')
 @app.route('/main_info')
 def main_info():
-   
-    # if 'identity' not in session:
-    #     return redirect(url_for('login'))
+    if 'identity' not in session:
+        return redirect(url_for('login'))
     return render_template('main_info.html')
 
 @app.route('/underwater')
@@ -466,6 +466,20 @@ def get_pca_data():
             "success": False,
             "error": str(e)
         }), 500
+    
+@app.route('/hard_status')
+def get_hardstatus():
+    cpu_percent = psutil.cpu_percent(interval=0.5)
+    mem = psutil.virtual_memory()
+    mem_percent = mem.percent
+    # GPU 示例：暂时用随机数模拟（可以接入 NVIDIA SMI 等工具）
+    gpu_percent = 30 + random.randint(-5, 5)  # 假设值
+
+    return jsonify({
+        'cpu': cpu_percent,
+        'mem': mem_percent,
+        'gpu': gpu_percent
+    })
 
 
 #smart_center app.py修改部分结束
