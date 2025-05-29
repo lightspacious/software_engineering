@@ -14,10 +14,10 @@ app = Flask(__name__)
 app.secret_key = '123456789'
 
 # 设置管理员身份###############################
-# @app.before_request
-# def fake_login_as_admin():
-#     session['username'] = '1'
-#     session['identity'] = '1'
+@app.before_request
+def fake_login_as_admin():
+    session['username'] = '1'
+    session['identity'] = '1'
 # 用于避开登陆界面并获得管理员权限##################
 
 # 配置 MySQL 数据库连接
@@ -38,9 +38,9 @@ class User(db.Model):
     # farm = db.Column(db.Integer)
 CORS(app)
 
-@app.route('/')
-def index():
-    return redirect(url_for('login')) 
+# @app.route('/')
+# def index():
+#     return redirect(url_for('login')) 
 
 
 # 登录路由
@@ -121,7 +121,7 @@ def signinsign_up():
         return redirect(url_for('login'))
     return render_template('sign.html')
 
-# @app.route('/')
+@app.route('/')
 @app.route('/main_info')
 def main_info():
     if 'identity' not in session:

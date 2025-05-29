@@ -68,10 +68,95 @@
     </script>
     
     
+    <style>
+        /* 智能问答按钮 */
+        /* 让 header 水平排列，标题靠左，按钮靠右 */
+        .card.data-section .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px; /* 根据需要调整下面内容的间距 */
+        }
 
+        .card.data-section .qa-trigger {
+            /* 大一点的尺寸 */
+            padding: 12px 24px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-transform: uppercase;
+
+            /* 渐变背景 */
+            background: linear-gradient(135deg,
+                        rgba(10,132,255,1) 0%,
+                        rgba(0,210,255,1) 100%);
+            color: #fff;
+
+            /* 圆角与内阴影 */
+            border: none;
+            border-radius: 30px;
+            box-shadow:
+                0 4px 15px rgba(0,210,255,0.6),
+                inset 0 -2px 4px rgba(0,0,0,0.2);
+
+            /* 发光效果 */
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            /* 按钮内部伪元素，用于发光动画 */
+            .card.data-section .qa-trigger::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center,
+                        rgba(255,255,255,0.6),
+                        transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: scale(0.5);
+            pointer-events: none;
+            z-index: -1;
+            }
+
+            /* 悬停和聚焦状态 */
+            .card.data-section .qa-trigger:hover,
+            .card.data-section .qa-trigger:focus {
+            transform: scale(1.05);
+            box-shadow:
+                0 6px 20px rgba(0,210,255,0.8),
+                inset 0 -2px 4px rgba(0,0,0,0.25);
+            }
+
+            /* 在悬停时触发展光动画 */
+            .card.data-section .qa-trigger:hover::before,
+            .card.data-section .qa-trigger:focus::before {
+            opacity: 1;
+            transform: scale(1);
+            }
+
+            /* 可选：添加一个持续微微跳动的动画 */
+            @keyframes pulse {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.02); }
+            100% { transform: scale(1); }
+            }
+            .card.data-section .qa-trigger {
+            animation: pulse 2s infinite ease-in-out;
+            }
+
+    </style>
     <!-- 右上方块 -->
     <div class="card data-section">
-        <h3>实时水文气象数据</h3>
+        <div class="header">
+            <h3>实时水文气象数据</h3>
+            <button id="qa-trigger" class="qa-trigger">智能问答</button>
+        </div>
+        
         <td>地点：北京市，白石桥</td>
         <table class="sensor-table">
             
@@ -113,6 +198,18 @@
         </div>
     </div>
 
+     <!-- 智能问答对话框 -->
+     <div id="qa-modal" class="qa-modal">
+        <div class="qa-modal-content">
+            <span class="close" id="qa-close">&times;</span>
+            <h3>智能问答</h3>
+            <div id="qa-chat-box">
+                <!-- 问答内容会显示在这里 -->
+            </div>
+            <input type="text" id="qa-input" placeholder="请输入问题...">
+            <button id="qa-submit">提交</button>
+        </div>
+    </div>
 
     <!-- 中间左侧（图表） -->
     <div class="card history-section">
@@ -124,7 +221,7 @@
         </div>
         <!-- 选择折线图字段的下拉框 -->
         <!-- 水温(℃),pH(无量纲),溶解氧(mg/L),电导率(μS/cm),浊度(NTU), -->
-         
+             <!-- 上传数据集按钮 -->
         <div>
             <label for="line-field-selection">选择折线图字段:
             <select id="line-field-selection" onchange="updateChart()">
@@ -148,7 +245,7 @@
                 <option value="藻密度">藻密度（cells/L）</option>
             </select></label>
         </div>
-        <!-- 选择省份的下拉框 -->
+        <!-- 选择省份的下拉框
         <div>
             <label for="province-selection">选择省份:
             <select id="province-selection" onchange="updateChart()">
@@ -157,16 +254,27 @@
                 <option value="广东省">广东省</option>
                 <option value="江苏省">江苏省</option>
                 <option value="河北省">河北省</option>
-                <!-- 添加更多省份 -->
+               
             </select></label>
-        </div>
+        </div> -->
         <canvas id="historyChart"></canvas>
+  
+        <!-- 图表信息和操作按钮 -->
         <div id="chart-info">
-            <p>省份：<span id="province">加载中...</span></p>
-            <p>流域：<span id="watershed">加载中...</span></p>
-            <p>断面名称：<span id="sectionName">加载中...</span></p>
+            <div class="chart-info-left">
+                <p>省份：<span id="province">加载中...</span></p>
+                <p>流域：<span id="watershed">加载中...</span></p>
+                <p>断面名称：<span id="sectionName">加载中...</span></p>
+            </div>
+            <!-- 上传数据和下载按钮 -->
+            <div class="chart-info-right">
+                <label for="file-upload">上传数据集：
+                    <input type="file" id="file-upload" onchange="handleFileUpload(event)">
+                </label>
+                <button id="downloadBtn" onclick="downloadChart()">下载图表</button>
+            </div>
         </div>
-        
+            
     </div>
     
 
@@ -493,17 +601,71 @@ input:checked + .slider:before {
     background-color: #007bff;
 }
 
-/*  */
 
-
-/* 图表绘制 */
 #chart-info {
+    display: flex;
+    justify-content: space-between;
     margin-top: 10px;
     color: white;
 }
+
+#chart-info .chart-info-left {
+    flex: 1;  /* 左侧部分占用剩余空间 */
+}
+
+#chart-info .chart-info-right {
+    display: flex;
+    flex-direction: column;  /* 上下排列 */
+    align-items: center;     /* 水平居中对齐 */
+    gap: 10px;               /* 设置按钮之间的间距 */
+}
+
 #chart-info p {
     margin: 5px 0;
 }
+
+#chart-info .chart-info-right button {
+    background: rgba(0, 123, 255, 0.1); /* 透明蓝色背景 */
+    border: 2px solid rgba(0, 123, 255, 1); /* 蓝色边框 */
+    color: rgba(0, 123, 255, 1); /* 蓝色字体 */
+    padding: 6px 14px; /* 更小的内边距 */
+    border-radius: 20px;  /* 更小的圆角 */
+    font-size: 12px;  /* 更小的字体大小 */
+    font-weight: bold;
+    cursor: pointer;
+    width: auto;  /* 自动宽度 */
+    transition: all 0.3s ease-in-out;  /* 平滑过渡效果 */
+    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3); /* 更小的蓝色阴影 */
+    margin-bottom: 5px;  /* 按钮之间的间距 */
+}
+
+#chart-info .chart-info-right button:hover {
+    background: rgba(0, 123, 255, 0.2); /* 悬停时的背景 */
+    color: white;  /* 悬停时的字体颜色 */
+    border: 2px solid rgba(0, 123, 255, 1); /* 蓝色边框 */
+    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.5); /* 悬停时的阴影 */
+    transform: translateY(-1px); /* 悬停时的轻微抬升效果 */
+}
+
+#chart-info .chart-info-right label {
+    color: rgba(0, 123, 255, 0.8);  /* 蓝色调的文字 */
+    font-size: 12px;  /* 更小的字体 */
+    margin-bottom: 5px;
+}
+
+#file-upload {
+    padding: 3px;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 123, 255, 0.6); /* 蓝色边框 */
+    background-color: rgba(0, 123, 255, 0.1); /* 透明蓝色背景 */
+    color: rgba(0, 123, 255, 1); /* 蓝色字体 */
+    width: 200px;
+    margin-bottom: 2px;  /* 给上传按钮添加间距 */
+}
+
+
+
+
 
 /* 更小且颜色更暗的炫酷下拉框样式 */
 #video-selection, #line-field-selection, #bar-field-selection, #province-selection {
@@ -572,38 +734,6 @@ setInterval(updateFullTime, 1000);
 updateFullTime();
 </script>
 <script>
-// function initMap() {
-//     // 创建高德地图实例
-//     var map = new AMap.Map('map-container', {
-//     center: [122.2077, 29.9853], // 设置地图中心点为舟山渔场
-//     zoom: 10,  // 设置地图缩放级别
-//     scrollWheel: true // 启用滚轮缩放
-//     });
-    
-//     // 添加比例尺控件
-//     map.addControl(new AMap.Scale());
-    
-//     // 添加平移缩放控件
-//     map.addControl(new AMap.Navigation());
-    
-//     // 添加自定义标记
-//     var marker = new AMap.Marker({
-//         position: [122.7308, 37.5412],  // 设置标记的坐标
-//         title: "海洋牧场一号舱"  // 标记的标题
-//     });
-//     marker.setMap(map);
-    
-//     // 信息窗口
-//     var infoWindow = new AMap.InfoWindow({
-//         content: "海洋牧场一号舱", // 信息窗口的内容
-//         offset: new AMap.Pixel(0, -30) // 信息窗口的偏移量
-//     });
-    
-//     // 添加标记点击事件，打开信息窗口
-//     marker.on('click', function() {
-//         infoWindow.open(map, marker.getPosition());
-//     });
-// }
 function initMap() {
     // 创建高德地图实例
     var map = new AMap.Map('map-container', {
@@ -660,10 +790,7 @@ function initMap() {
     console.log("地图初始化完成，共添加", markers.length, "个养殖区域标记");
 }
 
-// 在页面加载完成后初始化地图
-// window.onload = function() {
-//     initMap();
-// };
+
 </script>
 <script>
     // 创建一个函数来解析CSV文件
@@ -727,14 +854,6 @@ function initMap() {
 
 
 
-    // // 页面加载时初始化数据
-    window.onload = function() {
-        // initMap();
-
-        loadDataFromCSV();  // 加载并显示数据
-        initMap();
-
-    };
 </script>
 
 <script>
@@ -847,25 +966,37 @@ function initMap() {
 
 // 定义一个全局变量来存储 Chart 实例
 let historyChart = null;
+let currentDataset = []; // 用来存储当前数据集
+// 默认加载北京的数据
+async function loadDefaultData() {
+    const province = "北京市";  // 默认加载北京数据
+    const lineField = document.getElementById('line-field-selection').value;
+    const barField = document.getElementById('bar-field-selection').value;
 
-// 定义异步函数来加载数据并绘制图表
-async function renderChart(lineField , barField , province ) {
-    // 根据省份选择不同的文件路径
-    const datasetPath = `/static/dataset/history/${province}.csv`; // 假设每个省份的数据文件以省份名称命名
+    // 加载北京的数据
+    const datasetPath = `/static/dataset/history/${province}.csv`;
 
+    try {
+        currentDataset = await loadData(datasetPath); // 加载北京的数据
+        renderChart(lineField, barField, currentDataset);    // 使用北京的数据来渲染图表
+    } catch (error) {
+        console.error('Error loading default data:', error);
+    }
+}
+
+// 解析CSV数据的函数
+
+
+// 渲染图表的函数
+async function renderChart(lineField, barField, dataset) {
     try {
         // 销毁现有的图表实例（如果有的话）
         if (historyChart) {
             historyChart.destroy(); // 销毁旧的图表实例
         }
 
-        // 调用 loadData 函数，获取数据
-        const dataset = await loadData(datasetPath);
-        // console.log("数据集:", dataset);  // 打印数据集，确认是否正确
-        
         // 获取时间标签
         const labels = dataset.map(item => item.time);
-        // console.log("时间标签:", labels);  // 打印时间标签，确认是否正确
 
         // 获取字段数据的函数
         function getData(field) {
@@ -876,10 +1007,7 @@ async function renderChart(lineField , barField , province ) {
         const lineData = getData(lineField);  // 获取折线图数据
         const barData = getData(barField);    // 获取柱形图数据
 
-        // console.log("折线图数据:", lineData);  // 打印折线图数据
-        // console.log("柱形图数据:", barData);   // 打印柱形图数据
-
-            // 获取并更新 chart-info 内容，基于数据集第一条数据
+        // 获取并更新 chart-info 内容，基于数据集第一条数据
         const firstData = dataset[0];  // 获取数据集中的第一条数据
         document.getElementById('province').textContent = firstData.省份 || '未知省份';
         document.getElementById('watershed').textContent = firstData.流域 || '未知流域';
@@ -946,18 +1074,50 @@ async function renderChart(lineField , barField , province ) {
     }
 }
 
+// 处理文件上传
+function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const csvText = e.target.result;
+        // const dataset = parseCSV2(csvText);
+        currentDataset = parseCSV2(csvText); // 将上传的CSV数据存储在 global dataset 中
+
+        // 在上传数据后重新渲染图表
+        const lineField = document.getElementById('line-field-selection').value;
+        const barField = document.getElementById('bar-field-selection').value;
+        
+        renderChart(lineField, barField, currentDataset);  // 使用上传的数据来渲染图表
+    };
+    reader.readAsText(file);  // 读取文件内容
+}
+
 // 更新图表，根据选择的字段
 function updateChart() {
     const lineField = document.getElementById('line-field-selection').value; // 获取折线图字段
     const barField = document.getElementById('bar-field-selection').value; // 获取柱形图字段
-    const provinceField = document.getElementById('province-selection').value; // 获取柱形图字段
-    renderChart(lineField, barField,provinceField); // 重新渲染图表
+    // const provinceField = document.getElementById('province-selection').value; // 获取省份字段
+        // 获取当前图表数据
+    // const dataset = historyChart.data.datasets.data;
+    renderChart(lineField, barField, currentDataset); // 重新渲染图表
 }
 
-// 页面加载时默认渲染水温数据
-renderChart("水温", "高锰酸盐","北京市");
+// 页面加载时默认加载北京的数据
+window.onload = function() {
+    loadDefaultData();  // 默认加载北京数据
+    loadDataFromCSV();  // 加载并显示数据
+    initMap();
+    
+};
 
-
+function downloadChart() {
+    const link = document.createElement('a');
+    link.href = historyChart.toBase64Image(); // 获取图表的base64图片数据
+    link.download = 'chart.png';  // 设置下载文件名
+    link.click();  // 模拟点击下载
+}
 </script>
 <script>
     // 监听 checkbox 的变化，动态更新主控状态
@@ -977,5 +1137,237 @@ document.getElementById("brush-toggle").addEventListener("change", function() {
 });
 
 </script>>
+<style>
+/* 弹出对话框的样式 */
+.qa-modal {
+    display: none; /* 默认隐藏 */
+    position: fixed;
+    z-index: 1; /* 确保在最上层 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* 半透明背景 */
+}
+
+.qa-modal-content {
+    background-color:rgba(4, 15, 31, 0.7);
+    margin: 5% auto;
+    padding: 10px;
+    border-radius: 10px;
+    width: 90%;
+    height: 500px;
+    max-width: 900px;
+    color: #fffafa;
+}
+
+.qa-modal-content h3 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+}
+
+#qa-chat-box {
+    height: 400px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+#qa-input {
+    width: 80%;
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#qa-submit {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#qa-submit:hover {
+    background-color: #0056b3;
+}
+
+.qa-modal-content .close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+.qa-modal-content .close:hover,
+.qa-modal-content .close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script >
+    // 获取页面元素
+const qaTrigger = document.getElementById('qa-trigger');
+const qaModal = document.getElementById('qa-modal');
+const qaClose = document.getElementById('qa-close');
+const qaInput = document.getElementById('qa-input');
+const qaSubmit = document.getElementById('qa-submit');
+const qaChatBox = document.getElementById('qa-chat-box');
+
+// 打开对话框
+qaTrigger.onclick = function() {
+    qaModal.style.display = "block";
+}
+
+// 关闭对话框
+qaClose.onclick = function() {
+    qaModal.style.display = "none";
+}
+// 提交问题
+qaSubmit.onclick = function() {
+    const question = qaInput.value.trim();
+    if (question) {
+        displayChatMessage('用户', question);
+        // 获取系统的回答
+        getSystemResponse(question).then(answer => {
+          displayChatMessage('系统', answer);
+        });
+        qaInput.value = '';  // 清空输入框
+    }
+}
+// // 显示聊天消息
+// function displayChatMessage(sender, message) {
+//     const messageDiv = document.createElement('div');
+//     // messageDiv.textContent = `${sender}: ${message}`;
+//     if (sender === '系统') {
+//         // ② 用 marked 解析并渲染 HTML
+//         messageDiv.innerHTML = marked.parse(message);
+//       } else {
+//         messageDiv.textContent = `${sender}: ${message}`;
+//       }
+//     qaChatBox.appendChild(messageDiv);
+//     qaChatBox.scrollTop = qaChatBox.scrollHeight;  // 滚动到最新消息
+// }
+
+// JS：替换你的 displayChatMessage
+function displayChatMessage(sender, message) {
+  // 创建最外层容器
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('chat-message', sender === '系统' ? 'system' : 'user');
+
+  // 气泡主体
+  const bubble = document.createElement('div');
+  bubble.classList.add('chat-bubble');
+
+  // 如果是系统，就渲染 Markdown；否则当纯文本
+  if (sender === '系统') {
+    bubble.innerHTML = marked.parse(message);
+  } else {
+    // 可以再加个 <strong>标记用户名</strong>，也可去掉
+    bubble.innerHTML = `<strong>${sender}：</strong>${message}`;
+  }
+
+  wrapper.appendChild(bubble);
+  qaChatBox.appendChild(wrapper);
+  qaChatBox.scrollTop = qaChatBox.scrollHeight;
+}
+
+async function getSystemResponse(prompt) {
+  const apiKey = 'sk-d8d6e12e34ab47d992b434efe655576d';  // 请替换为你的真实 Key
+  const url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "qwen-plus",
+        messages: [
+          {
+            role: "system",
+            content: "你是一名海洋牧场的平台助手，你需要根据用户的要求，给出有关海洋牧场的信息和养殖建议等。"
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ]
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`网络请求失败，状态码 ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content 
+           || "抱歉，我没有理解您的问题。";
+  } catch (error) {
+    console.error('智能问答出错:', error);
+    return "抱歉，出现了问题。";
+  }
+}
+
+
+// 如果用户点击对话框外部，关闭对话框
+window.onclick = function(event) {
+    if (event.target === qaModal) {
+        qaModal.style.display = "none";
+    }
+}
+
+</script>
+<style>
+    /* CSS：加到你的样式表里 */
+.chat-message {
+  display: flex;
+  margin: 8px 16px;
+}
+/* 用户消息靠右，系统消息靠左 */
+.chat-message.user {
+  justify-content: flex-end;
+}
+.chat-message.system {
+  justify-content: flex-start;
+}
+
+/* 气泡样式 */
+.chat-bubble {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* 用户 vs 系统 背景色区分 */
+.chat-message.user .chat-bubble {
+  background-color: #daf1ff;
+  color: #055a8c;
+}
+.chat-message.system .chat-bubble {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* 可选：给系统的 <pre><code> 高亮加点内边距 */
+.chat-message.system .chat-bubble pre {
+  background: #2d2d2d;
+  color: #f8f8f2;
+  padding: 8px;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+</style>
+
 {% endblock %}
 
