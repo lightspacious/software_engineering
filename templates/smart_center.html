@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ml-pca@5.0.0/dist/ml-pca.min.js"></script>
 
 <style>
 .grid-item-smart {
@@ -49,7 +51,7 @@
     flex-direction: column; 
     gap: 10px;
     width: 400px;
-    transform: translateX(-50px); 
+    transform: translateX(20px); 
 
 }
 
@@ -60,9 +62,9 @@
     display: flex;
     flex-direction: column; 
     gap: 10px;
-    width: 430px;
+    width: 500px;
 
-    transform: translateX(50px); 
+    transform: translateX(140px); 
     
 }
 
@@ -106,7 +108,7 @@
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
     padding: 12px 16px;
-    width: 370px;
+    width: 450px;
     font-size: 14px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 999;
@@ -118,7 +120,7 @@
     border: 1px solid #ccc;
     padding: 12px 16px;
     border-radius: 8px;
-    width: 390px;
+    width: 450px;
     /* flex:3;   */
     font-family: Arial, sans-serif;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -516,7 +518,7 @@
 }
 
 .alert-container {
-  width: 400px;
+  width: 450px;
   max-height: 200px;  /* 控制容器最大高度 */
   overflow-y: auto;   /* 超出时出现滚动条 */
   /* border: 1px solid #ccc; */
@@ -543,7 +545,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-.custom-overview-box {
+/* .custom-overview-box {
  
     background-color: #91c2f3;
     border: 1px solid #ccc;
@@ -554,7 +556,7 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 999;
     font-family: Arial, sans-serif;
-}
+} */
 
 .custom-overview-box h6 {
     margin: 0;
@@ -586,13 +588,14 @@
 .custom-stats {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .custom-stats .stat-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    
 }
 
 .anomaly {
@@ -684,14 +687,25 @@
     color: #e1dbdb;
     font-weight: 500;
   }
-  /* 小型按钮 */
+    .button-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 10px;
+    /* width: max-content;   */
+  }
+
   .compact-btn {
     padding: 8px 12px;
     font-size: 13px;
-    /* margin-top: 10px; */
     background: #4fc3f7b0;
-    border: #4fc3f7;
-    border-radius: 6%;
+    border: 1px solid #4fc3f7;  /* 可选：添加边框 */
+    border-radius: 6px;         /* 固定圆角 */
+    cursor: pointer;           /* 鼠标悬停手型 */
+    transition: background 0.3s; /* 悬停动画（可选） */
+  }
+
+  .compact-btn:hover {
+    background: #4fc3f7;       /* 悬停效果 */
   }
 
 h1, h2 {
@@ -699,6 +713,12 @@ h1, h2 {
     text-align: center;
     font-size: 17px;
 }
+/* .button-container {
+  display: grid;
+  grid-template-columns: auto auto;  
+  gap: 20px;                       
+} */
+
 </style>
 
 <div class="grid-layout-smart">
@@ -711,51 +731,6 @@ h1, h2 {
         </div>
 
         <div class="chart">
-            <!-- <select id="province">
-                <option value="安徽省">安徽省</option>
-                <option value="北京市">北京市</option>
-                <option value="福建省">福建省</option>
-                <option value="甘肃省">甘肃省</option>
-                <option value="广东省">广东省</option>
-                <option value="广西壮族自治区">广西壮族自治区</option>
-                <option value="贵州省">贵州省</option>
-                <option value="海南省">海南省</option>
-                <option value="河北省">河北省</option>
-                <option value="河南省">河南省</option>
-                <option value="黑龙江省">黑龙江省</option>
-                <option value="湖北省">湖北省</option>
-                <option value="湖南省">湖南省</option>
-                <option value="吉林省">吉林省</option>
-                <option value="江苏省">江苏省</option>
-                <option value="江西省">江西省</option>
-                <option value="辽宁省">辽宁省</option>
-                <option value="内蒙古自治区">内蒙古自治区</option>
-                <option value="宁夏回族自治区">宁夏回族自治区</option>
-                <option value="青海省">青海省</option>
-                <option value="山东省">山东省</option>
-                <option value="山西省">山西省</option>
-                <option value="陕西省">陕西省</option>
-                <option value="上海市">上海市</option>
-                <option value="四川省">四川省</option>
-                <option value="天津市">天津市</option>
-                <option value="西藏自治区">西藏自治区</option>
-                <option value="新疆维吾尔自治区">新疆维吾尔自治区</option>
-                <option value="云南省">云南省</option>
-                <option value="浙江省">浙江省</option>
-                <option value="重庆市">重庆市</option>
-            </select>
-
-            <label for="basin">流域:</label>
-            <select id="basin">
-              
-            </select>
-
-            <label for="section">截面:</label>
-            <select id="section">
-               
-            </select> 
-            
-            <button onclick="fetchData()">获取数据</button> -->
             <div class="compact-ocean-form">
                 <div class="compact-row">
                   <div class="compact-group">
@@ -803,7 +778,13 @@ h1, h2 {
                     <select id="section"><option>选择截面</option></select>
                   </div>
                 </div>
-                <button class="compact-btn" onclick="fetchData()">获取数据</button>
+                <div class="button-container">
+                  <button class="compact-btn" onclick="fetchData()">获取数据</button>
+                  <input type="file" id="csvFileInput" accept=".csv" style="display: none" onchange="handleFileUpload(event)">
+                  <button class="compact-btn" onclick="document.getElementById('csvFileInput').click()">上传数据</button>
+                  <button class="compact-btn" onclick="water_data_out()">导出数据</button>
+                </div>
+
               </div>
             <div id="parameterSelector" class="parameter-selector"></div>
 
@@ -888,12 +869,16 @@ h1, h2 {
     </div>
     <div class="grid-item-smart smart_area3">
         <div class="chart">
-            <h2>鱼类整体情况一览</h2>
-            <div id="bubble" style=" left:-15px ;width:455px; height: 370px;"></div>
+          
+            <!-- <h2>鱼类整体情况一览</h2> -->
+            <div id="bubble" style=" left:0px ;width:460px; height: 400px;"></div>
+            
 
-
-            <h2>PCA 降维</h2>
-            <div id="pca" style="left:-15px ;width: 455px; height: 370px;"></div>
+            <!-- <h2>PCA 降维</h2> -->
+            <div id="pca" style="left:0px ;width:460px; height: 400px;"></div>
+            <input type="file" id="csvFileInput_fish" accept=".csv" style="display: none" onchange="handleFishFileUpload(event)">
+            <button class="compact-btn" onclick="document.getElementById('csvFileInput_fish').click()">上传数据</button>
+            <button class="compact-btn" onclick="Dataout()">导出数据</button>
         </div>
 
         <div class="exception">
@@ -916,6 +901,7 @@ h1, h2 {
 <!-- 省份/流域/截面初始化 + 默认图表 +切换 -->
 <!-- 异常以及警报 -->
 <script>  
+  // import { PCA } from 'ml-pca';
   /*所有省份 流域 截面 json文件*/
   const pro_data ={
   "上海市": {
@@ -3049,6 +3035,7 @@ h1, h2 {
     };
     
     let ab_data=[];
+    let data=[];
     async function fetchData() {
             const province = document.getElementById('province').value;
             const basin = document.getElementById('basin').value;
@@ -3062,7 +3049,7 @@ h1, h2 {
             const response = await fetch(`/get_data?province=${province}&basin=${basin}&section=${section}`);
             const response_ab = await fetch(`/get_water_quality_data?province=${province}&basin=${basin}&section=${section}`);
             
-            const data = await response.json();
+            data = await response.json();
             // const ab_data = await response_ab.json();
             ab_data = await response_ab.json();
             console.log(data);
@@ -3073,6 +3060,29 @@ h1, h2 {
             renderStats(ab_data);
           
     }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        console.log("file ",file);
+        if (!file) return;
+
+        Papa.parse(file, {
+                header: true, // 第一行作为字段名
+                skipEmptyLines: true,
+                complete: function(results) {
+                    data = results.data;
+                    console.log("upload 解析后的数据：", data);
+                    ab_data = detectAnomaliesInUpload(data);
+                    console.log("检测后的数据：", ab_data);
+
+                    processData(data);
+
+                    initParameterSelector();
+                    updateCharts();
+                    renderStats(ab_data);
+                }
+            });
+      }
     
     // 数据处理函数
     function processData(data) {
@@ -3268,6 +3278,16 @@ h1, h2 {
             return tooltip;
           }
         },
+        toolbox: {
+              feature: {
+                saveAsImage: {
+                  backgroundColor: '#f4f4f4'
+                } 
+                
+               
+              }
+            },
+       
         grid: {
           left: '50px',
           right: '10%',
@@ -3370,6 +3390,15 @@ h1, h2 {
         tooltip: {
           trigger: 'axis'
         },
+        toolbox: {
+              feature: {
+                saveAsImage: {
+                  backgroundColor: '#f4f4f4'
+                } 
+                
+               
+              }
+            },
         grid: {
           left: '55px',
           right: '10%',
@@ -3512,9 +3541,9 @@ h1, h2 {
               </div>
               <div>
                   <h6 style="color: #AFDDFF;font-size=15">异常类型分布</h6>
-                  <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                  <div style="display: flex; flex-wrap: wrap; gap: 15px;">
                       ${Object.entries(issueTypes).map(([type, count]) => `
-                        <div style="padding: 4px 5px; border: 1px solid #ccc; border-radius: 6px; background-color: ${count > 0 ? '#ffe6e6' : '#e6ffe6'};">
+                        <div style="padding: 4px 5px;min-width: 70px; border: 1px solid #ccc; border-radius: 6px; background-color: ${count > 0 ? '#ffe6e6' : '#e6ffe6'};">
                           <span style="color: #888;">${type}:</span>
                           <span style="font-weight: bold; color: ${count > 0 ? '#d9534f' : '#28a745'};">${count}</span>
                         </div>
@@ -3524,6 +3553,116 @@ h1, h2 {
               </div>
           `;
       }
+ 
+    function detectAnomaliesInUpload(data) {
+    const processed = [];
+
+    data.forEach(row => {
+            const issues = [];
+            let is_anomaly = false;
+
+            // 转换并检测 水温
+            const waterTemp = parseFloat(row['水温(℃)']);
+            if (isNaN(waterTemp)) {
+                issues.push("水温数据无效");
+                is_anomaly = true;
+            } else if (waterTemp < 15 || waterTemp > 35) {
+                issues.push(`水温异常: ${waterTemp}℃`);
+                is_anomaly = true;
+            }
+
+            // 转换并检测 pH
+            const phValue = parseFloat(row['pH(无量纲)']);
+            if (isNaN(phValue)) {
+                issues.push("pH数据无效");
+                is_anomaly = true;
+            } else if (phValue < 6.5 || phValue > 8.5) {
+                issues.push(`pH异常: ${phValue}`);
+                is_anomaly = true;
+            }
+
+            // 转换并检测 溶解氧
+            const doValue = parseFloat(row['溶解氧(mg/L)']);
+            if (isNaN(doValue)) {
+                issues.push("溶解氧数据无效");
+                is_anomaly = true;
+            } else if (doValue < 5) {
+                issues.push(`溶解氧过低: ${doValue} mg/L`);
+                is_anomaly = true;
+            }
+
+            // 检查藻密度缺失
+            const algaeDensity = row['藻密度(cells/L)'];
+            if (algaeDensity === undefined || algaeDensity === null || algaeDensity.toString().trim() === '--') {
+                issues.push("藻密度缺失");
+            }
+
+            processed.push({
+                "监测时间": row['监测时间'],
+                "断面名称": row['断面名称'],
+                "水温": row['水温(℃)'],
+                "pH": row['pH(无量纲)'],
+                "溶解氧": row['溶解氧(mg/L)'],
+                "藻密度": row['藻密度(cells/L)'],
+                "is_anomaly": is_anomaly,
+                "issues": issues.length > 0 ? issues : ["正常"]
+            });
+        });
+
+        return processed;
+    }
+    
+    function water_data_out(){
+        console.log("导出水质前data",data);
+        exportToCSV(data,"water_quality_data.csv");
+    }
+
+    function exportToCSV(data,filename) {
+        if (!data || !data.length) {
+          alert('没有数据可导出');
+          return;
+        }
+
+        // 获取所有字段名（表头）
+        const headers = Object.keys(data[0]);
+
+        // 组装CSV内容，先加表头
+        const csvRows = [];
+        csvRows.push(headers.join(','));
+
+        // 组装每条数据的值，注意转义逗号和引号
+        for (const row of data) {
+          const values = headers.map(header => {
+            let val = row[header];
+            if (val === undefined || val === null) val = '';
+            else val = val.toString();
+
+            // 如果字段里有逗号或引号，用双引号包起来，内部双引号转成两个双引号
+            if (val.includes(',') || val.includes('"')) {
+              val = '"' + val.replace(/"/g, '""') + '"';
+            }
+            return val;
+          });
+          csvRows.push(values.join(','));
+        }
+
+        // 生成CSV字符串
+        const csvString = csvRows.join('\n');
+
+        // 创建一个Blob对象，类型是text/csv
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+
+        // 创建一个下载链接并点击它
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        // link.download = "water_quality_data.csv";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
 
     //异常处理
     document.addEventListener('DOMContentLoaded', function () {
@@ -3700,40 +3839,273 @@ function getAqiDescription(pm25) {
 
 <!-- 鱼类数据绘制 -->
 <script>
-        // Bubble Chart
+    function Dataout() {
+        fetch("/get_fish_data")
+            .then(response => response.json())
+            .then(data => {
+              console.log("鱼类",data)
+              exportToCSV(data,"fish_data.csv");
+            })
+            .catch(error => {
+                console.error('获取数据失败:', error);
+                alert("数据导出失败！");
+            });
+    }
+    
+    // function performPCA(rawData) {
+    //     // 1. 过滤掉缺失值
+    //     const data = rawData.filter(row =>
+    //         row['Weight'] && row['Length'] && row['Width']
+    //     );
+
+    //     // 2. 提取物种标签和特征数据
+    //     const species = data.map(row => row['species'] || row['Species']);
+    //     const features = data.map(row => [
+    //         parseFloat(row['Weight']),
+    //         parseFloat(row['Length']),
+    //         parseFloat(row['Width'])
+    //     ]);
+
+    //     // 3. 数据标准化（zero mean, unit variance）
+    //     const mean = features[0].map((_, colIndex) =>
+    //         features.reduce((sum, row) => sum + row[colIndex], 0) / features.length
+    //     );
+    //     const std = features[0].map((_, colIndex) => {
+    //         const m = mean[colIndex];
+    //         return Math.sqrt(
+    //             features.reduce((sum, row) => sum + Math.pow(row[colIndex] - m, 2), 0) / features.length
+    //         );
+    //     });
+    //     const standardized = features.map(row =>
+    //         row.map((val, i) => (val - mean[i]) / std[i])
+    //     );
+
+    //     // 4. 执行 PCA
+    //     const pca = new PCA(standardized, { center: false, scale: false });
+    //     const pcaData = pca.predict(standardized, { nComponents: 2 }).to2DArray();
+
+    //     // 5. 拼接结果
+    //     return pcaData.map((point, idx) => ({
+    //         species: species[idx],
+    //         pc1: point[0],
+    //         pc2: point[1]
+    //     }));
+    // }
+    
+    // Bubble Chart
     fetch("/get_fish_data")
     .then(response => response.json())
     .then(data => {
         console.log(data);
-        let speciesSet = [...new Set(data.map(d => d.species))];
-        let colorPalette = {
-            "Bream": "#5470C6",
-            "Roach": "#91CC75",
-            "Pike": "#EE6666",
-            "Perch": "#FAC858",
-            "Smelt": "#73C0DE",
-            "Parkki": "#3BA272",
-            "Whitefish": "#FC8452"
-        };
+        drawFishBubbleChart(data);
+    });
+    
+  
+    function handleFishFileUpload(event) {
+      const file = event.target.files[0];
+      console.log("file ",file);
+      if (!file) return;
+      
+      let fish_data=[];
+      Papa.parse(file, {
+              header: true, // 第一行作为字段名
+              skipEmptyLines: true,
+              complete: function(results) {
+                  // fish_data = results.data;
+                  // 把字段名统一转小写
+                  fish_data = results.data.map(row => {
+                      const newRow = {};
+                      for (let key in row) {
+                          if (row.hasOwnProperty(key)) {
+                              let newKey = key.toLowerCase().trim();
+                              newKey = newKey.replace(/\(g\)/g, '')    // 去掉 (g)
+                                            .replace(/\(cm\)/g, '')   // 去掉 (cm)
+                                            .replace(/\s+/g, '');     // 去掉所有空格
+
+                              // 重命名 length1 -> length
+                              if (newKey === 'length1') {
+                                  newKey = 'length';
+                              }
+
+                              newRow[newKey] = row[key];
+                          }
+                      }
+                      return newRow;
+                  });
+                  fish_data = fish_data.map(row => ({
+                      species: row.species,
+                      length: row.length,
+                      weight: row.weight,
+                      width: row.width
+                  }));
+
+                  console.log("upload 解析后的数据：", fish_data);
+                  drawFishBubbleChart(fish_data);
+                  console.log("11111");
+                  
+                  // 发送到后端做 PCA
+                  fetch("/perform_pca", {
+                      method: "POST",
+                      headers: {
+                          "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({ fish_data })
+                  })
+                  .then(res => res.json())
+                  .then(res => {
+                      if (res.success) {
+                          console.log("PCA结果：", res.pca_data);
+                          drawPCAChart(res.pca_data); // 用你前面写的函数
+                      } else {
+                          alert("PCA 失败：" + res.error);
+                      }
+                  });
+
+           
+                  // const pcaPoints = performPCA(fish_data);
+                  // console.log(pcaPoints);
+                  // drawPCAChart(pcaPoints);
+                
+              }
+          });
+    }
+
+
+        // PCA Chart
+    fetch("/get_pca_data")
+    .then(response => response.json())
+    .then(responseData => { 
+      if (responseData.success) {
+            drawPCAChart(responseData.pca_data);
+        }
+     
+    });
+
+    // PCA 降维图绘制
+    function drawPCAChart(pca_data) {
+        let speciesSet = [...new Set(pca_data.map(d => d.species))];
+        let seriesData = speciesSet.map(species => ({
+            name: species,
+            type: 'scatter',
+            data: pca_data.filter(d => d.species === species)
+                          .map(d => [d.pc1, d.pc2])
+        }));
+
+        let chart = echarts.init(document.getElementById('pca'));
+        chart.setOption({
+            title: {
+                text: '鱼类PCA降维图像',
+                left: 'center',
+                top: 10,
+                textStyle: {
+                    color: '#4ED7F1',
+                    fontSize: 18,
+                    fontWeight: 'bold'
+                },
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: function (params) {
+                    return `
+                        物种: ${params.seriesName}<br>
+                        PC1: ${params.value[0].toFixed(2)}<br>
+                        PC2: ${params.value[1].toFixed(2)}
+                    `;
+                }
+            },
+            legend: {
+                data: speciesSet,
+                textStyle: {
+                    color: '#4ED7F1',
+                    fontSize: 13,
+                    fontWeight: 'bold'
+                },
+                top: 50
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {
+                        backgroundColor: '#f4f4f4'
+                    }
+                }
+            },
+            grid: {
+                left: '55px',
+                right: '10%',
+                bottom: '60px',
+                top: '100px'
+            },
+            xAxis: {
+                name: 'PC1',
+                nameLocation: 'middle',
+                nameGap: 30,
+                axisLabel: { rotate: 45 },
+                axisLine: {
+                    lineStyle: { color: '#4ED7F1' }
+                }
+            },
+            yAxis: {
+                name: 'PC2',
+                nameLocation: 'middle',
+                nameGap: 30,
+                axisLabel: {
+                    formatter: value => value.toFixed(2)
+                },
+                axisLine: {
+                    lineStyle: { color: '#4ED7F1' }
+                },
+                splitLine: {
+                    lineStyle: { color: '#4ED7F1' }
+                }
+            },
+            series: seriesData
+        });
+    }
+
+    // Fish 气泡图绘制
+    function drawFishBubbleChart(fish_data) {
+        let speciesSet = [...new Set(fish_data.map(d => d.species))];
+        console.log("speciesSet ",speciesSet);
+        let colorList = [
+          "#5470C6", "#91CC75", "#EE6666", "#FAC858",
+          "#73C0DE", "#3BA272", "#FC8452", "#9A60B4", "#EA7CCC"
+        ];
+        // 3. 生成颜色映射字典
+        let colorPalette = {};
+        speciesSet.forEach((species, index) => {
+          colorPalette[species] = colorList[index % colorList.length]; // 防止颜色不够用
+        });
+
+        console.log("color ",colorPalette)
+
         let seriesData = speciesSet.map((species, index) => ({
             name: species,
             type: 'scatter',
-            data: data.filter(d => d.species === species)
-                      .map(d => [d.length, d.weight, d.width]),
-            symbolSize: function (val) {
-                return val[2] * 2;
-            },
+            data: fish_data.filter(d => d.species === species)
+                          .map(d => [d.length, d.weight, d.width]),
+            symbolSize: val => val[2] * 2,
             itemStyle: {
-                color: colorPalette[index % colorPalette.length]
+                color: colorPalette[species] || colorPalette[index % Object.keys(colorPalette).length]
             }
         }));
 
         let chart = echarts.init(document.getElementById('bubble'));
         chart.setOption({
+            title: {
+                text: '鱼类整体情况一览',
+                left: 'center',
+                top: 10,
+                textStyle: {
+                    color: '#4ED7F1',
+                    fontSize: 18,
+                    fontWeight: 'bold'
+                },
+            },
             tooltip: {
                 backgroundColor: '#fff',
                 trigger: 'item',
                 formatter: function (params) {
+                    console.log("hhh",params)
                     return `
                         <strong>物种: ${params.seriesName}</strong><br>
                         长度: ${params.value[0]} cm<br>
@@ -3742,139 +4114,55 @@ function getAqiDescription(pm25) {
                     `;
                 }
             },
-            legend: { 
-              data: speciesSet,
-              textStyle: {
-                  color: '#fff', // 改成你想要的颜色，比如白色 '#fff'、蓝色 '#007BFF'
-                  fontSize: 13,   // 你也可以顺便调字体大小
-                  fontWeight: 'bold'
-              }
-              
+            toolbox: {
+                feature: {
+                    saveAsImage: {
+                        backgroundColor: '#f4f4f4'
+                    }
+                }
+            },
+            legend: {
+                data: speciesSet,
+                textStyle: {
+                    color: '#4ED7F1',
+                    fontSize: 13,
+                    fontWeight: 'bold'
+                },
+                top: 40
             },
             grid: {
-              left: '70px',
-              right: '10%',
-              bottom: '60px',
-              top: '60px'
+                left: '70px',
+                right: '10%',
+                bottom: '60px',
+                top: '100px'
             },
-            xAxis: { 
-              name: 'Length1 (cm)',
-              nameLocation: 'middle',
-              nameGap: 30,
-              axisLabel: {
-                rotate: 45
-              },
-              axisLine: {
-                lineStyle: {
-                  color: '#4ED7F1'  // 设置y轴线的颜色
+            xAxis: {
+                name: 'Length1 (cm)',
+                nameLocation: 'middle',
+                nameGap: 30,
+                axisLabel: { rotate: 45 },
+                axisLine: {
+                    lineStyle: { color: '#4ED7F1' }
                 }
-              },
-
-             },
-            yAxis: { 
-              name: 'Weight (g)',
-              nameLocation: 'middle',
-              nameGap: 50,
-              axisLabel: {
-                  formatter: function (value) {
-                    return value.toFixed(2); // 保留两位小数
-                  }
+            },
+            yAxis: {
+                name: 'Weight (g)',
+                nameLocation: 'middle',
+                nameGap: 50,
+                axisLabel: {
+                    formatter: value => value.toFixed(2)
                 },
                 axisLine: {
-                  lineStyle: {
-                    color: '#4ED7F1'  // 设置y轴线的颜色
-                  }
+                    lineStyle: { color: '#4ED7F1' }
                 },
                 splitLine: {
-                  lineStyle: {
-                    color: '#4ED7F1'   // 设置y轴网格线的颜色
-                  }
+                    lineStyle: { color: '#4ED7F1' }
                 }
-                  },
+            },
             series: seriesData
         });
-    });
+    }
 
-
-        // PCA Chart
-    fetch("/get_pca_data")
-    .then(response => response.json())
-    .then(responseData => { 
-      if (responseData.success) {
-            // console.log(data);
-            const pca_data = responseData.pca_data;  // 访问pca_data数组
-            // const outliers = responseData.outliers;
-            let speciesSet = [...new Set(pca_data.map(d => d.species))];
-            let seriesData = speciesSet.map(species => ({
-                name: species,
-                type: 'scatter',
-                data: pca_data.filter(d => d.species === species)
-                          .map(d => [d.pc1, d.pc2])
-            }));
-
-            let chart = echarts.init(document.getElementById('pca'));
-            chart.setOption({
-                tooltip: {
-                    trigger: 'item',
-                    formatter: function (params) {
-                        return `
-                            物种: ${params.seriesName}<br>
-                            PC1: ${params.value[0].toFixed(2)}<br>
-                            PC2: ${params.value[1].toFixed(2)}
-                        `;
-                    }
-                },
-                legend: { 
-                  data: speciesSet,
-                  textStyle: {
-                      color: '#fff', 
-                      fontSize: 13,   
-                      fontWeight: 'bold'
-                  }
-                },
-                grid: {
-                  left: '55px',
-                  right: '10%',
-                  bottom: '60px',
-                  top: '60px'
-                },
-                xAxis: { 
-                  name: 'PC1',
-                  nameLocation: 'middle',
-                  nameGap: 30,
-                  axisLabel: {
-                    rotate: 45
-                  },
-                  axisLine: {
-                    lineStyle: {
-                      color: '#4ED7F1'  // 设置x轴线的颜色
-                    }
-                  },
-                },
-                yAxis: { 
-                  name: 'PC2',
-                  nameLocation: 'middle',
-                  nameGap: 30,
-                  axisLabel: {
-                    formatter: function (value) {
-                      return value.toFixed(2); // 保留两位小数
-                    }
-                  },
-                  axisLine: {
-                    lineStyle: {
-                      color: '#4ED7F1'  // 设置y轴线的颜色
-                    }
-                  },
-                  splitLine: {
-                    lineStyle: {
-                      color: '#4ED7F1'   // 设置y轴网格线的颜色
-                    }
-                  }
-                },
-                
-                series: seriesData
-            });
-        }});
 </script>
 
 <!-- 实时监测 -->
@@ -3901,6 +4189,8 @@ setInterval(() => {
 }, 5000); // 每5秒刷新一次
 
 </script>
+
+
 
 <!-- 鱼类异常 -->
 <script>

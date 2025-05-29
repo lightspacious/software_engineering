@@ -14,10 +14,10 @@ app = Flask(__name__)
 app.secret_key = '123456789'
 
 # 设置管理员身份###############################
-# @app.before_request
-# def fake_login_as_admin():
-#     session['username'] = '1'
-#     session['identity'] = '1'
+@app.before_request
+def fake_login_as_admin():
+    session['username'] = '1'
+    session['identity'] = '1'
 # 用于避开登陆界面并获得管理员权限##################
 
 # 配置 MySQL 数据库连接
@@ -38,9 +38,9 @@ class User(db.Model):
     # farm = db.Column(db.Integer)
 CORS(app)
 
-@app.route('/')
-def index():
-    return redirect(url_for('login')) 
+# @app.route('/')
+# def index():
+#     return redirect(url_for('login')) 
 
 
 # 登录路由
@@ -124,8 +124,8 @@ def signinsign_up():
 # @app.route('/')
 @app.route('/main_info')
 def main_info():
-    if 'identity' not in session:
-        return redirect(url_for('login'))
+    # if 'identity' not in session:
+    #     return redirect(url_for('login'))
     return render_template('main_info.html')
 
 @app.route('/underwater')
@@ -469,6 +469,52 @@ def get_pca_data():
             "error": str(e)
         }), 500
     
+
+@app.route('/perform_pca', methods=['POST'])
+def perform_pca():
+    try:
+        # 1. 获取 JSON 数据并转为 DataFrame
+        json_data = request.get_json()
+        data = json_data['fish_data']
+        df = pd.DataFrame(data)
+        print("收到的数据列：", data)
+        print("收到的数据列：", df.columns.tolist())
+
+        # 2. 字段名统一处理（小写）
+        df.columns = [col.lower() for col in df.columns]
+
+        # 3. 提取用于 PCA 的列
+        features = ['length', 'weight', 'width']
+        df_pca = df.dropna(subset=features).copy()
+        X = df_pca[features].astype(float)
+
+        # 4. 执行标准化和 PCA
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        pca = PCA(n_components=2)
+        X_pca = pca.fit_transform(X_scaled)
+
+        # 5. 构建返回结果
+        result = []
+        for i, row in df_pca.iterrows():
+            result.append({
+                'species': row.get('species', 'Unknown'),
+                'pc1': float(X_pca[i, 0]),
+                'pc2': float(X_pca[i, 1])
+            })
+
+        return jsonify({
+            'success': True,
+            'pca_data': result,
+            'explained_variance': pca.explained_variance_ratio_.tolist()
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
 @app.route('/hard_status')
 def get_hardstatus():
     cpu_percent = psutil.cpu_percent(interval=0.5)
