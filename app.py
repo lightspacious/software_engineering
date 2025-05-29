@@ -14,10 +14,10 @@ app = Flask(__name__)
 app.secret_key = '123456789'
 
 # 设置管理员身份###############################
-@app.before_request
-def fake_login_as_admin():
-    session['username'] = '1'
-    session['identity'] = '1'
+# @app.before_request
+# def fake_login_as_admin():
+#     session['username'] = '1'
+#     session['identity'] = '1'
 # 用于避开登陆界面并获得管理员权限##################
 
 # 配置 MySQL 数据库连接
@@ -38,9 +38,9 @@ class User(db.Model):
     # farm = db.Column(db.Integer)
 CORS(app)
 
-# @app.route('/')
-# def index():
-#     return redirect(url_for('login')) 
+@app.route('/')
+def index():
+    return redirect(url_for('login')) 
 
 
 # 登录路由
@@ -124,8 +124,8 @@ def signinsign_up():
 # @app.route('/')
 @app.route('/main_info')
 def main_info():
-    # if 'identity' not in session:
-    #     return redirect(url_for('login'))
+    if 'identity' not in session:
+        return redirect(url_for('login'))
     return render_template('main_info.html')
 
 @app.route('/underwater')
@@ -477,8 +477,8 @@ def perform_pca():
         json_data = request.get_json()
         data = json_data['fish_data']
         df = pd.DataFrame(data)
-        print("收到的数据列：", data)
-        print("收到的数据列：", df.columns.tolist())
+        # print("收到的数据列：", data)
+        # print("收到的数据列：", df.columns.tolist())
 
         # 2. 字段名统一处理（小写）
         df.columns = [col.lower() for col in df.columns]
