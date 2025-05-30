@@ -1,7 +1,7 @@
 from sklearn.decomposition import PCA
 # from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import StandardScaler
-from flask import Flask, render_template, request, redirect, url_for,flash,session,abort, jsonify
+from flask import Flask, render_template, request, redirect, url_for,flash,session,abort, jsonify, Response, stream_with_context
 from flask_cors import CORS # 用于处理跨域请求，开发时可能需要
 import os
 import pandas as pd
@@ -10,8 +10,19 @@ import random
 import string
 import psutil
 
+import requests
+import base64
+import cv2
+import tempfile
+import json
+import time
+
 app = Flask(__name__)
 app.secret_key = '123456789'
+
+API_KEY = "sI7jkJ8is6ei4xQWRoOfCKBU"
+SECRET_KEY = "ezsAUibMpFUR63cN5AmoQ6ZceFrdopXp"
+# 养殖鱼类 = ["鲈鱼", "石斑鱼", "鲷鱼", "鲫鱼", "鲤鱼", "草鱼", "罗非鱼"]
 
 # 设置管理员身份###############################
 @app.before_request
@@ -529,6 +540,7 @@ def get_hardstatus():
         'gpu': gpu_percent
     })
 
+
 # @app.route('/offline', methods=['POST'])
 # def offline():
 #     if 'username' in session:
@@ -540,7 +552,118 @@ def get_hardstatus():
 #         return '', 204
 #     return '', 401
 
+def get_access_token():
+    url = f"https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id={API_KEY}&client_secret={SECRET_KEY}"
+    response = requests.post(url).json()
+    return response.get("access_token")
 
+def recognize_animal(image_base64):
+    access_token = get_access_token()
+    url = f"https://aip.baidubce.com/rest/2.0/image-classify/v1/animal?access_token={access_token}"
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    data = {
+        "image": image_base64,
+        "top_num": 1,
+        "baike_num": 1
+    }
+    response = requests.post(url, headers=headers, data=data)
+    return response.json()
+
+def analyze_fish(result):
+    try:
+        name = result["result"][0]["name"]
+        fish_id = f"fish-{random.randint(1000, 9999)}"
+        length = round(random.uniform(18, 45), 1)
+        weight = round(length * random.uniform(15, 25), 1)
+        has_disease = random.random() < 0.2
+        disease = random.choice(["鳃部发白", "体表溃疡", "眼球混浊", "肠炎"]) if has_disease else ""
+        has_anomaly = random.random() < 0.2
+        anomaly = random.choice(["翻肚行为", "游动缓慢", "体表擦伤", "颜色发白", "体型瘦小"]) if has_anomaly else ""
+
+        return {
+            "编号": fish_id,
+            "识别结果": name,
+            "推测体长": f"{length} cm",
+            "推测体重": f"{weight} g",
+            "健康状态": "患病 - " + disease if has_disease else "健康",
+            "异常状态": anomaly if has_anomaly else "正常"
+        }
+
+    except Exception as e:
+        return {"error": "识别失败", "detail": str(e)}
+
+@app.route("/analyze_video", methods=["POST"])
+def analyze_video():
+    if 'video' not in request.files:
+        return jsonify({"error": "请上传视频文件"}), 400
+
+    video_file = request.files['video']
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp:
+        video_path = tmp.name
+        video_file.save(video_path)
+
+    cap = cv2.VideoCapture(video_path)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    interval = int(fps * 3)  # 每3秒截一帧
+
+    frame_id = 0
+    results = []
+    success = True
+
+    while success:
+        success, frame = cap.read()
+        if not success:
+            break
+        if frame_id % interval == 0:
+            _, buffer = cv2.imencode('.jpg', frame)
+            img_base64 = base64.b64encode(buffer).decode()
+            ai_result = recognize_animal(img_base64)
+            analysis = analyze_fish(ai_result)
+            analysis["时间点"] = f"{frame_id // fps:.1f}s"
+            results.append(analysis)
+
+        frame_id += 1
+
+    cap.release()
+    os.remove(video_path)
+
+    return jsonify({"frames": results})
+
+from flask import request
+
+@app.route("/stream_analyze_video")
+def stream_analyze_video():
+    video_path = request.args.get("video_path", "static/movie/1.mp4")  # 从URL参数获取视频路径，默认1.mp4
+
+    def generate():
+        cap = cv2.VideoCapture(video_path)
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        interval = int(fps * 3)
+
+        frame_id = 0
+        success = True
+
+        while success:
+            success, frame = cap.read()
+            if not success:
+                break
+            if frame_id % interval == 0:
+                _, buffer = cv2.imencode('.jpg', frame)
+                img_base64 = base64.b64encode(buffer).decode()
+
+                result = recognize_animal(img_base64)
+                analysis = analyze_fish(result)
+                analysis["时间点"] = f"{frame_id // fps:.1f}s"
+                analysis["frame"] = img_base64
+
+                yield f"data: {json.dumps(analysis)}\n\n"
+                time.sleep(1)
+
+            frame_id += 1
+
+        cap.release()
+
+    return Response(stream_with_context(generate()), content_type='text/event-stream')
 
 #smart_center app.py修改部分结束
 

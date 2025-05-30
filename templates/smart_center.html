@@ -718,6 +718,71 @@ h1, h2 {
   grid-template-columns: auto auto;  
   gap: 20px;                       
 } */
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  margin: auto;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.25);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 2;
+  border-radius: 50%;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0.5;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.arrow:hover {
+  background-color: rgba(255, 255, 255, 0.85);
+  opacity: 1;
+}
+
+.left {
+  left: 10px;
+}
+
+.right {
+  right: 10px;
+}
+
+.add-video-container {
+  display: flex;
+  justify-content: space-between; /* 左右分散 */
+  align-items: center;
+  width: 100%;  /* 容器宽度满 */
+  gap: 10px; /* 可选间距 */
+}
+
+.custom-upload-btn, 
+.custom-stream-btn {
+  flex: 1; /* 宽度平分 */
+  padding: 8px 0; /* 纵向内边距，左右内边距去掉，保持均匀 */
+  background: linear-gradient(135deg, #1a6fc9, #0d47a1);
+  border: 2px solid #4fc3f7;
+  box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  margin: 0 5px; /* 按钮间距 */
+  color: white;
+}
+
+.custom-upload-btn:hover,
+.custom-stream-btn:hover {
+  background-color: #3371a1;
+}
 
 </style>
 
@@ -813,44 +878,53 @@ h1, h2 {
             </div>
         </div>
       <div class="video-grid">
-          <div class="video-box">
-              <video width="100%" controls autoplay muted>
-                  <source src="static/movie/1.mp4" type="video/mp4">
-                  您的浏览器不支持视频播放。
-              </video>
+          <div class="video-container">
+            <button class="arrow left" onclick="prevVideo()">&#9664;</button>
+
+            <video id="video-player" width="100%" controls autoplay muted>
+              <source id="video-source" src="static/movie/1.mp4" type="video/mp4">
+              您的浏览器不支持视频播放。
+            </video>
+
+            <button class="arrow right" onclick="nextVideo()">&#9654;</button>
           </div>
-          <div class="video-box">
-              <video width="100%" controls autoplay muted>
-                  <source src="static/movie/2.mp4" type="video/mp4">
-                  您的浏览器不支持视频播放。
-              </video>
-          </div>
+        <div class="add-video-container">
+         
+          <input type="file" id="video-upload" accept="video/mp4" style="display:none" />
+          <label for="video-upload" class="custom-upload-btn">添加视频文件</label>
+        
+          <button onclick="startStream()" class="custom-upload-btn">流式识别</button>
+        </div>
+
+         <div id="frame-container">
+            <img id="video-frame" src="static/海洋默认截图.jpg" alt="视频帧图像" style="max-width: 100%; height: auto; border: 1px solid #ccc;" />
+         </div>
       </div>
 
       <div class="grid-layout-area5">
             <div class="grid-item-area5 area5_area1">
                 <div class="label_5"><i class="ri-numbers-line"></i><span>编号</span></div>
-                <div class="num_value" id="fish-id">fish-9572</div>
+                <div class="num_value" id="fish-id">--</div>
             </div>
             <div class="grid-item-area5 area5_area2">
                 <div class="label_5"><i class="ri-star-smile-line"></i><span>鱼种</span></div>
-                <div class="num_value" id="fish-type">moonfish</div>
+                <div class="num_value" id="fish-type">--</div>
             </div>
             <div class="grid-item-area5 area5_area3">
                 <div class="label_5"><i class="ri-expand-diagonal-2-line"></i><span>体长</span></div>
-                <div class="num_value" id="fish-length">10寸</div>
+                <div class="num_value" id="fish-length">--</div>
             </div>
             <div class="grid-item-area5 area5_area4">
                 <div class="label_5"><i class="ri-weight-line"></i><span>体重</span></div>
-                <div class="num_value" id="fish-weight">5kg</div>
+                <div class="num_value" id="fish-weight">--</div>
             </div>
             <div class="grid-item-area5 area5_area5">
                 <div class="label_5 sick_label"><i class="ri-hard-drive-fill"></i></div>
-                <div class="num_value" id="fish-status">疑似患病</div>
+                <div class="num_value" id="fish-status">--</div>
             </div>
             <div class="grid-item-area5 area5_area6">
                 <div class="label_5 stange_label"><i class="ri-bootstrap-line"></i></div>
-                <div class="num_value" id="fish-group">鱼群异常</div>
+                <div class="num_value" id="fish-group">--</div>
             </div>
             <div class="grid-item-area5 area5_area7">
                 <div class="label_5 trace_label"><i class="ri-arrow-go-forward-line"></i></div>
@@ -4167,29 +4241,8 @@ function getAqiDescription(pm25) {
 
 <!-- 实时监测 -->
 <script>
-let currentIndex = 0;
-
-setInterval(() => {
-  fetch('static/dataset/fish_data.json')
-    .then(res => res.json())
-    .then(data => {
-      const fish = data[currentIndex];  // 取出当前下标的鱼
-
-      document.getElementById('fish-id').innerText = fish.id;
-      document.getElementById('fish-type').innerText = fish.type;
-      document.getElementById('fish-length').innerText = fish.length;
-      document.getElementById('fish-weight').innerText = fish.weight;
-      document.getElementById('fish-status').innerText = fish.status;
-      document.getElementById('fish-group').innerText = fish.group;
-
-      // 更新下标（循环到头就从0开始）
-      currentIndex = (currentIndex + 1) % data.length;
-    })
-    .catch(err => console.error('加载鱼类数据失败:', err));
-}, 5000); // 每5秒刷新一次
 
 </script>
-
 
 
 <!-- 鱼类异常 -->
@@ -4217,5 +4270,79 @@ setInterval(() => {
       alertContainer.appendChild(div);
     }
 </script>
+
+<script>
+  const videoList = ["static/movie/1.mp4", "static/movie/2.mp4"];
+  let currentIndex = 0;
+
+  const videoPlayer = document.getElementById("video-player");
+  const videoSource = document.getElementById("video-source");
+
+  function updateVideo() {
+    videoSource.src = videoList[currentIndex];
+    console.log("current_viedo ",currentIndex);
+    videoPlayer.load();
+    videoPlayer.play();
+    // startStream();  // 自动开始识别
+  }
+
+  function prevVideo() {
+    currentIndex = (currentIndex - 1 + videoList.length) % videoList.length;
+    updateVideo();
+  }
+
+  function nextVideo() {
+    currentIndex = (currentIndex + 1) % videoList.length;
+    updateVideo();
+  }
+
+  // 添加新视频（本地）
+  document.getElementById("video-upload").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      videoList.push(url);
+      currentIndex = videoList.length - 1;
+      updateVideo();
+
+    }
+  });
+
+  function startStream() {
+    const currentVideoPath = videoList[currentIndex];
+
+    // 注意：本地上传的视频路径是 blob: 开头，后端无法读取，这里做个保护判断
+    if (currentVideoPath.startsWith("blob:")) {
+      alert("当前是本地上传视频，无法进行识别分析");
+      return;
+    }
+
+    const encodedPath = encodeURIComponent(currentVideoPath);
+    const eventSource = new EventSource(`/stream_analyze_video?video_path=${encodedPath}`);
+
+    eventSource.onmessage = function (event) {
+      const data = JSON.parse(event.data);
+      console.log("返回鱼类信息", data);
+
+      const frameImgBase64 = data.frame;
+      document.getElementById("video-frame").src = "data:image/jpeg;base64," + frameImgBase64;
+
+      document.getElementById('fish-id').innerText = data["编号"];
+      document.getElementById('fish-type').innerText = data["识别结果"];
+      document.getElementById('fish-length').innerText = data["推测体长"];
+      document.getElementById('fish-weight').innerText = data["推测体重"];
+      document.getElementById('fish-status').innerText = data["健康状态"];
+      document.getElementById('fish-group').innerText = data["异常状态"];
+    };
+
+    eventSource.onerror = function () {
+      console.error("分析服务断开或出错");
+      eventSource.close();
+    };
+  }
+
+</script>
+
+
 
 {% endblock %}
