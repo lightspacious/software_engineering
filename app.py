@@ -592,44 +592,6 @@ def analyze_fish(result):
     except Exception as e:
         return {"error": "识别失败", "detail": str(e)}
 
-@app.route("/analyze_video", methods=["POST"])
-def analyze_video():
-    if 'video' not in request.files:
-        return jsonify({"error": "请上传视频文件"}), 400
-
-    video_file = request.files['video']
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp:
-        video_path = tmp.name
-        video_file.save(video_path)
-
-    cap = cv2.VideoCapture(video_path)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    interval = int(fps * 3)  # 每3秒截一帧
-
-    frame_id = 0
-    results = []
-    success = True
-
-    while success:
-        success, frame = cap.read()
-        if not success:
-            break
-        if frame_id % interval == 0:
-            _, buffer = cv2.imencode('.jpg', frame)
-            img_base64 = base64.b64encode(buffer).decode()
-            ai_result = recognize_animal(img_base64)
-            analysis = analyze_fish(ai_result)
-            analysis["时间点"] = f"{frame_id // fps:.1f}s"
-            results.append(analysis)
-
-        frame_id += 1
-
-    cap.release()
-    os.remove(video_path)
-
-    return jsonify({"frames": results})
-
-from flask import request
 
 @app.route("/stream_analyze_video")
 def stream_analyze_video():
