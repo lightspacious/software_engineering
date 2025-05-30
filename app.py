@@ -20,9 +20,10 @@ import time
 app = Flask(__name__)
 app.secret_key = '123456789'
 
+#鱼类识别api_key  secret_key  赠送 10000 次
 API_KEY = "sI7jkJ8is6ei4xQWRoOfCKBU"
 SECRET_KEY = "ezsAUibMpFUR63cN5AmoQ6ZceFrdopXp"
-# 养殖鱼类 = ["鲈鱼", "石斑鱼", "鲷鱼", "鲫鱼", "鲤鱼", "草鱼", "罗非鱼"]
+
 
 # 设置管理员身份###############################
 @app.before_request
@@ -190,6 +191,7 @@ def smart_center():
     if session['identity'] not in ['1', '2']:  # 普通用户无权访问
         return "<script>alert('您无权限访问该页面！');window.history.back();</script>"
     return render_template('smart_center.html')
+
 @app.route('/')
 @app.route('/data_center')
 def data_center():
@@ -429,10 +431,10 @@ def get_fish_data():
     # print(df.columns
 
     df.columns = [col.lower().strip().replace('(g)', '').replace('(cm)', '').replace(' ', '') for col in df.columns]
-    df = df[['species', 'length1', 'weight', 'width']]
-    df = df.rename(columns={
-        'length1': 'length'
-    })
+    # df = df[['species', 'length1', 'weight', 'width']]
+    # df = df.rename(columns={
+    #     'length1': 'length'
+    # })
     return jsonify(df.to_dict(orient='records'))
 
 @app.route('/get_pca_data')
@@ -489,13 +491,13 @@ def perform_pca():
         data = json_data['fish_data']
         df = pd.DataFrame(data)
         # print("收到的数据列：", data)
-        # print("收到的数据列：", df.columns.tolist())
+        print("收到的数据列：", df.columns.tolist())
 
         # 2. 字段名统一处理（小写）
         df.columns = [col.lower() for col in df.columns]
 
         # 3. 提取用于 PCA 的列
-        features = ['length', 'weight', 'width']
+        features = ['length1','length2','length3', 'weight', 'width','height']
         df_pca = df.dropna(subset=features).copy()
         X = df_pca[features].astype(float)
 
@@ -595,35 +597,35 @@ def analyze_fish(result):
 
 @app.route("/stream_analyze_video")
 def stream_analyze_video():
-    video_path = request.args.get("video_path", "static/movie/1.mp4")  # 从URL参数获取视频路径，默认1.mp4
+    video_path = request.args.get("video_path", "static/movie/1.mp4")
 
     def generate():
         cap = cv2.VideoCapture(video_path)
         fps = cap.get(cv2.CAP_PROP_FPS)
         interval = int(fps * 3)
-
         frame_id = 0
-        success = True
 
-        while success:
-            success, frame = cap.read()
-            if not success:
-                break
-            if frame_id % interval == 0:
-                _, buffer = cv2.imencode('.jpg', frame)
-                img_base64 = base64.b64encode(buffer).decode()
+        try:
+            while cap.isOpened():
+                success, frame = cap.read()
+                if not success:
+                    break
+                if frame_id % interval == 0:
+                    _, buffer = cv2.imencode('.jpg', frame)
+                    img_base64 = base64.b64encode(buffer).decode()
 
-                result = recognize_animal(img_base64)
-                analysis = analyze_fish(result)
-                analysis["时间点"] = f"{frame_id // fps:.1f}s"
-                analysis["frame"] = img_base64
+                    result = recognize_animal(img_base64)
+                    analysis = analyze_fish(result)
+                    analysis["时间点"] = f"{frame_id // fps:.1f}s"
+                    analysis["frame"] = img_base64
 
-                yield f"data: {json.dumps(analysis)}\n\n"
-                time.sleep(1)
-
-            frame_id += 1
-
-        cap.release()
+                    yield f"data: {json.dumps(analysis)}\n\n"
+                    time.sleep(1)
+                frame_id += 1
+        except GeneratorExit:
+            print("客户端主动关闭 SSE")
+        finally:
+            cap.release()
 
     return Response(stream_with_context(generate()), content_type='text/event-stream')
 

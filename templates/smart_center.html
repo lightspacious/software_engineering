@@ -784,6 +784,114 @@ h1, h2 {
   background-color: #3371a1;
 }
 
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 64, 128, 0.4); /* 深蓝透明背景 */
+  backdrop-filter: blur(4px); /* 背景模糊 */
+}
+
+.modal-content {
+ background: linear-gradient(135deg, #1a6fc9, #0d47a1);
+  border: 2px solid #4fc3f7;
+  box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+  margin: auto;
+  margin-top: 8%;
+  width: 600px;
+  height: 400px;
+  padding: 20px 30px;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #003366; /* 深蓝文字 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.close {
+  color: #003366;
+  position: absolute;
+  right: 20px;
+  top: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+.close:hover {
+  color: #000;
+  transform: scale(1.2);
+}
+
+
+.close {
+  color: #aaa;
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.control-panel {
+  display: flex;
+  justify-content: center;       /* 水平居中 */
+  align-items: center;           /* 垂直对齐 */
+  gap: 20px;                     /* 控件之间的间距 */
+  margin: 20px 0;                /* 与上下内容间距 */
+  flex-wrap: wrap;               /* 小屏幕自动换行 */
+}
+
+.control-panel select,
+.control-panel button {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #3399cc;
+  background: #4fc3f7b0;
+
+  cursor: pointer;
+  transition:all 0.2s ease;
+  
+}
+
+.control-panel button:hover,
+.control-panel select:hover {
+  background: #4fc3f7b0;
+  /* box-shadow: 0 0 6px rgba(0, 102, 204, 0.3); */
+  transform: scale(1.05); 
+  box-shadow: 0 0 12px rgba(0, 153, 255, 0.6); 
+  transition: all 0.2s ease;
+}
+
+.control-panel button:focus,
+.control-panel button:active {
+  background: #4fc3f7b0;
+  color: #003366;
+  outline: none;
+  box-shadow: 0 0 12px rgba(0, 153, 255, 0.6);
+}
+
+.control-panel select:focus,
+.control-panel select:active {
+  background: #4fc3f7b0;
+  color: #003366;
+  outline: none;  /* 去除默认蓝色聚焦框 */
+  box-shadow: 0 0 12px rgba(0, 153, 255, 0.6);
+}
+
+
+
 </style>
 
 <div class="grid-layout-smart">
@@ -943,17 +1051,22 @@ h1, h2 {
     </div>
     <div class="grid-item-smart smart_area3">
         <div class="chart">
-          
+           
+            
             <!-- <h2>鱼类整体情况一览</h2> -->
             <div id="bubble" style=" left:0px ;width:460px; height: 400px;"></div>
             
-
             <!-- <h2>PCA 降维</h2> -->
             <div id="pca" style="left:0px ;width:460px; height: 400px;"></div>
             <input type="file" id="csvFileInput_fish" accept=".csv" style="display: none" onchange="handleFishFileUpload(event)">
             <button class="compact-btn" onclick="document.getElementById('csvFileInput_fish').click()">上传数据</button>
             <button class="compact-btn" onclick="Dataout()">导出数据</button>
+            <!-- 弹出按钮 -->
+            <button class="compact-btn" id="openChartModal">体长预测</button>
+
         </div>
+
+        
 
         <div class="exception">
             <div class="title">警告提示</div>
@@ -964,7 +1077,28 @@ h1, h2 {
 
 
     </div>
-   
+
+       <!-- 模态框 -->
+        <div id="chartModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            
+            <div class="control-panel">
+              <button id="prev">← 上一页</button>
+              <select id="speciesSelect">
+                <option value="">请选择鱼类</option>
+              </select>
+              
+              
+              <button class="compact-btn" onclick="predataout()">导出数据</button>
+              <button id="next">下一页 →</button>
+            </div>
+            <div id="chart" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; max-width: 1200px; margin: auto;"></div>
+           
+            <div id="pageInfo" style="font-size: 13px;font-style: italic;"></div>
+          </div>
+        </div>
+
     <div id="fullscreen-alert">
         <div id="alert-message">⚠️ 水质异常警告 ⚠️</div>
         <div id="alert-details"></div>
@@ -3911,8 +4045,43 @@ function getAqiDescription(pm25) {
 }
 </script>
 
-<!-- 鱼类数据绘制 -->
+<!-- 预测模式块 -->
 <script>
+  const modal = document.getElementById("chartModal");
+  const openBtn = document.getElementById("openChartModal");
+  const closeBtn = document.querySelector(".close");
+
+  openBtn.onclick = () => {
+    modal.style.display = "block";
+    
+    // 如果图表在隐藏状态初始化，可能需要resize或重绘
+    const chartDom = document.getElementById('chart');
+    echarts.getInstanceByDom(chartDom)?.resize();
+  };
+
+  closeBtn.onclick = () => {
+    modal.style.display = "none";
+  };
+
+  window.onclick = (event) => {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+
+</script>
+
+<!-- 鱼类数据绘制  +  体长预测  + 鱼类异常-->
+<script>
+    
+    const pageSize = 4;
+    let allData = []; // 解析后的所有数据
+    let filteredData = []; // 过滤后的鱼类数据
+    let currentPage = 0;
+    const speciesSelect = document.getElementById('speciesSelect');
+    const chartDom = document.getElementById('chart');
+    const myChart = echarts.init(chartDom);
+
     function Dataout() {
         fetch("/get_fish_data")
             .then(response => response.json())
@@ -3972,9 +4141,19 @@ function getAqiDescription(pm25) {
     .then(data => {
         console.log(data);
         drawFishBubbleChart(data);
+        // console.log("upload 解析后的数据：", data);
+
+        allData =generatePredict(data);
+        initSpeciesSelect(allData) ;
+
+        filteredData = filterBySpecies(data[0].species);
+        console.log("filteredData 默认",filteredData);
+        currentPage = 0;
+        document.getElementById('speciesSelect').value = data[0].species;
+
+        renderChart(currentPage);
     });
-    
-  
+
     function handleFishFileUpload(event) {
       const file = event.target.files[0];
       console.log("file ",file);
@@ -3996,24 +4175,32 @@ function getAqiDescription(pm25) {
                                             .replace(/\(cm\)/g, '')   // 去掉 (cm)
                                             .replace(/\s+/g, '');     // 去掉所有空格
 
-                              // 重命名 length1 -> length
-                              if (newKey === 'length1') {
-                                  newKey = 'length';
-                              }
+                              // // 重命名 length1 -> length
+                              // if (newKey === 'length3') {
+                              //     newKey = 'length';
+                              // }
 
                               newRow[newKey] = row[key];
                           }
                       }
                       return newRow;
                   });
-                  fish_data = fish_data.map(row => ({
-                      species: row.species,
-                      length: row.length,
-                      weight: row.weight,
-                      width: row.width
-                  }));
-
+                  console.log("pca fish_data ",fish_data);
+    
                   console.log("upload 解析后的数据：", fish_data);
+                  
+                  //predict
+                  allData =generatePredict(fish_data);
+                  initSpeciesSelect(allData) ;
+
+                  filteredData = filterBySpecies(fish_data[0].species);
+                  console.log("filteredData 默认",filteredData);
+                  currentPage = 0;
+                  document.getElementById('speciesSelect').value = fish_data[0].species;
+
+                  renderChart(currentPage);
+                  //predict
+
                   drawFishBubbleChart(fish_data);
                   console.log("11111");
                   
@@ -4030,27 +4217,26 @@ function getAqiDescription(pm25) {
                       if (res.success) {
                           console.log("PCA结果：", res.pca_data);
                           drawPCAChart(res.pca_data); // 用你前面写的函数
+                          detectOutliersFromPCA(res.pca_data);
                       } else {
                           alert("PCA 失败：" + res.error);
                       }
                   });
 
-           
-                  // const pcaPoints = performPCA(fish_data);
-                  // console.log(pcaPoints);
-                  // drawPCAChart(pcaPoints);
-                
+
               }
           });
     }
 
 
-        // PCA Chart
+    // PCA Chart
     fetch("/get_pca_data")
     .then(response => response.json())
     .then(responseData => { 
       if (responseData.success) {
+            console.log("pca data ",responseData.pca_data);
             drawPCAChart(responseData.pca_data);
+            detectOutliersFromPCA(responseData.pca_data)
         }
      
     });
@@ -4152,16 +4338,29 @@ function getAqiDescription(pm25) {
 
         console.log("color ",colorPalette)
 
-        let seriesData = speciesSet.map((species, index) => ({
-            name: species,
-            type: 'scatter',
-            data: fish_data.filter(d => d.species === species)
-                          .map(d => [d.length, d.weight, d.width]),
-            symbolSize: val => val[2] * 2,
-            itemStyle: {
-                color: colorPalette[species] || colorPalette[index % Object.keys(colorPalette).length]
-            }
-        }));
+        console.log("fish data bubble",fish_data);
+
+       
+
+      let seriesData = speciesSet.map((species, index) => {
+          let filteredData = fish_data.filter(d => d.species === species).map(d => [
+                  d.length3, d.weight, d.width * d.height
+              ]);
+          console.log("验证", filteredData);  // 这里能正常打印
+
+          return {
+              name: species,
+              type: 'scatter',
+              data: fish_data.filter(d => d.species === species).map(d => [
+                  d.length3, d.weight, d.width * d.height
+              ]),
+              symbolSize: val => val[2] / 4.5 ,
+              itemStyle: {
+                  color: colorPalette[species] || colorPalette[index % Object.keys(colorPalette).length]
+              }
+          };
+      });
+
 
         let chart = echarts.init(document.getElementById('bubble'));
         chart.setOption({
@@ -4179,13 +4378,13 @@ function getAqiDescription(pm25) {
                 backgroundColor: '#fff',
                 trigger: 'item',
                 formatter: function (params) {
-                    console.log("hhh",params)
+                   const d = params.data;
                     return `
-                        <strong>物种: ${params.seriesName}</strong><br>
-                        长度: ${params.value[0]} cm<br>
-                        重量: ${params.value[1]} g<br>
-                        宽度: ${params.value[2]} cm
-                    `;
+                      <strong>物种: ${params.seriesName}</strong><br>
+                      长度: ${d[0]} cm<br>
+                      重量: ${d[1]} g<br>
+                      宽度*高度: ${d[2].toFixed(2)} cm*cm <br>
+                                  `;
                 }
             },
             toolbox: {
@@ -4207,13 +4406,15 @@ function getAqiDescription(pm25) {
             grid: {
                 left: '70px',
                 right: '10%',
+                
                 bottom: '60px',
                 top: '100px'
             },
             xAxis: {
-                name: 'Length1 (cm)',
+                name: 'Length (cm)',
                 nameLocation: 'middle',
                 nameGap: 30,
+                type: 'value',
                 axisLabel: { rotate: 45 },
                 axisLine: {
                     lineStyle: { color: '#4ED7F1' }
@@ -4222,6 +4423,7 @@ function getAqiDescription(pm25) {
             yAxis: {
                 name: 'Weight (g)',
                 nameLocation: 'middle',
+                type: 'value',
                 nameGap: 50,
                 axisLabel: {
                     formatter: value => value.toFixed(2)
@@ -4236,30 +4438,249 @@ function getAqiDescription(pm25) {
             series: seriesData
         });
     }
+    
+    // 生成预测体长（这里模拟预测：Length3+1~3之间的随机数）
+    function generatePredict(data) {
+      return data.map(item => {
+        let predict = (parseFloat(item['length3']) + (Math.random() * 2 + 1)).toFixed(2);
+        return {...item, PredictLength: predict};
+      });
+    }
 
-</script>
+    // 初始化鱼类下拉菜单 ok
+    function initSpeciesSelect(data) {
+      
+      const speciesSet = new Set(data.map(item => item.species));
+      console.log("upload init ",speciesSet);
+      speciesSelect.innerHTML = '<option value="">请选择鱼类</option>';
+      const firstOption = speciesSelect.querySelector('option[value=""]');
+      if (firstOption) {
+        firstOption.remove();
+      }
+      speciesSet.forEach(sp => {
+        console.log("sp",sp);
+        const opt = document.createElement('option');
+        opt.value = sp;
+        opt.textContent = sp;
+        speciesSelect.appendChild(opt);
+      });
+    }
 
-<!-- 实时监测 -->
-<script>
+    // 按鱼类过滤数据 ok
+    function filterBySpecies(species) {
+      console.log("species",species);
+      if (!species) return [];
+      return allData.filter(item => item.species === species);
+    }
 
-</script>
+
+    // 鱼类选择事件  ok
+    speciesSelect.addEventListener('change', () => {
+      const sp = speciesSelect.value;
+      console.log("选择了sp",sp);
+      filteredData = filterBySpecies(sp);
+      console.log("filteredData ",filteredData);
+      currentPage = 0;
+      // showPredict = false;
+      // document.getElementById('togglePredict').textContent = "显示预测体长";
+      renderChart(currentPage);
+    });
+
+    function renderChart(page) {
+        const pageSize = 4;  // 每页最多4个图表
+        const start = page * pageSize;
+        const end = Math.min(start + pageSize, filteredData.length);
+        const pageData = filteredData.slice(start, end);
+
+        const chartGrid = document.getElementById('chart');
+        chartGrid.innerHTML = ''; // 清空旧图表
+
+        if (pageData.length === 0) {
+          document.getElementById('pageInfo').innerText = "无数据";
+          return;
+        }
+
+        console.log("pageData",pageData);
+
+        pageData.forEach((item, idx) => {
+          console.log("(item, idx)",item,idx);
+          const container = document.createElement('div');
+          container.style.width = '200px';
+          container.style.height = '120px';
+          container.style.border = '1px solid #ddd';
+          container.style.padding = '8px';
+          container.style.boxShadow = '2px 2px 6px rgba(0,0,0,0.1)';
+          container.id = `miniChart-${idx}`;
+          chartGrid.appendChild(container);
+
+          const chart = echarts.init(container);
+          const fishId = `鱼${start + idx + 1}`;
+
+          const stages = ['length1', 'length2', 'length3','PredictLength'];
+          const xLabels = ['阶段1', '阶段2', '阶段3','预测'];
+          const yValues = stages.map(s => parseFloat(item[s]));
+          console.log("yValues",yValues);
+         
 
 
-<!-- 鱼类异常 -->
-<script>
-    fetch('static/dataset/outliers.json')
-      .then(response => response.json())
-      .then(outliers => {
+      const actualValues = yValues.slice(0, 3); //前三个点
+      const lastTwoValues = [yValues[2], yValues[3]]; //倒数第二个点和最后一个预测点
+
+      chart.setOption({
+        title: {
+          text: fishId,
+          left: 'center',
+          top: 4,
+          textStyle: { fontSize: 13, color: '#ffffff' }
+        },
+        toolbox: {
+                feature: {
+                    saveAsImage: {
+                       backgroundColor: '#001f3f'
+                    }
+                }
+            },
+        tooltip: {
+            trigger: 'item',  // 精确到单个点显示
+            backgroundColor: 'rgba(0,0,0,0.7)',   // 半透明黑色背景
+            borderColor: '#3399cc',               // 边框颜色（粉色）
+            borderWidth: 1,
+            padding: 8,
+            textStyle: {
+              color: '#fff',
+              fontSize: 13,
+              fontWeight: 'bold'
+            },
+          extraCssText: 'box-shadow: 0 0 10px #3399cc; border-radius: 6px;',
+          formatter: function(params) {
+            if (params.seriesName === '预测体长') {
+              if (params.dataIndex === 3) {
+                return `预测体长: ${params.value}cm`;
+              } else {
+                return ''; // 其他点不显示内容
+              }
+            } else if (params.seriesName === '实际体长') {
+              const stageNames = ['体长一', '体长二', '体长三', '预测体长'];
+              return `${stageNames[params.dataIndex]}: ${params.value}cm`;
+            }
+            return '';
+          }
+        },
+
+        // tooltip: { trigger: 'axis' },
+        xAxis: {
+          type: 'category',
+          data: xLabels,
+          axisLabel: { fontSize: 8, color: '#ffffff' },
+          axisLine: { lineStyle: { color: '#a0cfff' } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { fontSize: 10, color: '#ffffff' },
+          axisLine: { lineStyle: { color: '#a0cfff' } },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.2)' } }
+        },
+        series: [
+          {
+            name: '实际体长',
+            type: 'line',
+            data: actualValues,
+            smooth: true,
+            lineStyle: { width: 2, color: '#00ffff' },
+            itemStyle: { color: '#ffd700' },  // 金黄色点
+            symbolSize: 6,
+            connectNulls: true
+          },
+          {
+              name: '预测体长',
+              type: 'line',
+              data: [null, null, lastTwoValues[0], lastTwoValues[1]], 
+              smooth: true,
+              lineStyle: { width: 2, color: '#ff69b4', type: 'dashed' },  // 粉色虚线
+              itemStyle: {
+                color: '#ff4500'  // 只有预测点显示橙红色
+              },
+              symbolSize: function (value, params) {
+                // 只让最后一个点显示符号，倒数第二个点隐藏符号
+                if (params.dataIndex === 3) return 8;  // 预测点
+                return 0;  // 隐藏倒数第二个点的符号
+              },
+              showSymbol: true
+          }
+
+        ],
+        grid: { top: 25, left: 20, right: 10, bottom: 15 }
+      });
+
+        });
+
+        document.getElementById('pageInfo').innerText = `第 ${page + 1} 页，共 ${Math.ceil(filteredData.length / 4)} 页`;
+      }
+
+      // 上一页按钮
+      document.getElementById('prev').addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          renderChart(currentPage);
+        }
+      });
+
+      // 下一页按钮
+      document.getElementById('next').addEventListener('click', () => {
+        if ((currentPage + 1) * pageSize < filteredData.length) {
+          currentPage++;
+          renderChart(currentPage);
+        }
+      });
+    
+      //预测数据导出
+     function predataout() {
+        console.log("导出水质前data",allData);
+        exportToCSV(allData,"fish_length_predition.csv");
+     }
+ 
+     function detectOutliersFromPCA(pcaData) {
+        const alertContainer = document.getElementById('alertContainer');
+        alertContainer.innerHTML = '';  // 清空之前的异常提示
+        if (!Array.isArray(pcaData) || pcaData.length === 0) {
+          console.warn("PCA 数据为空或格式不正确");
+          return;
+        }
+
+        // 计算中心点
+        const center = pcaData.reduce((acc, cur) => {
+          acc.pc1 += cur.pc1;
+          acc.pc2 += cur.pc2;
+          return acc;
+        }, { pc1: 0, pc2: 0 });
+
+        center.pc1 /= pcaData.length;
+        center.pc2 /= pcaData.length;
+
+        // 计算每个点的距离
+        pcaData.forEach(d => {
+          d.dist = Math.sqrt((d.pc1 - center.pc1) ** 2 + (d.pc2 - center.pc2) ** 2);
+        });
+
+        // 计算平均距离与标准差
+        const meanDist = pcaData.reduce((sum, d) => sum + d.dist, 0) / pcaData.length;
+        const stdDist = Math.sqrt(pcaData.reduce((sum, d) => sum + (d.dist - meanDist) ** 2, 0) / pcaData.length);
+        const threshold = meanDist + 1.5 * stdDist;
+
+        // 筛选异常点
+        const outliers = pcaData.filter(d => d.dist > threshold);
+
+        // 显示异常提示
         outliers.forEach((outlier, i) => {
           setTimeout(() => {
-            showAlert_fish(`异常数据点！Species: ${outlier.Species}`);
+            showAlert_fish(`异常数据点！Species: ${outlier.species}`);
           }, i * 2000);
         });
-      })
-      .catch(err => {
-        showAlert_fish('无法加载异常数据，请检查文件路径是否正确！');
-        console.error(err);
-      });
+
+        return outliers;
+      }
+
+
    
     function showAlert_fish(message) {
       const alertContainer = document.getElementById('alertContainer');
@@ -4269,8 +4690,16 @@ function getAqiDescription(pm25) {
       console.log("当前message",message);
       alertContainer.appendChild(div);
     }
+
+   
 </script>
 
+<!-- 实时监测 -->
+<script>
+
+</script>
+
+<!--截屏 图片识别-->
 <script>
   const videoList = ["static/movie/1.mp4", "static/movie/2.mp4"];
   let currentIndex = 0;
@@ -4307,8 +4736,14 @@ function getAqiDescription(pm25) {
 
     }
   });
-
+  
+  let eventSource = null;
   function startStream() {
+     // 切换前关闭旧连接
+    if (eventSource) {
+      eventSource.close();
+    }
+
     const currentVideoPath = videoList[currentIndex];
 
     // 注意：本地上传的视频路径是 blob: 开头，后端无法读取，这里做个保护判断
@@ -4318,7 +4753,7 @@ function getAqiDescription(pm25) {
     }
 
     const encodedPath = encodeURIComponent(currentVideoPath);
-    const eventSource = new EventSource(`/stream_analyze_video?video_path=${encodedPath}`);
+    eventSource = new EventSource(`/stream_analyze_video?video_path=${encodedPath}`);
 
     eventSource.onmessage = function (event) {
       const data = JSON.parse(event.data);
