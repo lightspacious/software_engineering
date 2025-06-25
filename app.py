@@ -631,5 +631,163 @@ def stream_analyze_video():
 
 #smart_center app.py修改部分结束
 
+
+
+# underwater 鱼类运动轨迹追踪部分 start####################
+
+def draw_axes(image, length_ratio=0.25, tick_count=5, origin_padding=(50, 50), scale=1.0):
+    """
+    在图像左下角绘制坐标轴，自动适配图像尺寸。
+    - length_ratio: 坐标轴长度占图像宽/高的比例（0~1）
+    - tick_count: 刻度数
+    - origin_padding: 距离左/下边缘的像素偏移
+    - scale: 像素→物理单位的比例尺（每 scale 像素 = 1 单位）
+    """
+    h, w = image.shape[:2]
+    ox, oy = origin_padding
+    x0, y0 = ox, h - oy  # 左下角为原点
+
+    axis_length_x = int(w * length_ratio)
+    axis_length_y = int(h * length_ratio)
+
+    tick_step_x = axis_length_x // tick_count
+    tick_step_y = axis_length_y // tick_count
+
+    color = (0, 0, 0)  # 黑色坐标轴
+    font = cv2.FONT_HERSHEY_SIMPLEX
+
+    # X 轴
+    cv2.arrowedLine(image, (x0, y0), (x0 + axis_length_x, y0), color, 1, tipLength=0.02)
+    for i in range(tick_count + 1):
+        x = x0 + i * tick_step_x
+        cv2.line(image, (x, y0 - 5), (x, y0 + 5), color, 1)
+        cv2.putText(image, f"{int(i * tick_step_x / scale)}", (x - 15, y0 - 15), font, 0.4, color, 1)
+
+    # Y 轴
+    cv2.arrowedLine(image, (x0, y0), (x0, y0 - axis_length_y), color, 1, tipLength=0.02)
+    for i in range(tick_count + 1):
+        y = y0 - i * tick_step_y
+        cv2.line(image, (x0 - 5, y), (x0 + 5, y), color, 1)
+        cv2.putText(image, f"{int(i * tick_step_y / scale)}", (x0 + 10, y + 11), font, 0.4, color, 1)
+
+# —— 视频追踪轨迹流函数（封装后可复用） ——
+def fish_track_stream(video_path='top_view.mp4', max_len=20, memory=30, min_area=200, fps=30, search_range=20):
+    import cv2
+    import numpy as np
+    import pandas as pd
+    import trackpy as tp
+
+    def id_to_color(pid):
+        np.random.seed(pid)
+        return tuple(int(x) for x in np.random.randint(0, 255, size=3))
+
+    def preprocess_tracking(video_path, memory, min_area):
+        cap = cv2.VideoCapture(video_path)
+        if not cap.isOpened():
+            raise IOError("无法打开视频")
+
+        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        fgbg = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=50, detectShadows=False)
+
+        records = []
+        frames = []
+        frame_idx = 0
+
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            fg = fgbg.apply(gray)
+            _, fg = cv2.threshold(fg, 200, 255, cv2.THRESH_BINARY)
+            fg = cv2.morphologyEx(fg, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5,5)))
+            cnts, _ = cv2.findContours(fg, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+            for c in cnts:
+                if cv2.contourArea(c) < min_area:
+                    continue
+                M = cv2.moments(c)
+                cx = int(M['m10']/M['m00'])
+                cy = int(M['m01']/M['m00'])
+                records.append({'frame': frame_idx, 'x': cx, 'y': cy})
+            frame_idx += 1
+            frames.append(frame)
+
+        cap.release()
+        df = pd.DataFrame(records)
+        t = tp.link_df(df, search_range, memory=memory)
+        t = tp.filter_stubs(t, threshold=5)
+
+        unique_ids = sorted(t['particle'].unique())
+        color_map = {pid: id_to_color(pid) for pid in unique_ids}
+        return frames, t, color_map, w, h
+
+    def stream_generator():
+        frames, t, color_map, w, h = preprocess_tracking(video_path, memory, min_area)
+        frame_idx = len(frames)
+        trail = np.full((h, w, 3), (255, 255, 255), dtype=np.uint8)  # 白色背景
+        # 调整为统一大小
+        # OUTPUT_SIZE = (640, 480)  
+        # trail = np.full((OUTPUT_SIZE[1], OUTPUT_SIZE[0], 3), (255, 255, 255), dtype=np.uint8) # 白色背景
+        i = 0
+        while True:
+            trail[:] = (255, 255, 255)
+            # for pid in color_map:
+            #     recent = t[(t.particle == pid) & (t.frame <= i) & (t.frame > i - max_len)]
+            #     pts = recent[['x', 'y']].values.astype(np.int32)
+            #     if len(pts) > 1:
+            #         cv2.polylines(trail, [pts], False, color_map[pid], 2)
+            for pid in color_map:
+                recent = t[(t.particle == pid) & (t.frame <= i) & (t.frame > i - max_len)]
+                recent_sorted = recent.reset_index(drop=True).sort_values(by='frame')  # 确保按时间顺序画
+
+                for j, row in enumerate(recent_sorted.itertuples()):
+                    x, y = int(row.x), int(row.y)
+
+                    # 帧越新，weight 越大
+                    weight = (j + 1) / len(recent_sorted)  # 0~1之间
+                    radius = int(2 + 4 * weight)           # 半径：2~6 像素
+                    alpha = 0.2 + 0.8 * weight             # 透明度：0.2~1.0
+
+                    # 原始颜色
+                    color = np.array(color_map[pid], dtype=np.float32)
+                    blended_color = (1 - alpha) * np.array([139, 0, 0]) + alpha * color  # 混入背景色
+                    blended_color = tuple(map(int, blended_color))
+
+                    # 画圆点（越新越亮、越大）
+                    cv2.circle(trail, (x, y), radius, blended_color, -1)
+            # 添加坐标轴
+            draw_axes(trail, length_ratio=1, tick_count=10, origin_padding=(0, 1), scale=20.0)   
+
+            # 编码发送
+            ret, jpeg = cv2.imencode('.jpg', trail)
+            if not ret:
+                continue
+            yield (b'--frame\r\nContent-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n')
+            i = (i + 1) % frame_idx
+            cv2.waitKey(int(1000 / fps))
+
+    return stream_generator
+
+# 俯视轨迹
+@app.route('/video_feed_top')
+def video_feed_top():
+    return Response(
+        fish_track_stream(video_path='top_view2.mp4')(),  # 调用返回生成器
+        mimetype='multipart/x-mixed-replace; boundary=frame'
+    )
+
+# 正视轨迹
+@app.route('/video_feed_front')
+def video_feed_front():
+    return Response(
+        fish_track_stream(video_path='front_view2.mp4')(),
+        mimetype='multipart/x-mixed-replace; boundary=frame'
+    )
+
+# underwater 鱼类运动轨迹追踪部分 end####################
+
+
 if __name__ == '__main__':
     app.run(debug=True)
