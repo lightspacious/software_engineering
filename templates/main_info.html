@@ -202,12 +202,62 @@
      <div id="qa-modal" class="qa-modal">
         <div class="qa-modal-content">
             <span class="close" id="qa-close">&times;</span>
-            <h3>智能问答</h3>
+            <h3>智能问答
+                <button id="generate-advice-btn" style="
+                background-color: #008080;
+                color: white;
+                padding: 6px 12px;
+                border: none;
+                border-radius: 4px;
+                font-size: 14px;
+                margin-left: 10px;
+                cursor: pointer;
+                ">一键生成养殖建议</button>
+            </h3> 
+            <!-- 一键生成按钮 -->
             <div id="qa-chat-box">
                 <!-- 问答内容会显示在这里 -->
             </div>
             <input type="text" id="qa-input" placeholder="请输入问题...">
-            <button id="qa-submit">提交</button>
+            <button id="qa-submit">发送</button>
+        </div>
+        <!-- 区域选择弹窗 -->
+        <div id="region-modal" style="
+        display: none;
+        position: fixed;
+        z-index: 999;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+        ">
+        <div style="
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 400px;
+        text-align: center;
+        ">
+        <h3 style="margin-bottom: 16px;">请选择养殖流域</h3>
+        <select id="region-select" style="
+            width: 80%;
+            padding: 6px;
+            font-size: 14px;
+            margin-bottom: 16px;
+        ">
+            <option value="广东省">广东省</option>
+            <option value="江苏省">江苏省</option>
+            <option value="福建省">福建省</option>
+            <option value="安徽省">安徽省</option>
+            <option value="甘肃省">甘肃省</option>
+            <option value="贵州省">贵州省</option>
+            <option value="北京市">北京市</option>
+            <!-- 添加更多选项 -->
+        </select>
+        <br/>
+        <button onclick="confirmRegion()" style="margin-right: 10px;">确定</button>
+        <button onclick="closeRegionModal()">取消</button>
+        </div>
         </div>
     </div>
 
@@ -1240,6 +1290,15 @@ qaSubmit.onclick = function() {
         qaInput.value = '';  // 清空输入框
     }
 }
+
+// 在输入框按 Enter 发送
+qaInput.addEventListener("keydown", function(event) {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        qaSubmit.click();
+    }
+});
+
 // // 显示聊天消息
 // function displayChatMessage(sender, message) {
 //     const messageDiv = document.createElement('div');
@@ -1313,6 +1372,51 @@ async function getSystemResponse(prompt) {
   } catch (error) {
     console.error('智能问答出错:', error);
     return "抱歉，出现了问题。";
+  }
+}
+
+// ===== 新增：一键生成养殖建议 =====
+// 获取按钮与弹窗元素
+const generateBtn = document.getElementById('generate-advice-btn');
+const regionModal = document.getElementById('region-modal');
+const regionSelect = document.getElementById('region-select');
+
+// 点击“一键生成养殖建议”按钮
+generateBtn.onclick = function () {
+  regionModal.style.display = 'flex'; // 显示弹窗
+};
+
+// 关闭弹窗
+function closeRegionModal() {
+  regionModal.style.display = 'none';
+}
+
+// 确认区域选择，发起生成请求
+function confirmRegion() {
+  const region = regionSelect.value;
+  closeRegionModal();
+
+  displayChatMessage('用户', `我想要${region}流域的养殖建议`);
+  generateAdvice(region);
+}
+
+// 核心功能：生成养殖建议
+async function generateAdvice(region) {
+  try {
+    const res = await fetch('/api/advice', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ region })
+    });
+    const data = await res.json();
+
+    displayChatMessage('系统', `**数据统计：**\n${data.summary}`);
+    displayChatMessage('系统', `**养殖建议：**\n${data.advice}`);
+  } catch (err) {
+    console.error('生成建议失败：', err);
+    displayChatMessage('系统', '生成养殖建议时出错，请稍后再试。');
   }
 }
 

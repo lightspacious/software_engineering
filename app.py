@@ -16,6 +16,7 @@ import cv2
 import tempfile
 import json
 import time
+import traceback
 
 app = Flask(__name__)
 app.secret_key = '123456789'
@@ -788,6 +789,89 @@ def video_feed_front():
 
 # underwater 鱼类运动轨迹追踪部分 end####################
 
+
+#####  养殖建议一键生成部分 start start start ##################
+
+# 配置 DashScope（阿里云）API
+DASHSCOPE_API_KEY = 'sk-d8d6e12e34ab47d992b434efe655576d' # 替换为你的 DashScope key
+DATA_DIR = "./static/dataset/history"  # 你的水文数据目录
+FISH_FILE = "./Fish.csv"               # 你的通用鱼类数据路径
+
+@app.route('/api/advice', methods=['POST'])
+def generate_advice():
+    try:
+        region = request.json.get('region')
+        region_file = os.path.join(DATA_DIR, f'{region}.csv')
+
+        if not os.path.exists(region_file):
+            return jsonify({"error": "该流域数据不存在"}), 404
+
+        # 读取数据
+        water_df = pd.read_csv(region_file)
+        fish_df = pd.read_csv(FISH_FILE)
+
+        # 简要摘要
+        summary = (
+            f"{region}流域最近监测共记录{len(water_df)}条水文数据，"
+            f"平均温度：{water_df['水温(℃)'].mean():.1f}℃，"
+            f"pH：{water_df['pH(无量纲)'].mean():.2f}，"
+            f"溶氧：{water_df['溶解氧(mg/L)'].mean():.2f} mg/L。\n"
+            f"当前养殖鱼类共{fish_df['Species'].nunique()}种，总数量约{fish_df.shape[0]}尾。"
+        )
+
+        # 构造 prompt
+        prompt = (
+            f"你是当前海洋牧场智能平台的智能养殖顾问，请基于平台最近自动监测到的{region}流域水文与养殖数据，生成详细的养殖建议。\n"
+            f"以下是平台监测数据摘要：{summary}\n"
+            f"请综合判断水质是否适宜、养殖品种结构是否合理，并提出可能的优化建议。"
+        )
+
+        # DashScope 请求体
+        url = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {DASHSCOPE_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": "qwen-plus",
+            "messages": [
+                {"role": "system", "content": "你是一名海洋牧场平台的智能养殖顾问。"},
+                {"role": "user", "content": prompt}
+            ]
+        }
+
+        # 发出请求
+        # resp = requests.post(url, headers=headers, json=payload)
+        # resp.raise_for_status()
+        # reply = resp.json()["choices"][0]["message"]["content"]
+
+        # 发出请求
+        resp = requests.post(url, headers=headers, json=payload)
+        print(resp.status_code)
+        print(resp.text)  # 打印原始响应
+
+        resp.raise_for_status()
+
+        # 检查响应结构
+        resp_json = resp.json()
+        print(resp_json)  # 看看有没有 output
+
+        # 兼容新版 DashScope 返回结构
+        if "output" in resp_json:
+            reply = resp_json["output"]["choices"][0]["message"]["content"]
+        else:
+            reply = resp_json["choices"][0]["message"]["content"]
+
+        return jsonify({
+            "summary": summary,
+            "advice": reply
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
+
+#####  养殖建议一键生成部分 end end end ##################
 
 if __name__ == '__main__':
     app.run(debug=True)

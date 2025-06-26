@@ -5,7 +5,7 @@ import trackpy as tp
 import matplotlib.pyplot as plt
 
 # —— 配置参数 ——
-VIDEO_PATH   = 'top_view2.mp4'  # 视频路径（俯视角）
+VIDEO_PATH   = '1.mp4'  # 视频路径（俯视角）
 MIN_AREA     = 200             # 忽略较小的轮廓区域（像素面积）
 SEARCH_RANGE = 15              # Trackpy 连续帧之间的最大移动距离
 MEMORY       = 10               # 允许追踪对象在最多3帧内缺失后仍连接轨迹
