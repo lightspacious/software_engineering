@@ -1,0 +1,4783 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ml-pca@5.0.0/dist/ml-pca.min.js"></script>
+
+<style>
+.grid-item-smart {
+    /* background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.2); */
+    /* backdrop-filter: blur(6px); */
+    border-radius: 8px;
+    padding: 12px;
+    color: rgb(255, 255, 255);
+    font-family: "Orbitron", "Noto Sans SC", sans-serif;
+    font-size: 16px;
+}
+
+.grid-layout-smart {
+    display: grid;
+    grid-template-columns: auto auto auto;  /* 左中右：中间列更宽 */
+    grid-template-rows: 1fr 1fr;         /* 上下两行等高 */
+    /* grid-template-areas:
+        "area1 area2 area3"
+        "area4 area5 area6"; */
+    gap: 10px;
+    height: 85vh;
+    padding: 10px;
+}
+
+/* smart_center */
+.smart_area1 {
+    /* grid-area: area1; */
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
+    width: 410px;
+    transform: translateX(-21px); 
+
+}
+
+.smart_area2 {
+    /* grid-area: area2; */
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
+    width: 400px;
+    transform: translateX(20px); 
+
+}
+
+.smart_area3 {
+    /* grid-area: area3; */
+    grid-column: 3;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
+    width: 500px;
+
+    transform: translateX(140px); 
+    
+}
+
+.smart_area4 {
+    /* grid-area: area4; */
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column; 
+    width:100px;
+    gap: 10px;
+
+}
+
+.smart_area5 {
+    /* grid-area: area5; */
+    grid-column: 2 ;
+    grid-row: 2;
+    transform: translateX(-120px); 
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
+    width: 300px;
+
+}
+
+.smart_area6 {
+    /* grid-area: area6; */
+    grid-column: 3;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column; 
+    gap: 10px;
+    
+}
+
+.custom-overview-box {
+ 
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    padding: 12px 16px;
+    width: 450px;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 999;
+    font-family: Arial, sans-serif;
+}
+
+.chart {
+    /* background-color: #91c2f3; */
+    border: 1px solid #ccc;
+    padding: 12px 16px;
+    border-radius: 8px;
+    width: 450px;
+    /* flex:3;   */
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    text-align: center; /* 使标题居中 */
+   
+}
+
+.title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.remind {
+  
+    top: 25px;
+    left: 3px;
+    font-size: 10px; 
+    text-align: left;
+    color: #6890bf;
+}
+
+.exception {
+    /* background: #ffdddd; */
+    padding: 10px;
+    border-radius: 8px;
+    flex: 1;  
+    text-align: left; 
+}
+
+.notice {
+    display: flex;
+    position: relative;
+    left: 20px;
+    font-size: 16px; 
+    text-align: center;
+    justify-content: center; 
+    gap: 5px;
+    color: #d0d4da;
+}
+
+/*第5part*/
+.grid-layout-area5 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;  /* 左中右：中间列更宽 */
+    grid-template-rows: 1fr 1fr;         /* 上下两行等高 */
+    gap: 10px;
+    height: 35vh;
+    padding: 10px;
+    width: 550px;
+    transform: translateX(0px);
+
+}
+
+.grid-item-area5 {
+    background: rgba(7, 65, 92, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(6px);
+    border-radius: 8px;
+    padding: 12px;
+    color: rgb(255, 255, 255);
+    font-family: "Orbitron", "Noto Sans SC", sans-serif;
+    font-size: 16px;
+    flex-direction: column;
+}
+
+ .area5_area1 {
+    grid-column: 1;
+    grid-row: 1;
+    width: 70px;
+    position: relative;
+    
+    /* 新的海洋风格设计 */
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    
+    /* 文字样式 */
+    color: #e0f7fa; /* 浅青蓝色文字 */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.area5_area2 { 
+    /* grid-area: area5_area2; */
+    grid-column: 2;
+    grid-row: 1;
+    width:70px;
+    position: relative;
+    
+    /* 新的海洋风格设计 */
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    
+    /* 文字样式 */
+    color: #e0f7fa; /* 浅青蓝色文字 */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.area5_area3 { 
+    /* grid-area: area5_area3;  */
+    grid-column: 3;
+    grid-row: 1;
+    width:70px;
+    position: relative;
+    
+    /* 新的海洋风格设计 */
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    
+    /* 文字样式 */
+    color: #e0f7fa; /* 浅青蓝色文字 */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.area5_area4 {
+     /* grid-area: area5_area4;  */
+    grid-column: 4;
+    grid-row: 1;
+    width:70px;
+    position: relative;
+    
+    /* 新的海洋风格设计 */
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    
+    /* 文字样式 */
+    color: #e0f7fa; /* 浅青蓝色文字 */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.area5_area5 { 
+    /* grid-area: area5_area5;  */
+    grid-column: 1;
+    grid-row: 2;
+    width:70px;
+    position: relative;
+    
+    /* 新的海洋风格设计 */
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    
+    /* 文字样式 */
+    color: #e0f7fa; /* 浅青蓝色文字 */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.area5_area6 { 
+    /* grid-area: area5_area6;  */
+    grid-column: 2;
+    grid-row: 2;
+    width:70px;
+    position: relative;
+    
+    /* 新的海洋风格设计 */
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    
+    /* 文字样式 */
+    color: #e0f7fa; /* 浅青蓝色文字 */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.area5_area7 { 
+    /* grid-area: area5_area7;  */
+    grid-column: 3;
+    grid-row: 2;
+    width:70px;
+    position: relative;
+    
+    /* 新的海洋风格设计 */
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    
+    /* 文字样式 */
+    color: #e0f7fa; /* 浅青蓝色文字 */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.area5_area8 { 
+    /* grid-area: area5_area8;  */
+    grid-column: 4;
+    grid-row: 2;
+    width:70px;
+    position: relative;
+    
+    /* 新的海洋风格设计 */
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    
+    /* 文字样式 */
+    color: #e0f7fa; /* 浅青蓝色文字 */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.num_value {
+  text-align: center;       /* 让文本在这一行居中 */
+  top:20px;
+  position: relative;
+  display: flex;
+  justify-content: center;  /* 水平居中 */
+  align-items: center;      /* 垂直居中 */
+}
+
+.label_5{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.smart_area6 h2 {
+    text-align: center;
+    color: #c0d0ef; /* 标题颜色 */
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    height: 10px;
+}
+
+.weather-data-row {
+    display: flex;
+    justify-content: space-around; 
+    align-items: flex-start; /* 顶部对齐 */
+    margin-bottom: 25px;
+    gap:10px;
+    height: 100px;
+    width: 505px;
+    transform: translateX(20px);
+    /* transform: translateY(45px); */
+    
+    
+}
+
+.weather-item {
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    padding: 15px 10px;
+    text-align: center;
+    width: 20%; /* 大致均分宽度，可微调 */
+    height: 50px; /* 确保高度一致 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 垂直居中内容 */
+    align-items: center; /* 水平居中内容 */
+   
+}
+
+.weather-item img {
+    width: 40px; /* 图标大小，根据实际图标调整 */
+    height: 40px;
+    margin-bottom: 8px;
+}
+
+.weather-item p {
+    margin: 2px 0;
+    font-size: 0.9em;
+    color: #ffffff; /* 主要文字颜色 */
+}
+
+.weather-item .secondary-text {
+    font-size: 0.8em;
+    color: #a0b0d0; /* 次要文字颜色 */
+}
+
+/* 警报部分样式 */
+.alert-section {
+    border-top: 1px solid #3a5f8a;
+    padding-top: 15px;
+    position: relative; /* 为了警报图标的定位 */
+    height: 40px;
+}
+
+.alert-section h3 {
+    color: #ff6b6b; /* 红色警报文字 */
+    margin-top: 0;
+    font-size: 1.1em;
+    height: 20px;
+}
+
+.alert-section .alert-time {
+    font-size: 0.9em;
+    color: #b0c0e0;
+}
+
+.alert-section .alert-source {
+    font-size: 0.8em;
+    color: #b0c0e0;
+    height: 10px;
+}
+
+.alert-weather-icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 50px; /* 警报天气图标大小 */
+    height: auto;
+}
+
+
+.chart-container {
+      width: 100%;
+      height: 300px;
+      margin-bottom: 30px;
+}
+
+
+.parameter-selector {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+}
+.parameter-btn {
+      margin: 2px;
+      padding: 8px 15px;
+      background-color: #e0e0e0;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+}
+.parameter-btn.active {
+      background-color: #4e79a7;
+      color: white;
+}
+.status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+}
+.status-normal {
+      background-color: #4e79a7;
+}
+.status-maintenance {
+      background-color: #f28e2b;
+}
+
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    padding: 20px;
+    width: 490px;
+}
+
+.video-box {
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.alert-container {
+  width: 450px;
+  max-height: 200px;  /* 控制容器最大高度 */
+  overflow-y: auto;   /* 超出时出现滚动条 */
+  /* border: 1px solid #ccc; */
+  padding: 10px;
+  background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border: 2px solid #4fc3f7; /* 浅蓝色边框 */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+    transform: translateX(-5px);
+}
+
+.alert {
+  /* background-color: #91c2f3; */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  /* padding: 12px 16px; */
+  margin-bottom: 5px;
+  padding: 5px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* .custom-overview-box {
+ 
+    background-color: #91c2f3;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 12px 16px;
+    width: 390px;
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 999;
+    font-family: Arial, sans-serif;
+} */
+
+.custom-overview-box h6 {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.custom-overview-box h2 {
+    font-size: 20px;
+    margin: 4px 0 10px;
+}
+
+.custom-overview-box .text-primary {
+    color: #28a745;
+}
+
+.custom-overview-box .text-danger {
+    color: #dc3545;
+}
+
+.custom-overview-box .text-success {
+    color: #28a745;
+}
+
+.custom-overview-box .text-muted {
+    color: #6c757d;
+}
+
+.custom-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.custom-stats .stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+}
+
+.anomaly {
+    background-color: #ffdddd !important;
+}
+        
+#fullscreen-alert {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 0, 0.9);
+            color: white;
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 3em;
+            text-align: center;
+}
+        
+#alert-message {
+    margin-bottom: 30px;
+}
+        
+#close-alert {
+    padding: 15px 30px;
+    font-size: 0.5em;
+    background-color: white;
+    color: red;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+
+  /* 紧凑海洋主题 */
+  .compact-ocean-form {
+    max-width: 600px;
+    margin: 10px auto;
+    padding: 15px;
+    background: linear-gradient(135deg, #1a6fc9, #0d47a1); /* 深海蓝色渐变 */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(64, 169, 255, 0.15);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    border: 1px solid #4fc3f7;
+  }
+
+ .compact-row {
+    display: flex;
+    margin-bottom: 10px;
+    justify-content: space-between; /* 均匀分布 */
+  }
+
+  .compact-group {
+    width: calc((100% - 16px) / 3); /* 精确计算宽度 */
+    flex-shrink: 0; /* 禁止收缩 */
+    box-sizing: border-box;
+  }
+
+  /* 保持海洋风格的小型选择框 */
+  .compact-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #4fc3f7;
+    border-radius: 4px;
+    background-color:#4fc3f7b0;
+    font-size: 13px;
+  }
+
+  /* 确保三个元素永远不换行 */
+  @media (max-width: 500px) {
+    .compact-row {
+      flex-wrap: nowrap;
+      overflow-x: auto; /* 超小屏幕横向滚动 */
+    }
+    .compact-group {
+      min-width: 120px; /* 保持最小可操作宽度 */
+    }
+  }
+
+  /* 小型标签 */
+  label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 15px;
+    color: #e1dbdb;
+    font-weight: 500;
+  }
+    .button-container {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    gap: 10px;
+    /* width: max-content;   */
+  }
+
+  .compact-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    background: #4fc3f7b0;
+    border: 1px solid #4fc3f7;  /* 可选：添加边框 */
+    border-radius: 6px;         /* 固定圆角 */
+    cursor: pointer;           /* 鼠标悬停手型 */
+    transition: background 0.3s; /* 悬停动画（可选） */
+  }
+
+  .compact-btn:hover {
+    background: #4fc3f7;       /* 悬停效果 */
+  }
+
+h1, h2 {
+    color: #e1dbdb;
+    text-align: center;
+    font-size: 17px;
+}
+/* .button-container {
+  display: grid;
+  grid-template-columns: auto auto;  
+  gap: 20px;                       
+} */
+.video-container {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  margin: auto;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.25);
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 2;
+  border-radius: 50%;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0.5;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.arrow:hover {
+  background-color: rgba(255, 255, 255, 0.85);
+  opacity: 1;
+}
+
+.left {
+  left: 10px;
+}
+
+.right {
+  right: 10px;
+}
+
+.add-video-container {
+  display: flex;
+  justify-content: space-between; /* 左右分散 */
+  align-items: center;
+  width: 100%;  /* 容器宽度满 */
+  gap: 10px; /* 可选间距 */
+}
+
+.custom-upload-btn, 
+.custom-stream-btn {
+  flex: 1; /* 宽度平分 */
+  padding: 8px 0; /* 纵向内边距，左右内边距去掉，保持均匀 */
+  background: linear-gradient(135deg, #1a6fc9, #0d47a1);
+  border: 2px solid #4fc3f7;
+  box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  margin: 0 5px; /* 按钮间距 */
+  color: white;
+}
+
+.custom-upload-btn:hover,
+.custom-stream-btn:hover {
+  background-color: #3371a1;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 64, 128, 0.4); /* 深蓝透明背景 */
+  backdrop-filter: blur(4px); /* 背景模糊 */
+}
+
+.modal-content {
+ background: linear-gradient(135deg, #1a6fc9, #0d47a1);
+  border: 2px solid #4fc3f7;
+  box-shadow: 0 4px 8px rgba(0, 119, 182, 0.3);
+  margin: auto;
+  margin-top: 8%;
+  width: 600px;
+  height: 400px;
+  padding: 20px 30px;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: auto;
+  font-family: 'Segoe UI', sans-serif;
+  color: #003366; /* 深蓝文字 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.close {
+  color: #003366;
+  position: absolute;
+  right: 20px;
+  top: 12px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+.close:hover {
+  color: #000;
+  transform: scale(1.2);
+}
+
+
+.close {
+  color: #aaa;
+  position: absolute;
+  right: 20px;
+  top: 10px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.control-panel {
+  display: flex;
+  justify-content: center;       /* 水平居中 */
+  align-items: center;           /* 垂直对齐 */
+  gap: 20px;                     /* 控件之间的间距 */
+  margin: 20px 0;                /* 与上下内容间距 */
+  flex-wrap: wrap;               /* 小屏幕自动换行 */
+}
+
+.control-panel select,
+.control-panel button {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #3399cc;
+  background: #4fc3f7b0;
+
+  cursor: pointer;
+  transition:all 0.2s ease;
+  
+}
+
+.control-panel button:hover,
+.control-panel select:hover {
+  background: #4fc3f7b0;
+  /* box-shadow: 0 0 6px rgba(0, 102, 204, 0.3); */
+  transform: scale(1.05); 
+  box-shadow: 0 0 12px rgba(0, 153, 255, 0.6); 
+  transition: all 0.2s ease;
+}
+
+.control-panel button:focus,
+.control-panel button:active {
+  background: #4fc3f7b0;
+  color: #003366;
+  outline: none;
+  box-shadow: 0 0 12px rgba(0, 153, 255, 0.6);
+}
+
+.control-panel select:focus,
+.control-panel select:active {
+  background: #4fc3f7b0;
+  color: #003366;
+  outline: none;  /* 去除默认蓝色聚焦框 */
+  box-shadow: 0 0 12px rgba(0, 153, 255, 0.6);
+}
+
+
+
+</style>
+
+<div class="grid-layout-smart">
+    <div class="grid-item-smart smart_area1">
+      
+        <div class="custom-overview-box">
+            <div id="stats-container" class="custom-stats">
+                <!-- 数据动态填充 -->
+            </div>
+        </div>
+
+        <div class="chart">
+            <div class="compact-ocean-form">
+                <div class="compact-row">
+                  <div class="compact-group">
+                    <label for="province">省份:</label>
+                    <select id="province">
+                        <option value="安徽省">安徽省</option>
+                        <option value="北京市">北京市</option>
+                        <option value="福建省">福建省</option>
+                        <option value="甘肃省">甘肃省</option>
+                        <option value="广东省">广东省</option>
+                        <option value="广西壮族自治区">广西壮族自治区</option>
+                        <option value="贵州省">贵州省</option>
+                        <option value="海南省">海南省</option>
+                        <option value="河北省">河北省</option>
+                        <option value="河南省">河南省</option>
+                        <option value="黑龙江省">黑龙江省</option>
+                        <option value="湖北省">湖北省</option>
+                        <option value="湖南省">湖南省</option>
+                        <option value="吉林省">吉林省</option>
+                        <option value="江苏省">江苏省</option>
+                        <option value="江西省">江西省</option>
+                        <option value="辽宁省">辽宁省</option>
+                        <option value="内蒙古自治区">内蒙古自治区</option>
+                        <option value="宁夏回族自治区">宁夏回族自治区</option>
+                        <option value="青海省">青海省</option>
+                        <option value="山东省">山东省</option>
+                        <option value="山西省">山西省</option>
+                        <option value="陕西省">陕西省</option>
+                        <option value="上海市">上海市</option>
+                        <option value="四川省">四川省</option>
+                        <option value="天津市">天津市</option>
+                        <option value="西藏自治区">西藏自治区</option>
+                        <option value="新疆维吾尔自治区">新疆维吾尔自治区</option>
+                        <option value="云南省">云南省</option>
+                        <option value="浙江省">浙江省</option>
+                        <option value="重庆市">重庆市</option>
+                    </select>
+                  </div>
+                  <div class="compact-group">
+                    <label for="basin">流域:</label>
+                    <select id="basin"><option>选择流域</option></select>
+                  </div>
+                  <div class="compact-group">
+                    <label for="section">截面:</label>
+                    <select id="section"><option>选择截面</option></select>
+                  </div>
+                </div>
+                <div class="button-container">
+                  <button class="compact-btn" onclick="fetchData()">获取数据</button>
+                  <input type="file" id="csvFileInput" accept=".csv" style="display: none" onchange="handleFileUpload(event)">
+                  <button class="compact-btn" onclick="document.getElementById('csvFileInput').click()">上传数据</button>
+                  <button class="compact-btn" onclick="water_data_out()">导出数据</button>
+                </div>
+
+              </div>
+            <div id="parameterSelector" class="parameter-selector"></div>
+
+            <div class="chart-container" id="mainChart"></div>
+            <div class="chart-container" id="secondaryChart"></div>
+            
+        </div>
+
+     
+    </div>
+    <div class="grid-item-smart smart_area2">
+          <div class="weather-data-row">
+            <div class="weather-item">
+                <p id="temperature-range">-- ~ -- °C</p>
+            </div>
+            <div class="weather-item">
+                <p id="wind-direction">--</p>
+                <p class="secondary-text" id="wind-speed">--级</p>
+            </div>
+            <div class="weather-item">
+                <p id="humidity">-- %</p>
+            </div>
+            <div class="weather-item">
+                <p id="aqi-value">--</p>
+                <p class="secondary-text" id="aqi-description">--</p>
+            </div>
+        </div>
+      <div class="video-grid">
+          <div class="video-container">
+            <button class="arrow left" onclick="prevVideo()">&#9664;</button>
+
+            <video id="video-player" width="100%" controls autoplay muted>
+              <source id="video-source" src="static/movie/1.mp4" type="video/mp4">
+              您的浏览器不支持视频播放。
+            </video>
+
+            <button class="arrow right" onclick="nextVideo()">&#9654;</button>
+          </div>
+        <div class="add-video-container">
+         
+          <input type="file" id="video-upload" accept="video/mp4" style="display:none" />
+          <label for="video-upload" class="custom-upload-btn">添加视频文件</label>
+        
+          <button onclick="startStream()" class="custom-upload-btn">流式识别</button>
+        </div>
+
+         <div id="frame-container">
+            <img id="video-frame" src="static/海洋默认截图.jpg" alt="视频帧图像" style="max-width: 100%; height: auto; border: 1px solid #ccc;" />
+         </div>
+      </div>
+
+      <div class="grid-layout-area5">
+            <div class="grid-item-area5 area5_area1">
+                <div class="label_5"><i class="ri-numbers-line"></i><span>编号</span></div>
+                <div class="num_value" id="fish-id">--</div>
+            </div>
+            <div class="grid-item-area5 area5_area2">
+                <div class="label_5"><i class="ri-star-smile-line"></i><span>鱼种</span></div>
+                <div class="num_value" id="fish-type">--</div>
+            </div>
+            <div class="grid-item-area5 area5_area3">
+                <div class="label_5"><i class="ri-expand-diagonal-2-line"></i><span>体长</span></div>
+                <div class="num_value" id="fish-length">--</div>
+            </div>
+            <div class="grid-item-area5 area5_area4">
+                <div class="label_5"><i class="ri-weight-line"></i><span>体重</span></div>
+                <div class="num_value" id="fish-weight">--</div>
+            </div>
+            <div class="grid-item-area5 area5_area5">
+                <div class="label_5 sick_label"><i class="ri-hard-drive-fill"></i></div>
+                <div class="num_value" id="fish-status">--</div>
+            </div>
+            <div class="grid-item-area5 area5_area6">
+                <div class="label_5 stange_label"><i class="ri-bootstrap-line"></i></div>
+                <div class="num_value" id="fish-group">--</div>
+            </div>
+            <div class="grid-item-area5 area5_area7">
+                <div class="label_5 trace_label"><i class="ri-arrow-go-forward-line"></i></div>
+                <div class="num_value" id="fish-track">轨迹追踪</div>
+            </div>
+            <div class="grid-item-area5 area5_area8">
+                <div class="label_5 analysis_label"><i class="ri-line-chart-line"></i></div>
+                <div class="num_value" id="fish-analysis">轨迹分析</div>
+            </div>
+        </div>
+
+      
+    
+      
+
+    </div>
+    <div class="grid-item-smart smart_area3">
+        <div class="chart">
+           
+            
+            <!-- <h2>鱼类整体情况一览</h2> -->
+            <div id="bubble" style=" left:0px ;width:460px; height: 400px;"></div>
+            
+            <!-- <h2>PCA 降维</h2> -->
+            <div id="pca" style="left:0px ;width:460px; height: 400px;"></div>
+            <input type="file" id="csvFileInput_fish" accept=".csv" style="display: none" onchange="handleFishFileUpload(event)">
+            <button class="compact-btn" onclick="document.getElementById('csvFileInput_fish').click()">上传数据</button>
+            <button class="compact-btn" onclick="Dataout()">导出数据</button>
+            <!-- 弹出按钮 -->
+            <button class="compact-btn" id="openChartModal">体长预测</button>
+
+        </div>
+
+        
+
+        <div class="exception">
+            <div class="title">警告提示</div>
+            <div id="alertContainer" class="alert-container"></div>
+            
+        </div>
+
+
+
+    </div>
+
+       <!-- 模态框 -->
+        <div id="chartModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            
+            <div class="control-panel">
+              <button id="prev">← 上一页</button>
+              <select id="speciesSelect">
+                <option value="">请选择鱼类</option>
+              </select>
+              
+              
+              <button class="compact-btn" onclick="predataout()">导出数据</button>
+              <button id="next">下一页 →</button>
+            </div>
+            <div id="chart" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; max-width: 1200px; margin: auto;"></div>
+           
+            <div id="pageInfo" style="font-size: 13px;font-style: italic;"></div>
+          </div>
+        </div>
+
+    <div id="fullscreen-alert">
+        <div id="alert-message">⚠️ 水质异常警告 ⚠️</div>
+        <div id="alert-details"></div>
+        <button id="close-alert">我知道了</button>
+    </div>
+</div>
+
+<!-- 省份/流域/截面初始化 + 默认图表 +切换 -->
+<!-- 异常以及警报 -->
+<script>  
+  // import { PCA } from 'ml-pca';
+  /*所有省份 流域 截面 json文件*/
+  const pro_data ={
+  "上海市": {
+    "basins": [
+      "长江流域"
+    ],
+    "sections": {
+      "长江流域": [
+        "七效港西桥",
+        "三沙洪交汇口",
+        "三甲港",
+        "临江",
+        "二团",
+        "五效",
+        "前卫村桥",
+        "吴淞口",
+        "太浦河桥",
+        "急水港桥",
+        "斜塘口",
+        "横潦泾",
+        "汾湖大桥(界标)",
+        "浙江路桥",
+        "淀峰",
+        "蕴川路桥",
+        "钱桥",
+        "闵行西界(松浦大桥)",
+        "黄渡"
+      ]
+    }
+  },
+  "云南省": {
+    "basins": [
+      "滇池流域",
+      "珠江流域",
+      "西南诸河",
+      "长江流域"
+    ],
+    "sections": {
+      "滇池流域": [
+        "严家村桥(盘龙江)",
+        "回龙村",
+        "大观河入湖口(航运公司)(篆塘河泵站)",
+        "宝丰村入湖口",
+        "断桥",
+        "新河村入湖口(金属筛片厂小桥)",
+        "江尾下闸",
+        "海口西",
+        "滇池南",
+        "滇池南(老)",
+        "灰湾中",
+        "王大桥",
+        "白鱼口",
+        "罗家营",
+        "罗家营(老)",
+        "船房五社桥头(一检站)",
+        "草海中心",
+        "西苑隧道",
+        "观音山",
+        "观音山东",
+        "观音山中",
+        "观音山西"
+      ],
+      "珠江流域": [
+        "九甸大桥",
+        "厂房大桥",
+        "天生桥",
+        "孤山",
+        "抚仙湖心",
+        "星云湖心",
+        "杞麓湖心",
+        "永昌桥",
+        "江边桥",
+        "盘溪大桥",
+        "禄丰村",
+        "花山水库出水口",
+        "设里桥",
+        "谷拉河大桥",
+        "长虹桥",
+        "阳宗海中"
+      ],
+      "西南诸河": [
+        "丙舍桥",
+        "中越桥",
+        "中路村",
+        "交汇口",
+        "储木场",
+        "关累码头",
+        "勐仑大桥",
+        "勐捧岔河",
+        "南利大桥",
+        "南涧小湾电站(澜沧江)",
+        "嘎中桥",
+        "嘎旧",
+        "四级坝",
+        "土卡河水文站(土卡河)",
+        "坝洪村",
+        "天保农场",
+        "姐告大桥",
+        "孟定大桥",
+        "孟拉桥",
+        "小关邑",
+        "小河底河",
+        "小黑江检查站",
+        "异龙湖中",
+        "徐村桥",
+        "思茅港",
+        "打洛江大桥",
+        "拉甲木底桥",
+        "景临桥",
+        "橄榄坝",
+        "水文站",
+        "永保桥",
+        "江尾",
+        "河口县医院(河口)",
+        "洱海湖心",
+        "湾甸",
+        "红旗桥",
+        "绿汁江大桥",
+        "芒东桥",
+        "莲花乡",
+        "蔓耗桥",
+        "蚂蟥堡桥",
+        "迭撒大桥",
+        "那发出境",
+        "金河",
+        "风平",
+        "风情园大桥",
+        "黑箐",
+        "龙江桥",
+        "龙脖渡口"
+      ],
+      "长江流域": [
+        "以礼河水文站",
+        "头屯河",
+        "富民大桥",
+        "崔家庄",
+        "新华",
+        "普渡河桥",
+        "横江桥",
+        "江底桥",
+        "河口(象鼻山吊桥)",
+        "泸沽湖湖心(泸沽湖)",
+        "程海湖中",
+        "西观桥",
+        "通仙桥",
+        "金江桥",
+        "龙兴村"
+      ]
+    }
+  },
+  "内蒙古自治区": {
+    "basins": [
+      "松花江流域",
+      "西北诸河",
+      "黄河流域"
+    ],
+    "sections": {
+      "松花江流域": [
+        "新发",
+        "李屯",
+        "讷尔克气"
+      ],
+      "西北诸河": [
+        "王家庄"
+      ],
+      "黄河流域": [
+        "三盛公",
+        "卧佛下",
+        "大入黄口",
+        "头道拐",
+        "总排干入黄口",
+        "海勃湾",
+        "画匠营子",
+        "磴口",
+        "黑柳子"
+      ]
+    }
+  },
+  "北京市": {
+    "basins": [
+      "海河流域",
+      "淮河流域"
+    ],
+    "sections": {
+      "海河流域": [
+        "东店",
+        "南大荒桥",
+        "古北口",
+        "后城",
+        "大关桥",
+        "大红门闸上",
+        "密云水库",
+        "广北滨河路(桥）",
+        "怀柔水库",
+        "新八里桥",
+        "沙窝",
+        "清河闸",
+        "白石桥",
+        "码头",
+        "罗庄",
+        "花园路",
+        "谷家营",
+        "辛庄桥",
+        "鼓楼外大街"
+      ],
+      "淮河流域": [
+        "八间房漫水桥"
+      ]
+    }
+  },
+  "吉林省": {
+    "basins": [
+      "松花江流域",
+      "辽河流域"
+    ],
+    "sections": {
+      "松花江流域": [
+        "三家子",
+        "兰旗大桥",
+        "哨口",
+        "圈河",
+        "大山(新甸)",
+        "官厅桥",
+        "崇善",
+        "延吉下",
+        "查干湖",
+        "榆树川",
+        "池北铁桥",
+        "烟筒山",
+        "白山大桥",
+        "白旗",
+        "白沙滩",
+        "石井(小河龙)",
+        "砖瓦窑桥",
+        "西崴子",
+        "镇西大桥"
+      ],
+      "辽河流域": [
+        "四双大桥",
+        "城子上",
+        "大阳岔",
+        "林家",
+        "河清",
+        "绿江村"
+      ]
+    }
+  },
+  "四川省": {
+    "basins": [
+      "长江流域"
+    ],
+    "sections": {
+      "长江流域": [
+        "201医院",
+        "三块石",
+        "三川",
+        "三谷庄",
+        "三邑大桥",
+        "上石盘",
+        "两河口",
+        "丰谷",
+        "二江寺",
+        "倮果",
+        "八庙沟",
+        "八角",
+        "凉姜沟",
+        "北川通口",
+        "升钟水库铁炉寺",
+        "南渡",
+        "双江桥",
+        "团堡岭",
+        "大岗山",
+        "大磨子",
+        "大蹬沟",
+        "姚渡",
+        "姜公堰",
+        "宏缘",
+        "小水沟",
+        "岳店子下",
+        "平武水文站",
+        "幸福村(河东元坝)",
+        "幺滩",
+        "廖家堰",
+        "彭山岷江大桥",
+        "悦来渡口",
+        "手傍岩",
+        "手爬岩",
+        "拱城铺渡口",
+        "挂弓山",
+        "文成镇",
+        "昔街大桥",
+        "月波",
+        "李家湾",
+        "李码头",
+        "柏枝",
+        "梓江大桥",
+        "江陵",
+        "沙溪",
+        "沱江大桥(沱江二桥)",
+        "泸天化大桥",
+        "清风峡",
+        "渭门桥",
+        "烈面",
+        "球溪河口",
+        "白兔乡",
+        "百顷",
+        "石门子",
+        "碳研所",
+        "礼板湾(王妃岛)",
+        "福田坝",
+        "纳溪大渡口",
+        "联盟桥",
+        "胡市大桥",
+        "舵石盘",
+        "苴国村",
+        "蔡家渡口",
+        "西平镇",
+        "象山",
+        "跑马滩",
+        "车家河",
+        "邛海湖心",
+        "都江堰水文站",
+        "醒觉溪",
+        "金子",
+        "金溪电站",
+        "阿七大桥",
+        "雅砻江口",
+        "马尔邦碉王山庄",
+        "马边河河口",
+        "鲁班岛",
+        "龙洞",
+        "龟都府"
+      ]
+    }
+  },
+  "天津市": {
+    "basins": [
+      "海河流域"
+    ],
+    "sections": {
+      "海河流域": [
+        "万家码头",
+        "三岔口",
+        "于桥水库出口",
+        "于桥水库库中心",
+        "井冈山桥",
+        "北排水河防潮闸",
+        "北洋桥",
+        "土门楼",
+        "塘汉公路桥",
+        "大套桥",
+        "大红桥",
+        "尔王庄水库",
+        "曹庄子泵站",
+        "果河桥",
+        "沙河桥",
+        "沧浪渠出境",
+        "海河大闸",
+        "生产圈闸",
+        "翟庄子",
+        "蓟运河防潮闸",
+        "西屯桥",
+        "青静黄防潮闸",
+        "马棚口防潮闸",
+        "黄白桥",
+        "黎河桥"
+      ]
+    }
+  },
+  "宁夏回族自治区": {
+    "basins": [
+      "黄河流域"
+    ],
+    "sections": {
+      "黄河流域": [
+        "中卫下河沿(新墩)",
+        "叶盛公路桥",
+        "平罗黄河大桥",
+        "弹筝峡",
+        "沙湖",
+        "沟圈",
+        "泉眼山",
+        "金沙湾",
+        "银古公路桥",
+        "香山湖",
+        "麻黄沟"
+      ]
+    }
+  },
+  "安徽省": {
+    "basins": [
+      "太湖流域",
+      "巢湖流域",
+      "浙闽片河流",
+      "淮河流域",
+      "长江流域"
+    ],
+    "sections": {
+      "太湖流域": [
+        "殷桥"
+      ],
+      "巢湖流域": [
+        "三河镇大桥",
+        "三河镇新大桥",
+        "三胜大队渡口",
+        "东半湖湖心",
+        "兆河入湖区",
+        "入湖口渡口",
+        "北闸渡口(杭埠河)",
+        "双桥河入湖口",
+        "同大排灌站",
+        "巢湖船厂",
+        "希望桥",
+        "庐江缺口",
+        "忠庙",
+        "新河入湖区",
+        "施口",
+        "柘皋大桥",
+        "河口大桥",
+        "湖滨",
+        "湖滨(老)",
+        "石堆渡口",
+        "肥西化肥厂下",
+        "裕溪口",
+        "裕溪口(老)",
+        "西半湖湖心",
+        "通讯塔",
+        "青台山大桥",
+        "黄麓"
+      ],
+      "浙闽片河流": [
+        "新管",
+        "横江大桥",
+        "浦口",
+        "率水大桥",
+        "篁墩"
+      ],
+      "淮河流域": [
+        "丁埠大桥",
+        "下楼公路桥",
+        "东坪集",
+        "东湖闸",
+        "五河",
+        "五里闸",
+        "公路桥",
+        "关咀",
+        "刘寨村后",
+        "利辛段",
+        "后常桥",
+        "响洪甸水库出水口",
+        "固始李畈",
+        "大店岗",
+        "天长化工厂",
+        "小柳巷",
+        "小王桥",
+        "岳坊大桥",
+        "工农兵大桥",
+        "张大桥",
+        "新城口",
+        "新安渡口",
+        "李大桥闸",
+        "杨庄",
+        "杨湖",
+        "沫河口",
+        "泗县公路桥",
+        "涡阳义门大桥",
+        "湖沟",
+        "焦岗湖",
+        "王家坝",
+        "瓦埠湖",
+        "界首七渡口(七渡口)",
+        "白洋淀渡口",
+        "石头埠",
+        "石头埠(老)",
+        "符离闸",
+        "芦岭桥",
+        "蚌埠固镇",
+        "蚌埠闸上(蚌埠闸)",
+        "西淝河闸下",
+        "许庄(徐庄)",
+        "阜南",
+        "阜阳段上游",
+        "阜阳段下",
+        "陶洪集",
+        "颜集",
+        "鲁台孜",
+        "龙亢"
+      ],
+      "长江流域": [
+        "三兴村",
+        "东流",
+        "东西梁山",
+        "中心点",
+        "乌衣下",
+        "五步沟",
+        "入江口",
+        "前江口",
+        "化肥厂下",
+        "华阳河入江口",
+        "双丰",
+        "大官湖",
+        "姑溪河大桥",
+        "宝塔根",
+        "张溪",
+        "当涂查湾",
+        "得胜河入江口",
+        "枞阳大闸",
+        "武昌湖",
+        "水厂取水口",
+        "水口",
+        "汪溪",
+        "河口",
+        "泾南交界",
+        "湖心",
+        "狮子口",
+        "皖河口",
+        "皖河大桥",
+        "管家渡",
+        "花亭湖坝前",
+        "荻港",
+        "菜子湖",
+        "西湖湖心",
+        "车轴寺大桥",
+        "采石河下游",
+        "陈家墩",
+        "雁翅",
+        "靠近大坝",
+        "顺安河入江口",
+        "香口(东至龙江水厂)",
+        "鲁港桥",
+        "黄湖",
+        "龙感湖"
+      ]
+    }
+  },
+  "山东省": {
+    "basins": [
+      "海河流域",
+      "淮河流域",
+      "黄河流域"
+    ],
+    "sections": {
+      "海河流域": [
+        "三角洼水库",
+        "五号桩",
+        "前油坊",
+        "北湖",
+        "夏口",
+        "大山",
+        "富国",
+        "小泊头桥",
+        "油坊桥",
+        "滨孤路桥",
+        "王杠子闸",
+        "胜利桥",
+        "芦家河子水库",
+        "董姑桥",
+        "邵家"
+      ],
+      "淮河流域": [
+        "105公路桥",
+        "310公路桥",
+        "东八路桥",
+        "东石佛",
+        "中心",
+        "临沂北大桥",
+        "临沭大兴桥",
+        "二级坝",
+        "云蒙湖湖心",
+        "兖州南大桥",
+        "十字河大桥",
+        "南桥",
+        "台儿庄大桥",
+        "吉利河水库出口",
+        "喻屯",
+        "墨水河入海口",
+        "大古镇",
+        "尹沟(入湖口)",
+        "峡山水库库中",
+        "张建桥",
+        "捷庄(涝沟桥)",
+        "支脉河陈桥",
+        "斜拉桥",
+        "新薛河入湖口",
+        "李集",
+        "柳疃桥",
+        "桥头",
+        "沙沟桥(赵楼)",
+        "清泉寺",
+        "王晁桥",
+        "睦里庄",
+        "羊口",
+        "群乐桥",
+        "老运河微山段",
+        "范李",
+        "西姚",
+        "西石佛",
+        "西闸",
+        "贾庄闸",
+        "辛丰庄",
+        "道口",
+        "韩旺大桥",
+        "马楼",
+        "马连庄",
+        "高河桥(老万福河口)"
+      ],
+      "黄河流域": [
+        "卧虎山水库",
+        "张秋",
+        "徐家汶",
+        "泺口",
+        "王台大桥(流泽桥)",
+        "贺小庄"
+      ]
+    }
+  },
+  "山西省": {
+    "basins": [
+      "海河流域",
+      "黄河流域"
+    ],
+    "sections": {
+      "海河流域": [
+        "东榆林水库出口",
+        "代县桥",
+        "关河水库出口",
+        "册田水库出口",
+        "利仁皂",
+        "北寨",
+        "南庄",
+        "南水芦",
+        "司徒桥",
+        "后湾水库出口",
+        "固定桥",
+        "坪上桥",
+        "堡子湾",
+        "定襄桥",
+        "宣家塔",
+        "梵王寺",
+        "王家庄",
+        "王寨村",
+        "白羊墅",
+        "闫家庄大桥"
+      ],
+      "黄河流域": [
+        "上亳城",
+        "上兰",
+        "上平望",
+        "两河口桥",
+        "北峪口",
+        "南姚",
+        "后寨",
+        "张峰水库出口",
+        "张留庄",
+        "拴驴泉",
+        "曲立",
+        "杀虎口",
+        "桑柳树",
+        "汾河水库出口",
+        "河西村",
+        "温南社",
+        "王庄桥南",
+        "碛口",
+        "碧村",
+        "裴家川口",
+        "裴沟",
+        "西曲村",
+        "郝村",
+        "黑城村",
+        "龙头",
+        "龙门"
+      ]
+    }
+  },
+  "广东省": {
+    "basins": [
+      "珠江流域"
+    ],
+    "sections": {
+      "珠江流域": [
+        "七星岗",
+        "三棵树",
+        "三溪桥(乐昌三溪河)",
+        "下东",
+        "东湖",
+        "东溪水闸",
+        "中山港码头",
+        "乌坎",
+        "乌洲",
+        "九龙潭",
+        "五丰渡口",
+        "公庄河口（泰美）",
+        "六都水厂上游",
+        "凤江桥",
+        "北江石尾",
+        "十里亭",
+        "升平",
+        "南渡河桥",
+        "博罗城下(新角)",
+        "古劳",
+        "古封",
+        "吉隆商贸城前",
+        "地都",
+        "城口水站",
+        "埠场",
+        "塘口",
+        "增江口",
+        "墩头基",
+        "外砂",
+        "大山江",
+        "大泉",
+        "大麻",
+        "大龙涌口",
+        "孔江水库入库口",
+        "官坦",
+        "寿长",
+        "封开城上",
+        "小漠桥",
+        "尖山",
+        "尖峰大桥",
+        "山角",
+        "布洲",
+        "平洲",
+        "庙咀里(定南水站)",
+        "惠州汝湖",
+        "排里",
+        "新丰江水库",
+        "新铺",
+        "旗岭",
+        "梁村",
+        "樟村(家乐福)",
+        "横头街霞涌医院门口前",
+        "横栏",
+        "永安",
+        "江口",
+        "江口门",
+        "江城",
+        "沙河河口(里波水）",
+        "沙田泗盛",
+        "洪奇沥",
+        "流溪河山庄",
+        "海丰西闸",
+        "海门湾桥闸",
+        "深圳河口(老)",
+        "渠首",
+        "滨海十路与石化大道中交汇处",
+        "牛湾",
+        "珠海大桥",
+        "白沙街",
+        "石角",
+        "石角咀水闸",
+        "石龙南河",
+        "米急渡",
+        "紫溪",
+        "良德水库",
+        "苍山渡口",
+        "莲花山",
+        "莲阳桥闸",
+        "营仔",
+        "虎爪断桥",
+        "西阳电站",
+        "赤凤",
+        "赤坎水厂(塘口取水口)",
+        "连江西牛",
+        "都骑",
+        "长坝",
+        "陆丰半湾水闸",
+        "隆溪大道桥",
+        "隆都",
+        "青溪(大浦青溪)",
+        "马安大桥下",
+        "高桥",
+        "鸡啼门大桥",
+        "鸦岗",
+        "黄坡",
+        "黄岗",
+        "龙川城铁路桥",
+        "龙川寻邬",
+        "龙石",
+        "龟山塔"
+      ]
+    }
+  },
+  "广西壮族自治区": {
+    "basins": [
+      "珠江流域",
+      "长江流域"
+    ],
+    "sections": {
+      "珠江流域": [
+        "三滩",
+        "上中",
+        "上金",
+        "东兴",
+        "东边埇",
+        "亚桥",
+        "交州",
+        "京南",
+        "八角电站",
+        "公篓",
+        "六排",
+        "六景",
+        "勒马",
+        "南域",
+        "南岸",
+        "叮当",
+        "坡脚(八大河)",
+        "垒亭",
+        "大化",
+        "婆围村",
+        "平畲",
+        "平而关",
+        "德天",
+        "扶隆",
+        "木头滩",
+        "木洞",
+        "杨民",
+        "桂花",
+        "梅林",
+        "棉江",
+        "横塘",
+        "武林渡口",
+        "水库出水口",
+        "渔村",
+        "渠立",
+        "澄碧河水库",
+        "火电厂",
+        "爽底坪",
+        "狗尾濑",
+        "界首",
+        "白马",
+        "石嘴",
+        "石良角",
+        "石龙",
+        "老口",
+        "自良渡口",
+        "茅岭大桥",
+        "西门江",
+        "象州运江老街",
+        "贺街",
+        "车渡",
+        "边贸码头",
+        "那弄",
+        "钦江东",
+        "阳朔",
+        "隘屯(上皿屯)",
+        "雁江",
+        "露塘",
+        "高塘",
+        "高速公路桥",
+        "高速公路西桥",
+        "鼠岭(文车桥)",
+        "龙岩滩水库",
+        "龙溪"
+      ],
+      "长江流域": [
+        "随滩"
+      ]
+    }
+  },
+  "新疆维吾尔自治区": {
+    "basins": [
+      "西北诸河"
+    ],
+    "sections": {
+      "西北诸河": [
+        "七纺桥",
+        "兰干",
+        "十二医院",
+        "哈尔莫墩",
+        "喀什河大桥",
+        "布尔津河大桥",
+        "昭苏戍边桥",
+        "汇合口",
+        "特克斯河(昭苏解放大桥)",
+        "科布大桥",
+        "羊场大桥",
+        "阿热力",
+        "雅马渡大桥",
+        "顶山",
+        "龙口",
+        "龙口大桥"
+      ]
+    }
+  },
+  "江苏省": {
+    "basins": [
+      "太湖流域",
+      "淮河流域",
+      "长江流域"
+    ],
+    "sections": {
+      "太湖流域": [
+        "312国道桥",
+        "东潘桥",
+        "五牧",
+        "五里湖心",
+        "兰山嘴",
+        "兰山嘴(老)",
+        "千灯浦口",
+        "吕城",
+        "大浦港桥",
+        "大港桥",
+        "姚巷桥",
+        "平台山",
+        "拖山",
+        "望亭上游",
+        "朱厍港口",
+        "林家闸",
+        "殷村港桥",
+        "江边闸",
+        "沙渚",
+        "洪巷桥",
+        "浏河闸",
+        "潘家坝",
+        "百渎港桥",
+        "胥湖心",
+        "航管站",
+        "落蓬湾",
+        "蠡桥",
+        "西山",
+        "赵屯(石浦大桥)",
+        "越溪桥",
+        "辛丰镇",
+        "金潼桥",
+        "钓邾大桥",
+        "锡东水厂",
+        "长济桥",
+        "陈东港",
+        "黄埝桥"
+      ],
+      "淮河流域": [
+        "三场",
+        "三垛西大桥",
+        "东偏泓",
+        "东安闸桥西",
+        "临洪闸",
+        "临淮乡（河流）",
+        "临淮乡（湖库）",
+        "五叉河口",
+        "六垛闸",
+        "兴庄桥",
+        "华山闸",
+        "唐曹",
+        "善后河闸",
+        "四队桥",
+        "团结闸",
+        "坝头桥",
+        "城北大桥",
+        "墩尚水漫桥",
+        "大兴桥",
+        "大团桥",
+        "大屈",
+        "大板跳闸",
+        "大浦闸",
+        "大运河船闸(宝应船闸)",
+        "头罾闸",
+        "富民桥",
+        "射阳河闸",
+        "小洋口",
+        "小红圈",
+        "川东闸",
+        "张嘴渡口",
+        "张楼",
+        "总渠苏嘴",
+        "成河乡中",
+        "戴楼衡阳(塔集)",
+        "斗龙港闸",
+        "新村桥",
+        "新洋港闸",
+        "新浦大桥",
+        "曹庄桥",
+        "李庄",
+        "李集桥",
+        "柴米河桥",
+        "槐泗河口",
+        "江都西闸",
+        "沙庄桥",
+        "沙集西闸",
+        "沭南闸",
+        "泰东大桥",
+        "泰西",
+        "洪泽湖高房咀",
+        "洪金",
+        "海头大桥",
+        "海陵大桥",
+        "淮河大桥",
+        "港上桥",
+        "湖心区",
+        "灌河大桥",
+        "烧香北闸",
+        "燕尾闸",
+        "王港闸",
+        "环东闸口",
+        "盐河桥",
+        "砖瓦厂",
+        "老山乡",
+        "艾山西大桥",
+        "范河桥",
+        "草堰大桥",
+        "蒋坝镇",
+        "蔺家坝",
+        "袁闸",
+        "郑园桥",
+        "顾勒大桥",
+        "马陵翻水站",
+        "骆马湖",
+        "骆马湖乡",
+        "高良涧镇",
+        "黄桥",
+        "黄沙港闸",
+        "黑林桥",
+        "龙冈凤凰桥",
+        "龙集镇北"
+      ],
+      "长江流域": [
+        "七桥瓮",
+        "三江营",
+        "九圩港桥",
+        "兆文山",
+        "冻青桥",
+        "北山水库",
+        "塘芦港闸",
+        "夏仕港大桥",
+        "大洋港桥",
+        "小河口上游",
+        "小湾",
+        "新十圩港大桥",
+        "新河桥",
+        "新港桥",
+        "林山",
+        "碾砣港闸",
+        "祥和大桥",
+        "聚南大桥",
+        "节制闸",
+        "阳澄湖心",
+        "陈浅",
+        "马甸闸西",
+        "魏村"
+      ]
+    }
+  },
+  "江西省": {
+    "basins": [
+      "珠江流域",
+      "长江流域"
+    ],
+    "sections": {
+      "珠江流域": [
+        "兴宁电站"
+      ],
+      "长江流域": [
+        "三洪村",
+        "三都",
+        "上犹江江口",
+        "丰城小港口",
+        "临水河口",
+        "乌江江口",
+        "八一桥",
+        "共青城寨下",
+        "南河河口",
+        "南矶山",
+        "吴城修河",
+        "周坊",
+        "土桥",
+        "坝上",
+        "塔城",
+        "大余城郊",
+        "大洋洲",
+        "大港",
+        "姚港(河西水厂)",
+        "孔目江江口",
+        "孤江江口",
+        "市自来水厂",
+        "平江江口",
+        "应家坊",
+        "康山",
+        "弋阳",
+        "戴村",
+        "新庙前",
+        "新联",
+        "旗山",
+        "昌邑",
+        "桃江江口",
+        "桐车湾",
+        "梅江江口",
+        "梅港",
+        "梓坑",
+        "棚下(杨村)",
+        "洎水河河口",
+        "流口村",
+        "浮桥",
+        "港口",
+        "湖心岛",
+        "滁槎",
+        "潦河河口",
+        "焦石坝",
+        "瑞洪大桥",
+        "生米",
+        "白塔河河口",
+        "禾水河口",
+        "罗坊",
+        "肖江江口",
+        "良田村",
+        "蛤蟆石",
+        "蜀水河口",
+        "赣县梅林",
+        "赵家湾",
+        "超坊",
+        "通津",
+        "遂川江江口",
+        "都昌",
+        "鄱阳花园",
+        "野鸡山村",
+        "金滩",
+        "金鱼石",
+        "钟岭水厂",
+        "铅山",
+        "镇埠",
+        "高安市青州村",
+        "鲇鱼山",
+        "龙南自来水厂",
+        "龙山口"
+      ]
+    }
+  },
+  "河北省": {
+    "basins": [
+      "海河流域",
+      "辽河流域"
+    ],
+    "sections": {
+      "海河流域": [
+        "26#大桥",
+        "三小营",
+        "三河东大桥",
+        "上二道河子",
+        "上板城大桥",
+        "下槐镇",
+        "丰北闸",
+        "偏桥子大桥",
+        "兆通",
+        "光淀张庄",
+        "党坝",
+        "八号桥",
+        "北河店",
+        "南刘庄",
+        "南张村",
+        "台头",
+        "后城(老)",
+        "后西吴桥",
+        "吴村",
+        "唐三营",
+        "圈头",
+        "地都",
+        "墙子路",
+        "大套桥(老)",
+        "大杖子(一)",
+        "大杖子(二)",
+        "大杖子(老)",
+        "大桑园",
+        "大湖心",
+        "大王务",
+        "大王务(老)",
+        "大石桥",
+        "大黑汀水库",
+        "安州",
+        "小范桥",
+        "岗南水库",
+        "岳城水库出口",
+        "左卫桥",
+        "平山桥",
+        "戴河口",
+        "新开河口",
+        "曲周",
+        "李台",
+        "杜里村",
+        "汤河口",
+        "洋河口",
+        "涧河口",
+        "温泉屯",
+        "滦县大桥",
+        "烧车淀",
+        "王家摆",
+        "田庄子",
+        "白合",
+        "石河口",
+        "老夏安公路",
+        "老鸦庄",
+        "艾辛庄",
+        "郭家屯",
+        "采蒲台",
+        "饮马河口"
+      ],
+      "辽河流域": [
+        "甸子"
+      ]
+    }
+  },
+  "河南省": {
+    "basins": [
+      "海河流域",
+      "淮河流域",
+      "长江流域",
+      "黄河流域"
+    ],
+    "sections": {
+      "海河流域": [
+        "修武水文站",
+        "冯宿桥",
+        "南乐元村集",
+        "南乐水文站",
+        "南谷洞水库",
+        "卫辉下马营",
+        "小河口",
+        "弓上水库",
+        "彰武水库",
+        "新乡贾太湖",
+        "濮阳西水坡",
+        "获嘉东碑村"
+      ],
+      "淮河流域": [
+        "中牟陈桥",
+        "临颍吴刘闸",
+        "临颍高村桥",
+        "信阳琵琶山桥",
+        "叶舞公路桥",
+        "周口康店",
+        "商水双桥",
+        "固始马罡",
+        "大坝北",
+        "大陈闸",
+        "尖岗水库",
+        "息县大埠口",
+        "新蔡李桥",
+        "新蔡班台(班台)",
+        "新郑黄甫寨",
+        "昭平台水库",
+        "板桥水库",
+        "永城张板桥",
+        "沈丘闸",
+        "淮滨北庙",
+        "淮滨水文站(淮滨)",
+        "潢川水文站",
+        "白沙水库",
+        "白龟山水库",
+        "睢县板桥",
+        "石漫滩水库",
+        "竹竿铺",
+        "紫罗山",
+        "舞阳马湾",
+        "薄山水库",
+        "西华址坊",
+        "西华大王庄",
+        "西华程湾",
+        "西平杨庄",
+        "通许邸阁",
+        "鄢陵陶城闸",
+        "长台关甘岸桥",
+        "饮用水源地取水口",
+        "鹿邑付桥(鹿邑付桥闸)",
+        "黄口"
+      ],
+      "长江流域": [
+        "三道河",
+        "上河",
+        "五龙泉",
+        "内乡怀乡桥",
+        "南阳盆窑",
+        "宋岗",
+        "方城夏河",
+        "淅川史家湾(史家湾)",
+        "淅川张营(张营)",
+        "淅川荆紫关(荆紫关)",
+        "淅川高湾(高湾)",
+        "陶岔"
+      ],
+      "黄河流域": [
+        "七里铺",
+        "三门峡水库",
+        "南山",
+        "封丘王堤",
+        "封丘陶北",
+        "小浪底水库(小浪底)",
+        "武陟渠首",
+        "洛宁长水",
+        "洛河大桥",
+        "潭头",
+        "濮阳大韩桥",
+        "白马寺",
+        "窄口长桥",
+        "高崖寨",
+        "龙门大桥"
+      ]
+    }
+  },
+  "浙江省": {
+    "basins": [
+      "太湖流域",
+      "浙闽片河流"
+    ],
+    "sections": {
+      "太湖流域": [
+        "上塘河排涝闸",
+        "乌镇北",
+        "五杭运河大桥",
+        "南台头闸一号桥",
+        "南浔",
+        "合溪",
+        "城南翻水站",
+        "城西大桥",
+        "塘浦",
+        "大钱",
+        "奉口",
+        "小新村",
+        "小梅口",
+        "尤甪村",
+        "斜路港",
+        "新塘",
+        "新港口(新塘港)",
+        "杨家浦",
+        "枫南大桥",
+        "池家浜水文站",
+        "汤溇",
+        "汪家埠",
+        "湘家荡",
+        "王江泾",
+        "盐官排涝枢纽",
+        "红旗塘大坝",
+        "荆湾",
+        "铁路桥",
+        "长山闸一号桥",
+        "青阳汇",
+        "顾家桥"
+      ],
+      "浙闽片河流": [
+        "三潭岛",
+        "上仙屋",
+        "下界首",
+        "下童",
+        "东关桥",
+        "东迹渡",
+        "临城",
+        "临江",
+        "义东桥",
+        "北湖中心",
+        "南江桥",
+        "双塔底",
+        "双港口",
+        "台口",
+        "四灶浦闸",
+        "均溪",
+        "坝口",
+        "堰后",
+        "塔下洲",
+        "外舍",
+        "大坝前",
+        "大嵩",
+        "大荆",
+        "富足山",
+        "将军岩",
+        "小旦",
+        "小溪口",
+        "小金山",
+        "屠家埠",
+        "曹娥江大闸闸前",
+        "松阳二中",
+        "柏枝岙",
+        "桐君山",
+        "桐庐",
+        "梁桥",
+        "横山",
+        "水车",
+        "江口",
+        "江口渡",
+        "汤曹汇合口",
+        "沙头",
+        "沙段",
+        "沙湾上",
+        "洋溪渡",
+        "洪坞桥",
+        "浦口闸",
+        "浦阳江出口",
+        "浮石渡",
+        "浮礁渡",
+        "清林渡",
+        "清水埠",
+        "温峤",
+        "湄池",
+        "溪口",
+        "王家泾",
+        "石门洞",
+        "章店",
+        "第三农业站",
+        "老鼠屿",
+        "葛山头",
+        "蒲岐",
+        "街口(鸠坑口)",
+        "费垅",
+        "赵山渡",
+        "郑家",
+        "里石门水库",
+        "金清新闸",
+        "铜山源水库",
+        "长汀",
+        "长诏水库出口",
+        "闸口",
+        "风化"
+      ]
+    }
+  },
+  "海南省": {
+    "basins": [
+      "珠江流域"
+    ],
+    "sections": {
+      "珠江流域": [
+        "上村桥",
+        "中和桥",
+        "乐中",
+        "乐罗",
+        "儒房",
+        "农垦橡胶所一队",
+        "分洪桥",
+        "南丰库心(海南)",
+        "叉河口",
+        "后安桥",
+        "后山村",
+        "后黎村",
+        "和乐桥",
+        "坡柳水闸",
+        "大溪村",
+        "大风(昌化)",
+        "妙林",
+        "山口",
+        "崖城大桥",
+        "水库出口(大隆水库出口)",
+        "水库库心(大广坝水库出口)",
+        "水涯新区",
+        "汀洲(丹村)",
+        "溪仔村",
+        "演州河河口",
+        "白仞滩电站",
+        "罗带铁路桥",
+        "羊头外村桥",
+        "群英大坝",
+        "藤桥河大桥",
+        "跨界桥",
+        "铁桥",
+        "龙塘",
+        "龙江"
+      ]
+    }
+  },
+  "湖北省": {
+    "basins": [
+      "长江流域"
+    ],
+    "sections": {
+      "长江流域": [
+        "七要口",
+        "两河口(草埠湖水厂)",
+        "中官浦",
+        "中官铺",
+        "云池(白洋)",
+        "五岭子",
+        "余家湖",
+        "兰溪大桥",
+        "冯集",
+        "剑河口",
+        "南津关",
+        "厉山",
+        "周八家",
+        "周家坝",
+        "咸宁湖心",
+        "坝上中(胡家岭)",
+        "垌冢桥",
+        "埠口",
+        "大冶湖闸",
+        "天河口",
+        "太平沙",
+        "夹河口",
+        "孙家湾",
+        "孝感河口大桥",
+        "孝昌王店",
+        "安陆桑树",
+        "宗关",
+        "富水水库",
+        "富池闸",
+        "小河",
+        "岳口",
+        "巫峡口",
+        "巴河镇河口",
+        "平林",
+        "库坝上",
+        "应城公路桥",
+        "康家岗",
+        "张湾",
+        "恩施大沙坝",
+        "拖市",
+        "排水闸",
+        "新刘家台",
+        "新沟闸",
+        "新河村",
+        "新滩",
+        "朱家河口",
+        "朱市",
+        "杨家垱",
+        "杨泗港",
+        "柳口",
+        "桅杆坪",
+        "梁子岛水源(七星)",
+        "汉南村",
+        "汉洪大桥",
+        "江口村",
+        "江夏湖心",
+        "汤店",
+        "沈湾",
+        "沐家泾",
+        "泗河口",
+        "洪下水文站",
+        "浪河口",
+        "涢水大桥",
+        "淤泥湖",
+        "清江大桥",
+        "港洲村",
+        "湖心A(洪湖湖心A)",
+        "滠口",
+        "漳河水库库心",
+        "潘口水库坝上",
+        "潜江大桥",
+        "焦家院",
+        "燕矶",
+        "牛山湖湖心",
+        "玉皇滩",
+        "王河电站",
+        "田店泵站",
+        "界牌沟",
+        "白家湾",
+        "白浒山",
+        "白石港",
+        "百福司镇",
+        "皇庄",
+        "砖瓦厂",
+        "神定河口",
+        "罗汉闸",
+        "羊尾",
+        "翟湾",
+        "聂家滩",
+        "茶庵",
+        "荆州河口",
+        "西梁子湖湖北",
+        "西梁子湖湖南",
+        "西梁子湖湖心(南北嘴)",
+        "西河桥",
+        "西河驿",
+        "观音寺",
+        "调关",
+        "转斗",
+        "运粮湖同心队",
+        "郭玉",
+        "金水闸",
+        "铁路大桥(小桂林)",
+        "长沙坝",
+        "长顺乡",
+        "阳日湾",
+        "陆溪口",
+        "陈家坡",
+        "陶冲村",
+        "隔卜桥",
+        "隔河岩水库坝上",
+        "马兰河口",
+        "马渡河",
+        "马良龚家湾",
+        "鲢鱼地泵站",
+        "麻城许家湾",
+        "黄腊石",
+        "黄陵大桥",
+        "黄龙1(黄龙滩水库)"
+      ]
+    }
+  },
+  "湖南省": {
+    "basins": [
+      "长江流域"
+    ],
+    "sections": {
+      "长江流域": [
+        "万子湖",
+        "万家嘴",
+        "三江口",
+        "三角洲",
+        "东洞庭湖",
+        "五强溪",
+        "侯家淇",
+        "八仙桥",
+        "六门闸",
+        "凤滩水库",
+        "南嘴",
+        "南渡",
+        "双牌水库",
+        "地阳坪公路大桥",
+        "坡头",
+        "坪口",
+        "城北水厂",
+        "城陵矶",
+        "塘渡口",
+        "大河滩",
+        "大通湖",
+        "头山",
+        "小河嘴",
+        "岳阳楼",
+        "归阳镇",
+        "托口",
+        "托口渠水",
+        "捞刀河口",
+        "新港",
+        "昭山",
+        "桂花渡水厂",
+        "桃谷山",
+        "桔子洲",
+        "樟树港",
+        "武水汇合口",
+        "永定澄潭(区水厂)",
+        "江口",
+        "沙河口",
+        "河溪水文站",
+        "洣水入湘江口",
+        "浦市上游",
+        "涟水入河口",
+        "渌水入河口",
+        "渡口大桥",
+        "渡头村",
+        "溪子口(县水厂)",
+        "熬洲",
+        "球溪",
+        "石花村",
+        "窑坡渡",
+        "窑市",
+        "绥宁河口镇",
+        "绿埠头",
+        "罗渡镇",
+        "耒水入湘江口",
+        "联江村",
+        "舂陵水入湘江口",
+        "舞水入河口(黔城二水厂)",
+        "荆江口",
+        "草市镇",
+        "萝卜湾",
+        "蒋家嘴",
+        "蒸水入湘江口",
+        "街埠头",
+        "西阳渡口",
+        "诸葛庙",
+        "邵水入河口",
+        "醴陵王坊",
+        "里耶镇",
+        "铜信溪电站(铜信溪)",
+        "陈家河(四水厂)",
+        "霞湾",
+        "马坡湖",
+        "鱼市",
+        "鹿角",
+        "鹿角(老)"
+      ]
+    }
+  },
+  "甘肃省": {
+    "basins": [
+      "西北诸河",
+      "长江流域",
+      "黄河流域"
+    ],
+    "sections": {
+      "西北诸河": [
+        "六坝桥",
+        "冰沟",
+        "皇城水库",
+        "红崖山水库",
+        "莺落峡",
+        "解放村水库",
+        "迎山坡",
+        "高崖水文站"
+      ],
+      "长江流域": [
+        "两水桥",
+        "固水子村"
+      ],
+      "黄河流域": [
+        "五佛寺",
+        "什川桥",
+        "先明峡桥",
+        "地沟桥",
+        "扶和桥",
+        "折桥",
+        "桦林",
+        "洮园桥",
+        "湟水桥",
+        "玛曲",
+        "葡萄园(牛背)",
+        "长庆桥",
+        "青城桥",
+        "靖远桥"
+      ]
+    }
+  },
+  "福建省": {
+    "basins": [
+      "浙闽片河流",
+      "珠江流域"
+    ],
+    "sections": {
+      "浙闽片河流": [
+        "上坂",
+        "云霄高塘渡口",
+        "八都",
+        "十里庵",
+        "华安西陂",
+        "南安康美桥",
+        "南安霞东桥",
+        "南溪浮宫桥",
+        "南靖洪濑汤坑桥",
+        "南靖靖城桥",
+        "古田黄田",
+        "园头桥",
+        "大田高才",
+        "宁化肖家",
+        "安溪罗内桥",
+        "将乐万全",
+        "将乐樟应",
+        "尤溪拥口大桥",
+        "库心",
+        "建宁袁庄",
+        "建瓯蓬墩",
+        "建阳坪州大桥",
+        "政和西津",
+        "斑竹溪渡口",
+        "松溪岩下",
+        "武夷山兴田",
+        "水汾桥",
+        "永安安砂水库下游",
+        "永安贡川桥",
+        "永春东关桥",
+        "永泰横龙",
+        "江口桥",
+        "浦南水文站",
+        "浪石",
+        "白岩潭",
+        "福安洪口",
+        "福安白塔",
+        "福安赛岐",
+        "福鼎会甲溪",
+        "诏安澳子头",
+        "连江琯头",
+        "连江荷山渡口",
+        "邵武晒口桥",
+        "长泰洛宾",
+        "闽侯竹岐",
+        "闽安",
+        "闽清雄江",
+        "隘头潭",
+        "雁石桥"
+      ],
+      "珠江流域": [
+        "上杭李家坪",
+        "长汀美溪桥"
+      ]
+    }
+  },
+  "西藏自治区": {
+    "basins": [
+      "西南诸河"
+    ],
+    "sections": {
+      "西南诸河": [
+        "才纳(帮布布)",
+        "米瑞"
+      ]
+    }
+  },
+  "贵州省": {
+    "basins": [
+      "珠江流域",
+      "长江流域"
+    ],
+    "sections": {
+      "珠江流域": [
+        "万峰湖(万峰湖湖心)",
+        "三江口",
+        "三都桥",
+        "从江大桥",
+        "发耳",
+        "坝草",
+        "坡脚",
+        "岔河口",
+        "打邦",
+        "新华",
+        "榕江",
+        "甲茶",
+        "界牌",
+        "蔗香北",
+        "蔗香南",
+        "赵家渡",
+        "黄果树",
+        "黄泥河"
+      ],
+      "长江流域": [
+        "乌杨树",
+        "六广",
+        "兴仁桥",
+        "凤山桥边",
+        "坡渡",
+        "大乌江镇",
+        "大关桥",
+        "大桥边",
+        "平敏大桥",
+        "打秋坪",
+        "斯拉河大桥",
+        "新庄",
+        "旁海",
+        "沿江渡",
+        "清水铺",
+        "玉屏",
+        "花鱼洞",
+        "茅台",
+        "西岩寺",
+        "贵铝泵房",
+        "重安江大桥",
+        "长沙",
+        "长脚",
+        "高店",
+        "鱼塘大桥",
+        "鲢鱼溪",
+        "鲤鱼塘",
+        "龙场"
+      ]
+    }
+  },
+  "辽宁省": {
+    "basins": [
+      "辽河流域"
+    ],
+    "sections": {
+      "辽河流域": [
+        "丁家柳河桥",
+        "万泰",
+        "三台子",
+        "三合屯",
+        "下王家",
+        "下达河入汤河水库口",
+        "东大桥",
+        "东陵大桥",
+        "二道河水库口",
+        "于台",
+        "于家房",
+        "亮子河入河口",
+        "何家信子",
+        "关门山大桥",
+        "兴国桥",
+        "兴安",
+        "凡河一号桥",
+        "凤鸣电站",
+        "北太子河入观音阁水库口",
+        "南大桥",
+        "南太子河入库口",
+        "口子街",
+        "古楼",
+        "台沟",
+        "城子坦",
+        "复州湾大桥",
+        "大伙房水库",
+        "大清河口",
+        "孤家子",
+        "小姐庙",
+        "小渔场",
+        "巨流河大桥",
+        "张家堡",
+        "戈布桥",
+        "曙光大桥",
+        "李家湾大桥",
+        "松树水文站",
+        "柴河水库入库口",
+        "江桥",
+        "汤河桥",
+        "河洪桥",
+        "清河水库入库口",
+        "清辽",
+        "爱河大桥",
+        "牛庄",
+        "牤牛河大桥",
+        "王家沟",
+        "王家窝棚",
+        "珠尔山",
+        "登化",
+        "砂山",
+        "福德店",
+        "章吉营",
+        "红石碑入海前",
+        "老官砬子",
+        "茧场",
+        "蒲石河大桥",
+        "西树林",
+        "赵圈河",
+        "辽河公园",
+        "通江口",
+        "高台子",
+        "麦家"
+      ]
+    }
+  },
+  "重庆市": {
+    "basins": [
+      "长江流域"
+    ],
+    "sections": {
+      "长江流域": [
+        "万木",
+        "两河口",
+        "中和",
+        "丰收坝",
+        "临渡",
+        "光辉",
+        "北渡",
+        "北温泉",
+        "卫星桥",
+        "向家",
+        "和尚山",
+        "土堡寨",
+        "太和",
+        "官渡",
+        "寨溪大桥",
+        "寸滩",
+        "御临镇",
+        "支坪街道",
+        "晒网坝",
+        "木瓜洞",
+        "朱杨溪",
+        "朱沱",
+        "李渡",
+        "水寨子",
+        "江口镇",
+        "江津大桥",
+        "汤溪河江口",
+        "清溪场",
+        "湖海场",
+        "玉溪",
+        "玉滩水库",
+        "白帝城",
+        "石门坎",
+        "码头",
+        "红花村",
+        "花台",
+        "苏家",
+        "运输桥",
+        "郁江桥",
+        "金子(老)",
+        "高洞梁",
+        "高洞电站",
+        "高阳渡口",
+        "鸭江镇",
+        "黎家乡崔家岩村"
+      ]
+    }
+  },
+  "陕西省": {
+    "basins": [
+      "长江流域",
+      "黄河流域"
+    ],
+    "sections": {
+      "长江流域": [
+        "丹凤下",
+        "南柳渡",
+        "小钢桥",
+        "构峪口",
+        "梁西渡",
+        "漫川关",
+        "瀛湖坝前",
+        "灶火庵",
+        "烈金坝",
+        "白水江",
+        "老君关",
+        "鲁光坪",
+        "黄金峡"
+      ],
+      "黄河流域": [
+        "千河公路桥",
+        "卧龙寺桥",
+        "咸阳铁桥",
+        "岔口",
+        "张家庄",
+        "昝家山",
+        "柏树坪",
+        "水库出水口",
+        "沙王渡",
+        "泾河桥",
+        "清涧无定河",
+        "温家川(神木窟野河)",
+        "潼关吊桥",
+        "灵口",
+        "王家河",
+        "王谦村",
+        "田庄镇南城村",
+        "碛塄",
+        "贾家畔",
+        "阎家滩",
+        "高家川",
+        "魏家堡",
+        "鱼河",
+        "黑河张家桥"
+      ]
+    }
+  },
+  "青海省": {
+    "basins": [
+      "西北诸河",
+      "黄河流域"
+    ],
+    "sections": {
+      "西北诸河": [
+        "小桥",
+        "德令哈市水厂旁"
+      ],
+      "黄河流域": [
+        "塔尔桥",
+        "大河家",
+        "峡塘",
+        "扎马隆",
+        "甘冲口",
+        "金滩",
+        "龙羊峡库区出水口"
+      ]
+    }
+  },
+  "黑龙江省": {
+    "basins": [
+      "松花江流域"
+    ],
+    "sections": {
+      "松花江流域": [
+        "858九队",
+        "三岔口",
+        "三道",
+        "佳木斯上",
+        "佳木斯下",
+        "加格达奇上",
+        "友好",
+        "双河渠首",
+        "同江",
+        "呼玛河口内",
+        "嘉荫",
+        "大顶子山",
+        "摆渡镇",
+        "朱顺屯",
+        "查哈阳乡",
+        "水库出口",
+        "汤旺河口内",
+        "海浪",
+        "海浪河口内",
+        "虎头上",
+        "阿什河口内",
+        "饶河上",
+        "黑河上"
+      ]
+    }
+  }
+};
+
+  // 获取HTML元素
+  const provinceSelect = document.getElementById("province");
+  const basinSelect = document.getElementById("basin");
+  const sectionSelect = document.getElementById("section");
+
+  // 处理省份变化
+  provinceSelect.addEventListener("change", function() {
+    const province = provinceSelect.value;
+    updateBasins(province);
+    updateSections(province, basinSelect.value); // 更新截面
+  });
+
+  // 处理流域变化
+  basinSelect.addEventListener("change", function() {
+    const province = provinceSelect.value;
+    const basin = basinSelect.value;
+    updateSections(province, basin);
+  });
+
+  // 更新流域选项
+  function updateBasins(province) {
+    const basins = pro_data[province]?.basins || [];
+    basinSelect.innerHTML = basins.map(basin => `<option value="${basin}">${basin}</option>`).join('');
+    // 更新流域后的截面
+    updateSections(province, basins[0] || ''); // 默认选择第一个流域
+  }
+
+  // 更新截面选项
+  function updateSections(province, basin) {
+    const sections = pro_data[province]?.sections[basin] || [];
+    sectionSelect.innerHTML = sections.map(section => `<option value="${section}">${section}</option>`).join('');
+  }
+
+  // 初始化
+  updateBasins(provinceSelect.value);
+  updateSections(provinceSelect.value, basinSelect.value);
+  fetchData();
+
+    // 初始化图表
+  const mainChart = echarts.init(document.getElementById('mainChart'));
+  
+  const secondaryChart = echarts.init(document.getElementById('secondaryChart'));
+    
+    // 可配置参数
+  const config = {
+      mainParameters: ['水温(℃)', 'pH(无量纲)', '溶解氧(mg/L)'],
+      secondaryParameters: ['电导率(μS/cm)', '浊度(NTU)', '高锰酸盐指数(mg/L)'],
+      colors: {
+        normal: '#FFF5E4',
+        maintenance: '#EB5B00',
+        warning: '#BF3131'
+      },
+      animationDuration: 1000
+    };
+    
+    // 全局数据存储
+    let chartData = {
+      rawData: [],
+      timeData: [],
+      parameterData: {},
+      currentMainParam: config.mainParameters[0],
+      currentSecondaryParam: config.secondaryParameters[0]
+    };
+    
+    let ab_data=[];
+    let data=[];
+    async function fetchData() {
+            const province = document.getElementById('province').value;
+            const basin = document.getElementById('basin').value;
+            const section = document.getElementById('section').value;
+        
+            console.log("province ",province);
+
+            console.log("basin ",basin);
+            console.log("section ",section);
+            
+            const response = await fetch(`/get_data?province=${province}&basin=${basin}&section=${section}`);
+            const response_ab = await fetch(`/get_water_quality_data?province=${province}&basin=${basin}&section=${section}`);
+            
+            data = await response.json();
+            // const ab_data = await response_ab.json();
+            ab_data = await response_ab.json();
+            console.log(data);
+            processData(data);
+
+            initParameterSelector();
+            updateCharts();
+            renderStats(ab_data);
+          
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        console.log("file ",file);
+        if (!file) return;
+
+        Papa.parse(file, {
+                header: true, // 第一行作为字段名
+                skipEmptyLines: true,
+                complete: function(results) {
+                    data = results.data;
+                    console.log("upload 解析后的数据：", data);
+                    ab_data = detectAnomaliesInUpload(data);
+                    console.log("检测后的数据：", ab_data);
+
+                    processData(data);
+
+                    initParameterSelector();
+                    updateCharts();
+                    renderStats(ab_data);
+                }
+            });
+      }
+    
+    // 数据处理函数
+    function processData(data) {
+      console.log(data);
+      chartData.rawData = data;
+      chartData.timeData = data.map(row => row['监测时间']);
+      
+      // 提取所有参数数据
+      const allParams = Object.keys(data[0]).filter(
+        key => key !== '流域' && key !== '断面名称' && key !== '监测时间' && 
+               key !== '水质类别' && key !== '站点情况'
+      );
+      
+      allParams.forEach(param => {
+        chartData.parameterData[param] = {
+          values: data.map(row => parseFloat(row[param]) || 0),
+          status: data.map(row => row['站点情况'] === '维护' ? 'maintenance' : 
+                                (row['站点情况'] === '警告' ? 'warning' : 'normal'))
+        };
+      });
+    }
+    
+   // 初始化参数选择器（带海洋风格）
+    function initParameterSelector() {
+        const selector = document.getElementById('parameterSelector');
+        selector.innerHTML = '';
+        
+        // 应用海洋主题容器样式
+        selector.style.background = 'linear-gradient(135deg, #1a6fc9, #0d47a1)';
+        selector.style.padding = '15px';
+        selector.style.borderRadius = '8px';
+        selector.style.boxShadow = '0 4px 12px rgba(0, 107, 148, 0.3)';
+        selector.style.marginBottom = '20px';
+
+        // 主参数选择组
+        const mainGroup = document.createElement('div');
+        mainGroup.style.marginBottom = '12px';
+        mainGroup.style.display = 'flex';
+        mainGroup.style.alignItems = 'center';
+        mainGroup.style.gap = '10px';
+        
+        // 主参数标签
+        const mainLabel = document.createElement('span');
+        mainLabel.textContent = '主参数:';
+        mainLabel.style.color = '#e1dbdb';
+        mainLabel.style.fontWeight = '400';
+        mainLabel.style.minWidth = '60px';
+        mainGroup.appendChild(mainLabel);
+
+        // 主参数下拉框
+        const mainSelect = document.createElement('select');
+        mainSelect.id = 'mainParameterSelect';
+        mainSelect.style.flex = '1';
+        mainSelect.style.padding = '8px 12px';
+        mainSelect.style.borderRadius = '4px';
+        mainSelect.style.border = '1px solid rgba(255,255,255,0.3)';
+        mainSelect.style.backgroundColor = '#4fc3f7b0';
+        mainSelect.style.color = '#083779';
+        mainSelect.style.cursor = 'pointer';
+        
+        // 悬停效果
+        mainSelect.addEventListener('mouseenter', () => {
+            mainSelect.style.boxShadow = '0 0 0 2px rgba(0, 150, 255, 0.5)';
+        });
+        mainSelect.addEventListener('mouseleave', () => {
+            mainSelect.style.boxShadow = 'none';
+        });
+
+        // 添加选项
+        config.mainParameters.forEach(param => {
+            const option = document.createElement('option');
+            option.value = param;
+            option.textContent = param;
+            if (param === chartData.currentMainParam) {
+                option.selected = true;
+            }
+            mainSelect.appendChild(option);
+        });
+
+        // 事件监听
+        mainSelect.addEventListener('change', (event) => {
+            chartData.currentMainParam = event.target.value;
+            updateCharts();
+            updateActiveButtons();
+        });
+
+        mainGroup.appendChild(mainSelect);
+        selector.appendChild(mainGroup);
+
+        // 次要参数选择组
+        const secondaryGroup = document.createElement('div');
+        secondaryGroup.style.display = 'flex';
+        secondaryGroup.style.alignItems = 'center';
+        secondaryGroup.style.gap = '10px';
+        
+        // 次要参数标签
+        const secondaryLabel = document.createElement('span');
+        secondaryLabel.textContent = '次要参数:';
+        secondaryLabel.style.color = '#e1dbdb';
+        secondaryLabel.style.fontWeight = '400';
+        secondaryLabel.style.minWidth = '60px';
+        secondaryGroup.appendChild(secondaryLabel);
+
+        // 次要参数下拉框
+        const secondarySelect = document.createElement('select');
+        secondarySelect.id = 'secondaryParameterSelect';
+        secondarySelect.style.flex = '1';
+        secondarySelect.style.padding = '8px 12px';
+        secondarySelect.style.borderRadius = '4px';
+        secondarySelect.style.border = '1px solid rgba(255,255,255,0.3)';
+        secondarySelect.style.backgroundColor = '#4fc3f7b0';
+        secondarySelect.style.color = '#083779';
+        secondarySelect.style.cursor = 'pointer';
+        
+        // 悬停效果
+        secondarySelect.addEventListener('mouseenter', () => {
+            secondarySelect.style.boxShadow = '0 0 0 2px rgba(0, 150, 255, 0.5)';
+        });
+        secondarySelect.addEventListener('mouseleave', () => {
+            secondarySelect.style.boxShadow = 'none';
+        });
+
+        // 添加选项
+        config.secondaryParameters.forEach(param => {
+            const option = document.createElement('option');
+            option.value = param;
+            option.textContent = param;
+            if (param === chartData.currentSecondaryParam) {
+                option.selected = true;
+            }
+            secondarySelect.appendChild(option);
+        });
+
+        // 事件监听
+        secondarySelect.addEventListener('change', (event) => {
+            chartData.currentSecondaryParam = event.target.value;
+            updateCharts();
+            updateActiveButtons();
+        });
+
+        secondaryGroup.appendChild(secondarySelect);
+        selector.appendChild(secondaryGroup);
+    }
+    
+    // 更新活动按钮状态
+    function updateActiveButtons() {
+      document.querySelectorAll('.parameter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent === chartData.currentMainParam || 
+            btn.textContent === chartData.currentSecondaryParam) {
+          btn.classList.add('active');
+        }
+      });
+    }
+    
+    // 更新图表
+    function updateCharts() {
+      updateMainChart();
+      updateSecondaryChart();
+    }
+    
+    // 更新主图表
+    function updateMainChart() {
+      const param = chartData.currentMainParam;
+      const data = chartData.parameterData[param];
+      console.log('当前绘图数据：', data);
+      console.log('当前绘图数据：', data.values);
+      console.log('当前绘图数据：', Math.max(...data.values) * 1.05);
+      
+
+
+
+      
+      const option = {
+        title: {
+          text: `${param}变化趋势`,
+          left: 'center',
+          textStyle: {
+            color: '#fff', // 改成你想要的颜色，比如白色 '#fff'、蓝色 '#007BFF'
+            fontSize: 15,   // 你也可以顺便调字体大小
+            fontWeight: 'bold'
+          }
+        },
+        tooltip: {
+          trigger: 'axis',
+          formatter: function(params) {
+            const dataIndex = params[0].dataIndex;
+            const rawData = chartData.rawData[dataIndex];
+            let tooltip = `<strong>${rawData['监测时间']}</strong><br>`;
+            tooltip += `${param}: ${params[0].value}<br>`;
+            tooltip += `水质类别: ${rawData['水质类别']}<br>`;
+            tooltip += `站点情况: ${rawData['站点情况']}`;
+            return tooltip;
+          }
+        },
+        toolbox: {
+              feature: {
+                saveAsImage: {
+                  backgroundColor: '#f4f4f4'
+                } 
+                
+               
+              }
+            },
+       
+        grid: {
+          left: '50px',
+          right: '10%',
+          bottom: '60px',
+          top: '60px'
+        },
+        xAxis: {
+          type: 'category',
+          data: chartData.timeData,
+          axisLabel: {
+            rotate: 45
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#4ED7F1'  // 设置y轴线的颜色
+            }
+          },
+        },
+        yAxis: {
+          type: 'value',
+          name: param,
+          min: Math.min(...data.values) * 0.95,
+          max: Math.max(...data.values) * 1.05,
+          axisLabel: {
+            formatter: function (value) {
+              return value.toFixed(2); // 保留两位小数
+            }
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#4ED7F1'  // 设置y轴线的颜色
+            }
+          },
+          splitLine: {
+            lineStyle: {
+              color: '#4ED7F1'   // 设置y轴网格线的颜色
+            }
+          }
+            
+        },
+        dataZoom: [{
+          type: 'slider',
+          start: 0,
+          show: false, // 隐藏滑动条UI
+          end: 100
+        }, {
+          type: 'inside',
+          start: 0,
+          end: 100
+        }],
+        series: [{
+          name: param,
+          type: 'line',
+          data: data.values.map((value, index) => ({
+            value: value,
+            itemStyle: {
+              color: config.colors[data.status[index]]
+            }
+          })),
+          symbol: 'circle',
+          symbolSize: 6,
+          lineStyle: {
+            width: 2,
+            color: '#FFF5E4'
+          },
+          markLine: {
+            silent: true,
+            data: getReferenceLines(param),
+            label: {
+              position: 'end',
+              formatter: '{b}: {c}'
+            },
+            lineStyle: {
+              type: 'dashed',
+              color: '#666'
+            }
+          }
+        }],
+        animationDuration: config.animationDuration
+      };
+      
+      mainChart.setOption(option, true);
+    }
+    
+    // 更新次要图表
+    function updateSecondaryChart() {
+      const param = chartData.currentSecondaryParam;
+      const data = chartData.parameterData[param];
+      
+      const option = {
+        title: {
+          text: `${param}变化趋势`,
+          left: 'center',
+          textStyle: {
+            color: '#fff', // 改成你想要的颜色，比如白色 '#fff'、蓝色 '#007BFF'
+            fontSize: 15,   // 你也可以顺便调字体大小
+            fontWeight: 'bold'
+          }
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        toolbox: {
+              feature: {
+                saveAsImage: {
+                  backgroundColor: '#f4f4f4'
+                } 
+                
+               
+              }
+            },
+        grid: {
+          left: '55px',
+          right: '10%',
+          bottom: '60px',
+          top: '60px'
+        },
+        xAxis: {
+          type: 'category',
+          data: chartData.timeData,
+          axisLabel: {
+            rotate: 45
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#4ED7F1'  // 设置y轴线的颜色
+            }
+          },
+          
+          
+        },
+        yAxis: {
+          type: 'value',
+          name: param,
+          min: Math.min(...data.values) * 0.95,
+          max: Math.max(...data.values) * 1.05,
+          axisLabel: {
+            formatter: function (value) {
+              return value.toFixed(2); // 保留两位小数
+            }
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#4ED7F1'  // 设置y轴线的颜色
+            }
+          },
+          splitLine: {
+            lineStyle: {
+              color: '#4ED7F1'   // 设置y轴网格线的颜色
+            }
+          }
+        },
+        dataZoom: [{
+          type: 'slider',
+          start: 0,
+          show: false, // 隐藏滑动条UI
+          end: 100
+        }, {
+          type: 'inside',
+          start: 0,
+          end: 100
+        }],
+        series: [{
+          name: param,
+          type: 'line',
+          data: data.values.map((value, index) => ({
+            value: value,
+            itemStyle: {
+              color: config.colors[data.status[index]] // 为每个数据点设置颜色
+            }
+          })),
+          symbol: 'circle',
+          symbolSize: 6,
+          lineStyle: {
+            width: 2,
+            color: config.colors.normal
+          }
+        }],
+        animationDuration: config.animationDuration
+      };
+      
+      secondaryChart.setOption(option, true);
+    }
+    
+    // 获取参考线数据（可根据不同参数设置不同标准）
+    function getReferenceLines(param) {
+      const lines = [];
+      
+      if (param === 'pH(无量纲)') {
+        lines.push(
+          { name: '下限', yAxis: 6.5 , lineStyle: { color: '#FFFA8D' }  },
+          { name: '上限', yAxis: 8.5 , lineStyle: { color: '#FFFA8D' }  }
+        );
+      } else if (param === '溶解氧(mg/L)') {
+        lines.push(
+          { name: 'I类标准', yAxis: 7.5 , lineStyle: { color: '#FFFA8D' }},
+          { name: 'III类标准', yAxis: 5 , lineStyle: { color: '#FFFA8D' }}
+        );
+      } else if (param === '水温(℃)') {
+        lines.push(
+          { name: '平均', yAxis: 15 , lineStyle: { color: '#FFFA8D' }}
+        );
+      }
+      console.log(`当前参数: ${param}, 参考线: `, lines);
+      
+      return lines;
+      // return lines.filter(line => line.yAxis < 100 && line.yAxis > -50);
+    }
+    
+    // 窗口大小变化时重新调整图表大小
+    window.addEventListener('resize', function() {
+      mainChart.resize();
+      secondaryChart.resize();
+    });
+    
+    //表格更新
+    function renderStats(data) {
+        const total = data.length;
+        const anomalies = data.filter(item => item.is_anomaly).length;
+        const normal = total - anomalies;
+
+        console.log("当前的anomalies和normal ",anomalies,normal);
+
+        const issueTypes = {
+              '水温异常': 0,
+              'pH异常': 0,
+              '溶解氧过低': 0,
+              '藻密度缺失': 0
+        };
+
+        data.forEach(item => {
+              // console.log("item ",item);
+              item.issues.forEach(issue => {
+                  if (issue.includes('水温异常')) issueTypes['水温异常']++;
+                  if (issue.includes('pH异常')) issueTypes['pH异常']++;
+                  if (issue.includes('溶解氧过低')) issueTypes['溶解氧过低']++;
+                  if (issue.includes('藻密度缺失')) issueTypes['藻密度缺失']++;
+              });
+          });
+
+          document.getElementById('stats-container').innerHTML = `
+              <div class="stat-item">
+                  <h6 style="color: #AFDDFF;font-size=15">数据总量</h6>
+                  <h2 class="text-primary">${total}</h2>
+              </div>
+              <div class="stat-item">
+                  <h6 style="color: #AFDDFF;font-size=15">异常数据</h6>
+                  <h2 class="${anomalies > 0 ? 'text-danger' : 'text-success'}">
+                      ${anomalies} (${Math.round(anomalies / total * 100)}%)
+                  </h2>
+              </div>
+              <div>
+                  <h6 style="color: #AFDDFF;font-size=15">异常类型分布</h6>
+                  <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                      ${Object.entries(issueTypes).map(([type, count]) => `
+                        <div style="padding: 4px 5px;min-width: 70px; border: 1px solid #ccc; border-radius: 6px; background-color: ${count > 0 ? '#ffe6e6' : '#e6ffe6'};">
+                          <span style="color: #888;">${type}:</span>
+                          <span style="font-weight: bold; color: ${count > 0 ? '#d9534f' : '#28a745'};">${count}</span>
+                        </div>
+                      `).join('')}
+
+                  </div>
+              </div>
+          `;
+      }
+ 
+    function detectAnomaliesInUpload(data) {
+    const processed = [];
+
+    data.forEach(row => {
+            const issues = [];
+            let is_anomaly = false;
+
+            // 转换并检测 水温
+            const waterTemp = parseFloat(row['水温(℃)']);
+            if (isNaN(waterTemp)) {
+                issues.push("水温数据无效");
+                is_anomaly = true;
+            } else if (waterTemp < 15 || waterTemp > 35) {
+                issues.push(`水温异常: ${waterTemp}℃`);
+                is_anomaly = true;
+            }
+
+            // 转换并检测 pH
+            const phValue = parseFloat(row['pH(无量纲)']);
+            if (isNaN(phValue)) {
+                issues.push("pH数据无效");
+                is_anomaly = true;
+            } else if (phValue < 6.5 || phValue > 8.5) {
+                issues.push(`pH异常: ${phValue}`);
+                is_anomaly = true;
+            }
+
+            // 转换并检测 溶解氧
+            const doValue = parseFloat(row['溶解氧(mg/L)']);
+            if (isNaN(doValue)) {
+                issues.push("溶解氧数据无效");
+                is_anomaly = true;
+            } else if (doValue < 5) {
+                issues.push(`溶解氧过低: ${doValue} mg/L`);
+                is_anomaly = true;
+            }
+
+            // 检查藻密度缺失
+            const algaeDensity = row['藻密度(cells/L)'];
+            if (algaeDensity === undefined || algaeDensity === null || algaeDensity.toString().trim() === '--') {
+                issues.push("藻密度缺失");
+            }
+
+            processed.push({
+                "监测时间": row['监测时间'],
+                "断面名称": row['断面名称'],
+                "水温": row['水温(℃)'],
+                "pH": row['pH(无量纲)'],
+                "溶解氧": row['溶解氧(mg/L)'],
+                "藻密度": row['藻密度(cells/L)'],
+                "is_anomaly": is_anomaly,
+                "issues": issues.length > 0 ? issues : ["正常"]
+            });
+        });
+
+        return processed;
+    }
+    
+    function water_data_out(){
+        console.log("导出水质前data",data);
+        exportToCSV(data,"water_quality_data.csv");
+    }
+
+    function exportToCSV(data,filename) {
+        if (!data || !data.length) {
+          alert('没有数据可导出');
+          return;
+        }
+
+        // 获取所有字段名（表头）
+        const headers = Object.keys(data[0]);
+
+        // 组装CSV内容，先加表头
+        const csvRows = [];
+        csvRows.push(headers.join(','));
+
+        // 组装每条数据的值，注意转义逗号和引号
+        for (const row of data) {
+          const values = headers.map(header => {
+            let val = row[header];
+            if (val === undefined || val === null) val = '';
+            else val = val.toString();
+
+            // 如果字段里有逗号或引号，用双引号包起来，内部双引号转成两个双引号
+            if (val.includes(',') || val.includes('"')) {
+              val = '"' + val.replace(/"/g, '""') + '"';
+            }
+            return val;
+          });
+          csvRows.push(values.join(','));
+        }
+
+        // 生成CSV字符串
+        const csvString = csvRows.join('\n');
+
+        // 创建一个Blob对象，类型是text/csv
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+
+        // 创建一个下载链接并点击它
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        // link.download = "water_quality_data.csv";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+
+    //异常处理
+    document.addEventListener('DOMContentLoaded', function () {
+        simulateRealTimeMonitoring();
+        console.log("准备开始异常数据");
+        
+    });
+
+
+    let intervalId = null;
+    let cur_Index = 0;
+    const dataBody = document.getElementById('data-body');
+    const startBtn =true;
+  
+    const alertBox = document.getElementById('fullscreen-alert');
+    const alertMessage = document.getElementById('alert-details');
+    const closeAlertBtn = document.getElementById('close-alert');
+
+    function simulateRealTimeMonitoring() {
+        intervalId = setInterval(() => {
+          console.log("data的长度",ab_data);
+            if (cur_Index >= ab_data.length) {
+                cur_Index = 0; // 循环数据
+            }
+
+            const data_cur = ab_data[cur_Index];
+            console.log(ab_data);
+            
+            // 如果是异常数据，显示全屏警报
+            if (data_cur.is_anomaly) {
+                console.log("出现异常");
+                showAlert_Water(data_cur);
+            }
+
+            cur_Index++;
+        }, 6000); // 每6秒更新一次数据
+    }
+   closeAlertBtn.addEventListener('click', () => {
+      alertBox.style.display = 'none';
+   });
+
+   function showAlert_Water(data) {
+      alertMessage.innerHTML = `
+          <p>监测时间: ${data.监测时间}</p>
+          <p>监测地点: ${data.断面名称}</p>
+          <p>异常问题: ${data.issues.join(', ')}</p>
+      `;
+      alertBox.style.display = 'flex';
+    }
+</script>
+
+<!-- 实时气象api接入 -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    fetchWeatherData();
+    fetchAirQualityData();
+});
+
+const latitude = 39.9042;
+const longitude = 116.4074;
+async function fetchWeatherData() {
+
+  const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=relative_humidity_2m,wind_speed_10m,wind_direction_10m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&models=cma_grapes_global&timezone=Asia/Shanghai&forecast_days=7`;
+   
+    try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('API Response:', data); 
+
+        updateUI(data);
+
+    } catch (error) {
+        console.error("获取天气数据失败:", error);
+       
+        document.getElementById('temperature-range').textContent = '加载失败';
+        document.getElementById('wind-direction').textContent = '加载失败';
+        document.getElementById('humidity').textContent = '加载失败';
+       
+    }
+}
+
+async function fetchAirQualityData() {
+    const timezone = 'Asia/Shanghai'; // 或者 'auto'
+
+    const airQualityApiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=pm2_5&timezone=${timezone}`;
+
+    try {
+        const response = await fetch(airQualityApiUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Air Quality API Response:', data);
+
+        if (data.current && data.current.pm2_5 !== undefined) {
+            const pm25 = data.current.pm2_5;
+            // 更新UI
+            document.getElementById('aqi-value').textContent = pm25.toFixed(1);
+            document.getElementById('aqi-description').textContent = getAqiDescription(pm25); // 您已有的辅助函数
+            console.log(`Current PM2.5: ${pm25}`);
+        } else {
+            document.getElementById('aqi-value').textContent = '加载失败';
+            console.log('PM2.5 data not available.');
+        }
+
+    } catch (error) {
+        console.error("获取空气质量数据失败:", error);
+    }
+}
+
+function updateUI(data) {
+    // 1. 更新温度 (显示日最高温和最低温)
+    if (data.daily && data.daily.temperature_2m_max && data.daily.temperature_2m_min) {
+        const tempMax = Math.round(data.daily.temperature_2m_max[0]);
+        const tempMin = Math.round(data.daily.temperature_2m_min[0]);
+        document.getElementById('temperature-range').textContent = `${tempMin} ~ ${tempMax}°C`;
+    }
+
+    // 2. 更新风向和风速
+    if (data.current && data.current.wind_speed_10m !== undefined && data.current.wind_direction_10m !== undefined) {
+        const windSpeedKmh = data.current.wind_speed_10m;
+        const windDirectionDegree = data.current.wind_direction_10m;
+
+        document.getElementById('wind-direction').textContent = convertWindDirection(windDirectionDegree);
+        document.getElementById('wind-speed').textContent = convertWindSpeedToBeaufort(windSpeedKmh) + '级';
+        // 或者直接显示风速 document.getElementById('wind-speed').textContent = `${windSpeedKmh.toFixed(1)} km/h`;
+    }
+
+    // 3. 更新湿度
+    if (data.current && data.current.relative_humidity_2m !== undefined) {
+        const humidity = data.current.relative_humidity_2m;
+        document.getElementById('humidity').textContent = `${humidity}%`;
+    }
+
+}
+
+// 将风向角度转换为文字描述
+function convertWindDirection(degrees) {
+    const directions = ['北风', '东北偏北风', '东北风', '东北偏东风', '东风', '东南偏东风', '东南风', '东南偏南风', '南风', '西南偏南风', '西南风', '西南偏西风', '西风', '西北偏西风', '西北风', '西北偏北风'];
+    const index = Math.round((degrees % 360) / 22.5);
+    return directions[index % 16];
+}
+
+// 将风速 (km/h) 转换为蒲福风级 (近似)
+function convertWindSpeedToBeaufort(kmh) {
+    if (kmh < 1) return 0;
+    if (kmh <= 5) return 1;
+    if (kmh <= 11) return 2;
+    if (kmh <= 19) return 3;
+    if (kmh <= 28) return 4;
+    if (kmh <= 38) return 5;
+    if (kmh <= 49) return 6;
+    if (kmh <= 61) return 7;
+    if (kmh <= 74) return 8;
+    if (kmh <= 88) return 9;
+    if (kmh <= 102) return 10;
+    if (kmh <= 117) return 11;
+    return 12;
+}
+
+//根据 PM2.5 数值判断空气质量等级
+function getAqiDescription(pm25) {
+    if (pm25 <= 35) return '优';
+    if (pm25 <= 75) return '良';
+    if (pm25 <= 115) return '轻度污染';
+    if (pm25 <= 150) return '中度污染';
+    if (pm25 <= 250) return '重度污染';
+    return '严重污染';
+}
+</script>
+
+<!-- 预测模式块 -->
+<script>
+  const modal = document.getElementById("chartModal");
+  const openBtn = document.getElementById("openChartModal");
+  const closeBtn = document.querySelector(".close");
+
+  openBtn.onclick = () => {
+    modal.style.display = "block";
+    
+    // 如果图表在隐藏状态初始化，可能需要resize或重绘
+    const chartDom = document.getElementById('chart');
+    echarts.getInstanceByDom(chartDom)?.resize();
+  };
+
+  closeBtn.onclick = () => {
+    modal.style.display = "none";
+  };
+
+  window.onclick = (event) => {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+
+</script>
+
+<!-- 鱼类数据绘制  +  体长预测  + 鱼类异常-->
+<script>
+    
+    const pageSize = 4;
+    let allData = []; // 解析后的所有数据
+    let filteredData = []; // 过滤后的鱼类数据
+    let currentPage = 0;
+    const speciesSelect = document.getElementById('speciesSelect');
+    const chartDom = document.getElementById('chart');
+    const myChart = echarts.init(chartDom);
+
+    function Dataout() {
+        fetch("/get_fish_data")
+            .then(response => response.json())
+            .then(data => {
+              console.log("鱼类",data)
+              exportToCSV(data,"fish_data.csv");
+            })
+            .catch(error => {
+                console.error('获取数据失败:', error);
+                alert("数据导出失败！");
+            });
+    }
+    
+    // function performPCA(rawData) {
+    //     // 1. 过滤掉缺失值
+    //     const data = rawData.filter(row =>
+    //         row['Weight'] && row['Length'] && row['Width']
+    //     );
+
+    //     // 2. 提取物种标签和特征数据
+    //     const species = data.map(row => row['species'] || row['Species']);
+    //     const features = data.map(row => [
+    //         parseFloat(row['Weight']),
+    //         parseFloat(row['Length']),
+    //         parseFloat(row['Width'])
+    //     ]);
+
+    //     // 3. 数据标准化（zero mean, unit variance）
+    //     const mean = features[0].map((_, colIndex) =>
+    //         features.reduce((sum, row) => sum + row[colIndex], 0) / features.length
+    //     );
+    //     const std = features[0].map((_, colIndex) => {
+    //         const m = mean[colIndex];
+    //         return Math.sqrt(
+    //             features.reduce((sum, row) => sum + Math.pow(row[colIndex] - m, 2), 0) / features.length
+    //         );
+    //     });
+    //     const standardized = features.map(row =>
+    //         row.map((val, i) => (val - mean[i]) / std[i])
+    //     );
+
+    //     // 4. 执行 PCA
+    //     const pca = new PCA(standardized, { center: false, scale: false });
+    //     const pcaData = pca.predict(standardized, { nComponents: 2 }).to2DArray();
+
+    //     // 5. 拼接结果
+    //     return pcaData.map((point, idx) => ({
+    //         species: species[idx],
+    //         pc1: point[0],
+    //         pc2: point[1]
+    //     }));
+    // }
+    
+    // Bubble Chart
+    fetch("/get_fish_data")
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        drawFishBubbleChart(data);
+        // console.log("upload 解析后的数据：", data);
+
+        allData =generatePredict(data);
+        initSpeciesSelect(allData) ;
+
+        filteredData = filterBySpecies(data[0].species);
+        console.log("filteredData 默认",filteredData);
+        currentPage = 0;
+        document.getElementById('speciesSelect').value = data[0].species;
+
+        renderChart(currentPage);
+    });
+
+    function handleFishFileUpload(event) {
+      const file = event.target.files[0];
+      console.log("file ",file);
+      if (!file) return;
+      
+      let fish_data=[];
+      Papa.parse(file, {
+              header: true, // 第一行作为字段名
+              skipEmptyLines: true,
+              complete: function(results) {
+                  // fish_data = results.data;
+                  // 把字段名统一转小写
+                  fish_data = results.data.map(row => {
+                      const newRow = {};
+                      for (let key in row) {
+                          if (row.hasOwnProperty(key)) {
+                              let newKey = key.toLowerCase().trim();
+                              newKey = newKey.replace(/\(g\)/g, '')    // 去掉 (g)
+                                            .replace(/\(cm\)/g, '')   // 去掉 (cm)
+                                            .replace(/\s+/g, '');     // 去掉所有空格
+
+                              // // 重命名 length1 -> length
+                              // if (newKey === 'length3') {
+                              //     newKey = 'length';
+                              // }
+
+                              newRow[newKey] = row[key];
+                          }
+                      }
+                      return newRow;
+                  });
+                  console.log("pca fish_data ",fish_data);
+    
+                  console.log("upload 解析后的数据：", fish_data);
+                  
+                  //predict
+                  allData =generatePredict(fish_data);
+                  initSpeciesSelect(allData) ;
+
+                  filteredData = filterBySpecies(fish_data[0].species);
+                  console.log("filteredData 默认",filteredData);
+                  currentPage = 0;
+                  document.getElementById('speciesSelect').value = fish_data[0].species;
+
+                  renderChart(currentPage);
+                  //predict
+
+                  drawFishBubbleChart(fish_data);
+                  console.log("11111");
+                  
+                  // 发送到后端做 PCA
+                  fetch("/perform_pca", {
+                      method: "POST",
+                      headers: {
+                          "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({ fish_data })
+                  })
+                  .then(res => res.json())
+                  .then(res => {
+                      if (res.success) {
+                          console.log("PCA结果：", res.pca_data);
+                          drawPCAChart(res.pca_data); // 用你前面写的函数
+                          detectOutliersFromPCA(res.pca_data);
+                      } else {
+                          alert("PCA 失败：" + res.error);
+                      }
+                  });
+
+
+              }
+          });
+    }
+
+
+    // PCA Chart
+    fetch("/get_pca_data")
+    .then(response => response.json())
+    .then(responseData => { 
+      if (responseData.success) {
+            console.log("pca data ",responseData.pca_data);
+            drawPCAChart(responseData.pca_data);
+            detectOutliersFromPCA(responseData.pca_data)
+        }
+     
+    });
+
+    // PCA 降维图绘制
+    function drawPCAChart(pca_data) {
+        let speciesSet = [...new Set(pca_data.map(d => d.species))];
+        let seriesData = speciesSet.map(species => ({
+            name: species,
+            type: 'scatter',
+            data: pca_data.filter(d => d.species === species)
+                          .map(d => [d.pc1, d.pc2])
+        }));
+
+        let chart = echarts.init(document.getElementById('pca'));
+        chart.setOption({
+            title: {
+                text: '鱼类PCA降维图像',
+                left: 'center',
+                top: 10,
+                textStyle: {
+                    color: '#4ED7F1',
+                    fontSize: 18,
+                    fontWeight: 'bold'
+                },
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: function (params) {
+                    return `
+                        物种: ${params.seriesName}<br>
+                        PC1: ${params.value[0].toFixed(2)}<br>
+                        PC2: ${params.value[1].toFixed(2)}
+                    `;
+                }
+            },
+            legend: {
+                data: speciesSet,
+                textStyle: {
+                    color: '#4ED7F1',
+                    fontSize: 13,
+                    fontWeight: 'bold'
+                },
+                top: 50
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {
+                        backgroundColor: '#f4f4f4'
+                    }
+                }
+            },
+            grid: {
+                left: '55px',
+                right: '10%',
+                bottom: '60px',
+                top: '100px'
+            },
+            xAxis: {
+                name: 'PC1',
+                nameLocation: 'middle',
+                nameGap: 30,
+                axisLabel: { rotate: 45 },
+                axisLine: {
+                    lineStyle: { color: '#4ED7F1' }
+                }
+            },
+            yAxis: {
+                name: 'PC2',
+                nameLocation: 'middle',
+                nameGap: 30,
+                axisLabel: {
+                    formatter: value => value.toFixed(2)
+                },
+                axisLine: {
+                    lineStyle: { color: '#4ED7F1' }
+                },
+                splitLine: {
+                    lineStyle: { color: '#4ED7F1' }
+                }
+            },
+            series: seriesData
+        });
+    }
+
+    // Fish 气泡图绘制
+    function drawFishBubbleChart(fish_data) {
+        let speciesSet = [...new Set(fish_data.map(d => d.species))];
+        console.log("speciesSet ",speciesSet);
+        let colorList = [
+          "#5470C6", "#91CC75", "#EE6666", "#FAC858",
+          "#73C0DE", "#3BA272", "#FC8452", "#9A60B4", "#EA7CCC"
+        ];
+        // 3. 生成颜色映射字典
+        let colorPalette = {};
+        speciesSet.forEach((species, index) => {
+          colorPalette[species] = colorList[index % colorList.length]; // 防止颜色不够用
+        });
+
+        console.log("color ",colorPalette)
+
+        console.log("fish data bubble",fish_data);
+
+       
+
+      let seriesData = speciesSet.map((species, index) => {
+          let filteredData = fish_data.filter(d => d.species === species).map(d => [
+                  d.length3, d.weight, d.width * d.height
+              ]);
+          console.log("验证", filteredData);  // 这里能正常打印
+
+          return {
+              name: species,
+              type: 'scatter',
+              data: fish_data.filter(d => d.species === species).map(d => [
+                  d.length3, d.weight, d.width * d.height
+              ]),
+              symbolSize: val => val[2] / 4.5 ,
+              itemStyle: {
+                  color: colorPalette[species] || colorPalette[index % Object.keys(colorPalette).length]
+              }
+          };
+      });
+
+
+        let chart = echarts.init(document.getElementById('bubble'));
+        chart.setOption({
+            title: {
+                text: '鱼类整体情况一览',
+                left: 'center',
+                top: 10,
+                textStyle: {
+                    color: '#4ED7F1',
+                    fontSize: 18,
+                    fontWeight: 'bold'
+                },
+            },
+            tooltip: {
+                backgroundColor: '#fff',
+                trigger: 'item',
+                formatter: function (params) {
+                   const d = params.data;
+                    return `
+                      <strong>物种: ${params.seriesName}</strong><br>
+                      长度: ${d[0]} cm<br>
+                      重量: ${d[1]} g<br>
+                      宽度*高度: ${d[2].toFixed(2)} cm*cm <br>
+                                  `;
+                }
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {
+                        backgroundColor: '#f4f4f4'
+                    }
+                }
+            },
+            legend: {
+                data: speciesSet,
+                textStyle: {
+                    color: '#4ED7F1',
+                    fontSize: 13,
+                    fontWeight: 'bold'
+                },
+                top: 40
+            },
+            grid: {
+                left: '70px',
+                right: '10%',
+                
+                bottom: '60px',
+                top: '100px'
+            },
+            xAxis: {
+                name: 'Length (cm)',
+                nameLocation: 'middle',
+                nameGap: 30,
+                type: 'value',
+                axisLabel: { rotate: 45 },
+                axisLine: {
+                    lineStyle: { color: '#4ED7F1' }
+                }
+            },
+            yAxis: {
+                name: 'Weight (g)',
+                nameLocation: 'middle',
+                type: 'value',
+                nameGap: 50,
+                axisLabel: {
+                    formatter: value => value.toFixed(2)
+                },
+                axisLine: {
+                    lineStyle: { color: '#4ED7F1' }
+                },
+                splitLine: {
+                    lineStyle: { color: '#4ED7F1' }
+                }
+            },
+            series: seriesData
+        });
+    }
+    
+    // 生成预测体长（这里模拟预测：Length3+1~3之间的随机数）
+    function generatePredict(data) {
+      return data.map(item => {
+        let predict = (parseFloat(item['length3']) + (Math.random() * 2 + 1)).toFixed(2);
+        return {...item, PredictLength: predict};
+      });
+    }
+
+    // 初始化鱼类下拉菜单 ok
+    function initSpeciesSelect(data) {
+      
+      const speciesSet = new Set(data.map(item => item.species));
+      console.log("upload init ",speciesSet);
+      speciesSelect.innerHTML = '<option value="">请选择鱼类</option>';
+      const firstOption = speciesSelect.querySelector('option[value=""]');
+      if (firstOption) {
+        firstOption.remove();
+      }
+      speciesSet.forEach(sp => {
+        console.log("sp",sp);
+        const opt = document.createElement('option');
+        opt.value = sp;
+        opt.textContent = sp;
+        speciesSelect.appendChild(opt);
+      });
+    }
+
+    // 按鱼类过滤数据 ok
+    function filterBySpecies(species) {
+      console.log("species",species);
+      if (!species) return [];
+      return allData.filter(item => item.species === species);
+    }
+
+
+    // 鱼类选择事件  ok
+    speciesSelect.addEventListener('change', () => {
+      const sp = speciesSelect.value;
+      console.log("选择了sp",sp);
+      filteredData = filterBySpecies(sp);
+      console.log("filteredData ",filteredData);
+      currentPage = 0;
+      // showPredict = false;
+      // document.getElementById('togglePredict').textContent = "显示预测体长";
+      renderChart(currentPage);
+    });
+
+    function renderChart(page) {
+        const pageSize = 4;  // 每页最多4个图表
+        const start = page * pageSize;
+        const end = Math.min(start + pageSize, filteredData.length);
+        const pageData = filteredData.slice(start, end);
+
+        const chartGrid = document.getElementById('chart');
+        chartGrid.innerHTML = ''; // 清空旧图表
+
+        if (pageData.length === 0) {
+          document.getElementById('pageInfo').innerText = "无数据";
+          return;
+        }
+
+        console.log("pageData",pageData);
+
+        pageData.forEach((item, idx) => {
+          console.log("(item, idx)",item,idx);
+          const container = document.createElement('div');
+          container.style.width = '200px';
+          container.style.height = '120px';
+          container.style.border = '1px solid #ddd';
+          container.style.padding = '8px';
+          container.style.boxShadow = '2px 2px 6px rgba(0,0,0,0.1)';
+          container.id = `miniChart-${idx}`;
+          chartGrid.appendChild(container);
+
+          const chart = echarts.init(container);
+          const fishId = `鱼${start + idx + 1}`;
+
+          const stages = ['length1', 'length2', 'length3','PredictLength'];
+          const xLabels = ['阶段1', '阶段2', '阶段3','预测'];
+          const yValues = stages.map(s => parseFloat(item[s]));
+          console.log("yValues",yValues);
+         
+
+
+      const actualValues = yValues.slice(0, 3); //前三个点
+      const lastTwoValues = [yValues[2], yValues[3]]; //倒数第二个点和最后一个预测点
+
+      chart.setOption({
+        title: {
+          text: fishId,
+          left: 'center',
+          top: 4,
+          textStyle: { fontSize: 13, color: '#ffffff' }
+        },
+        toolbox: {
+                feature: {
+                    saveAsImage: {
+                       backgroundColor: '#001f3f'
+                    }
+                }
+            },
+        tooltip: {
+            trigger: 'item',  // 精确到单个点显示
+            backgroundColor: 'rgba(0,0,0,0.7)',   // 半透明黑色背景
+            borderColor: '#3399cc',               // 边框颜色（粉色）
+            borderWidth: 1,
+            padding: 8,
+            textStyle: {
+              color: '#fff',
+              fontSize: 13,
+              fontWeight: 'bold'
+            },
+          extraCssText: 'box-shadow: 0 0 10px #3399cc; border-radius: 6px;',
+          formatter: function(params) {
+            if (params.seriesName === '预测体长') {
+              if (params.dataIndex === 3) {
+                return `预测体长: ${params.value}cm`;
+              } else {
+                return ''; // 其他点不显示内容
+              }
+            } else if (params.seriesName === '实际体长') {
+              const stageNames = ['体长一', '体长二', '体长三', '预测体长'];
+              return `${stageNames[params.dataIndex]}: ${params.value}cm`;
+            }
+            return '';
+          }
+        },
+
+        // tooltip: { trigger: 'axis' },
+        xAxis: {
+          type: 'category',
+          data: xLabels,
+          axisLabel: { fontSize: 8, color: '#ffffff' },
+          axisLine: { lineStyle: { color: '#a0cfff' } }
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: { fontSize: 10, color: '#ffffff' },
+          axisLine: { lineStyle: { color: '#a0cfff' } },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.2)' } }
+        },
+        series: [
+          {
+            name: '实际体长',
+            type: 'line',
+            data: actualValues,
+            smooth: true,
+            lineStyle: { width: 2, color: '#00ffff' },
+            itemStyle: { color: '#ffd700' },  // 金黄色点
+            symbolSize: 6,
+            connectNulls: true
+          },
+          {
+              name: '预测体长',
+              type: 'line',
+              data: [null, null, lastTwoValues[0], lastTwoValues[1]], 
+              smooth: true,
+              lineStyle: { width: 2, color: '#ff69b4', type: 'dashed' },  // 粉色虚线
+              itemStyle: {
+                color: '#ff4500'  // 只有预测点显示橙红色
+              },
+              symbolSize: function (value, params) {
+                // 只让最后一个点显示符号，倒数第二个点隐藏符号
+                if (params.dataIndex === 3) return 8;  // 预测点
+                return 0;  // 隐藏倒数第二个点的符号
+              },
+              showSymbol: true
+          }
+
+        ],
+        grid: { top: 25, left: 20, right: 10, bottom: 15 }
+      });
+
+        });
+
+        document.getElementById('pageInfo').innerText = `第 ${page + 1} 页，共 ${Math.ceil(filteredData.length / 4)} 页`;
+      }
+
+      // 上一页按钮
+      document.getElementById('prev').addEventListener('click', () => {
+        if (currentPage > 0) {
+          currentPage--;
+          renderChart(currentPage);
+        }
+      });
+
+      // 下一页按钮
+      document.getElementById('next').addEventListener('click', () => {
+        if ((currentPage + 1) * pageSize < filteredData.length) {
+          currentPage++;
+          renderChart(currentPage);
+        }
+      });
+    
+      //预测数据导出
+     function predataout() {
+        console.log("导出水质前data",allData);
+        exportToCSV(allData,"fish_length_predition.csv");
+     }
+ 
+     function detectOutliersFromPCA(pcaData) {
+        const alertContainer = document.getElementById('alertContainer');
+        alertContainer.innerHTML = '';  // 清空之前的异常提示
+        if (!Array.isArray(pcaData) || pcaData.length === 0) {
+          console.warn("PCA 数据为空或格式不正确");
+          return;
+        }
+
+        // 计算中心点
+        const center = pcaData.reduce((acc, cur) => {
+          acc.pc1 += cur.pc1;
+          acc.pc2 += cur.pc2;
+          return acc;
+        }, { pc1: 0, pc2: 0 });
+
+        center.pc1 /= pcaData.length;
+        center.pc2 /= pcaData.length;
+
+        // 计算每个点的距离
+        pcaData.forEach(d => {
+          d.dist = Math.sqrt((d.pc1 - center.pc1) ** 2 + (d.pc2 - center.pc2) ** 2);
+        });
+
+        // 计算平均距离与标准差
+        const meanDist = pcaData.reduce((sum, d) => sum + d.dist, 0) / pcaData.length;
+        const stdDist = Math.sqrt(pcaData.reduce((sum, d) => sum + (d.dist - meanDist) ** 2, 0) / pcaData.length);
+        const threshold = meanDist + 1.5 * stdDist;
+
+        // 筛选异常点
+        const outliers = pcaData.filter(d => d.dist > threshold);
+
+        // 显示异常提示
+        outliers.forEach((outlier, i) => {
+          setTimeout(() => {
+            showAlert_fish(`异常数据点！Species: ${outlier.species}`);
+          }, i * 2000);
+        });
+
+        return outliers;
+      }
+
+
+   
+    function showAlert_fish(message) {
+      const alertContainer = document.getElementById('alertContainer');
+      const div = document.createElement('div');
+      div.className = 'alert';
+      div.textContent = message;
+      console.log("当前message",message);
+      alertContainer.appendChild(div);
+    }
+
+   
+</script>
+
+<!-- 实时监测 -->
+<script>
+
+</script>
+
+<!--截屏 图片识别-->
+<script>
+  const videoList = ["static/movie/1.mp4", "static/movie/2.mp4"];
+  let currentIndex = 0;
+
+  const videoPlayer = document.getElementById("video-player");
+  const videoSource = document.getElementById("video-source");
+
+  function updateVideo() {
+    videoSource.src = videoList[currentIndex];
+    console.log("current_viedo ",currentIndex);
+    videoPlayer.load();
+    videoPlayer.play();
+    // startStream();  // 自动开始识别
+  }
+
+  function prevVideo() {
+    currentIndex = (currentIndex - 1 + videoList.length) % videoList.length;
+    updateVideo();
+  }
+
+  function nextVideo() {
+    currentIndex = (currentIndex + 1) % videoList.length;
+    updateVideo();
+  }
+
+  // 添加新视频（本地）
+  document.getElementById("video-upload").addEventListener("change", function (e) {
+    const file = e.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      videoList.push(url);
+      currentIndex = videoList.length - 1;
+      updateVideo();
+
+    }
+  });
+  
+  let eventSource = null;
+  function startStream() {
+     // 切换前关闭旧连接
+    if (eventSource) {
+      eventSource.close();
+    }
+
+    const currentVideoPath = videoList[currentIndex];
+
+    // 注意：本地上传的视频路径是 blob: 开头，后端无法读取，这里做个保护判断
+    if (currentVideoPath.startsWith("blob:")) {
+      alert("当前是本地上传视频，无法进行识别分析");
+      return;
+    }
+
+    const encodedPath = encodeURIComponent(currentVideoPath);
+    eventSource = new EventSource(`/stream_analyze_video?video_path=${encodedPath}`);
+
+    eventSource.onmessage = function (event) {
+      const data = JSON.parse(event.data);
+      console.log("返回鱼类信息", data);
+
+      const frameImgBase64 = data.frame;
+      document.getElementById("video-frame").src = "data:image/jpeg;base64," + frameImgBase64;
+
+      document.getElementById('fish-id').innerText = data["编号"];
+      document.getElementById('fish-type').innerText = data["识别结果"];
+      document.getElementById('fish-length').innerText = data["推测体长"];
+      document.getElementById('fish-weight').innerText = data["推测体重"];
+      document.getElementById('fish-status').innerText = data["健康状态"];
+      document.getElementById('fish-group').innerText = data["异常状态"];
+    };
+
+    eventSource.onerror = function () {
+      console.error("分析服务断开或出错");
+      eventSource.close();
+    };
+  }
+
+</script>
+
+
+
+{% endblock %}

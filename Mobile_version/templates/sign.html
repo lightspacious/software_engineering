@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>注册账号</title>
+    <style>
+        body {  
+            display: flex;  
+            justify-content: center;  
+            align-items: center;  
+            height: 100vh;  
+            background: url('/static/back.png') no-repeat center center fixed;
+            background-size: cover;
+            /* background: radial-gradient(ellipse at bottom, #2fa1f9 0%, #e0e6df 100%) fixed;     */
+            font-family: 'Press Start 2P', cursive;
+        }  
+
+        .registration-container {  
+            /* background: url('/static/back.png') no-repeat center center fixed; */
+            /* background:transparent; */
+            /* background-size: cover; */
+            background: rgba(255, 253, 253, 0.329);
+            padding: 30px 30px; 
+            border: 5px solid #fffcfc41; 
+            border-radius: 30px;  
+            max-width: 450px;  
+            width: 100%;  
+            min-height: 600px;
+            text-align: center;   
+        }  
+
+        h1 {  
+            margin-bottom: 20px;  
+            color: #333333;  
+            font-size: 30px;  
+        }  
+
+        .input-group {  
+            margin-bottom: 40px;  
+            text-align: left;   
+        }  
+
+        label {  
+            display: block;  
+            margin-bottom: 5px;  
+            font-weight: bold;  
+            color: #000000;  
+        }  
+
+        input, select {  
+            width: 100%;  
+            padding: 10px;  
+            border: 3px solid #eaf6ff; 
+            border-radius: 5px;  
+            background: #fafafa; 
+            color: #43474a; 
+            font-size: 14px;  
+            box-sizing: border-box;
+            transition: border-color 0.3s;  
+        }  
+
+        input:focus, select:focus {  
+            border-color: #eaf6ff; 
+            outline: none;  
+        }  
+
+        button {  
+            width: 80%;  
+            padding: 10px;  
+            background-color: #eaf6ff; 
+            color: #43474a; 
+            border: none;  
+            border-radius: 5px;  
+            font-weight: bold;  
+            cursor: pointer;  
+            font-size: 16px;   
+            margin-bottom: 20px;
+        }  
+
+        button:hover {  
+            background-color: #3498db; 
+        }  
+
+        #message {  
+            text-align: center;  
+            margin-top: 15px;  
+            color: red;  
+        }  
+        .error-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff4f4;
+        border: 1px solid #ff4d4f;
+        color: #a8071a;
+        padding: 10px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-family: "Microsoft YaHei", "微软雅黑", "Arial", sans-serif;
+        max-width: 800px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+        }
+
+        .error-icon {
+        margin-right: 8px;
+        font-weight: bold;
+        font-size: 16px;
+        }
+
+        @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        }
+    </style>
+</head>
+<body>
+    <div class="registration-container">
+        <h1>注册账号</h1>
+        <form id="registrationForm" method="POST" action="/signinsign" onsubmit="return validateForm()">
+            <div class="input-group">
+                <label for="username">用户名</label>
+                <input type="text" id="signusername" name="signusername" placeholder="输入用户名" required>
+            </div>
+            <div class="input-group">
+                <label for="email">邮箱</label>
+                <input type="email" id="signemail" name="signemail" placeholder="输入邮箱" required>
+            </div>
+            <div class="input-group">
+                <label for="password">密码</label>
+                <input type="password" id="signpassword" name="signpassword" placeholder="输入密码" required>
+            </div>
+            <div class="input-group">
+                <label for="confirm-password">确认密码</label>
+                <input type="password" id="confirm-password" name="confirm_password" placeholder="确认密码" required>
+            </div>
+            <div class="input-group">
+                <label for="identity">用户类型</label>
+                <select id="identity" name="identity" onchange="togglePrivilegeCodeField()" required>
+                    <option value="0">普通用户</option>
+                    <option value="1">养殖户</option>
+                    <option value="2">管理员</option>
+                </select>
+            </div>
+            <div class="input-group" id="privilege-code-group" style="display:none;">
+                <label for="code">输入特权码</label>
+                <input type="text" id="code" name="code" placeholder="选择非普通用户需要输入特权码">
+            </div>
+            <button type="submit">注册</button>
+        </form>
+        {% if error %}
+            <div class="error-box">
+                <span class="error-icon">✖</span>
+                <span class="error-message">{{ error }}</span>
+            </div>
+        {% endif %}
+        <div id="message"></div>
+    </div>
+
+<script>
+    // 判断是否显示特权码输入框
+    function togglePrivilegeCodeField() {
+        const identity = document.getElementById("identity").value;
+        const privilegeCodeGroup = document.getElementById("privilege-code-group");
+        
+        if (identity === "1" || identity === "2") {
+            privilegeCodeGroup.style.display = "block";
+        } else {
+            privilegeCodeGroup.style.display = "none";
+        }
+    }
+
+    // 注册时的验证函数
+    function validateForm() {
+        const username = document.getElementById("username").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirm-password").value;
+        const identity = document.getElementById("identity").value;
+        const code = document.getElementById("code").value.trim();
+        const message = document.getElementById("message");
+        
+        // 验证基本信息
+        if (!username || !email || !password || !confirmPassword) {
+            message.textContent = "所有字段都必须填写";
+            return false;
+        }
+
+        if (password !== confirmPassword) {
+            message.textContent = "两次输入的密码不一致";
+            return false;
+        }
+
+        // 验证特权码（只对养殖户和管理员有效）
+        if ((identity === "1" || identity === "2") && !code) {
+            message.textContent = "请选择输入特权码";
+            return false;
+        }
+
+        if (identity === "1" || identity === "2") {
+            // 假设特权码为“123456”，可以根据实际情况修改
+            if (code !== "123456") {
+                message.textContent = "特权码不正确";
+                return false;
+            }
+        }
+
+        message.textContent = ""; // 清除错误信息
+        return true; // 允许提交
+    }
+
+    // 等待页面加载完毕
+    window.addEventListener('DOMContentLoaded', (event) => {
+        const errorBox = document.querySelector('.error-box');
+        if (errorBox) {
+        // 设置 3 秒后淡出并移除
+        setTimeout(() => {
+            errorBox.style.transition = 'opacity 0.5s ease';
+            errorBox.style.opacity = '0';
+            // 0.5秒后从DOM中移除
+            setTimeout(() => errorBox.remove(), 500);
+        }, 1500); // 3 秒后开始淡出
+        }
+    });
+</script>
+</body>
+</html>

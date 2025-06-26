@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>海洋牧场监测可视化系统 - 登录</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Arial", sans-serif;
+            background: url('/static/back.png') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+        }
+
+        /* 背景遮罩层增强前景可读性 */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.1);
+            z-index: 0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-box {
+            display: flex;
+            width: 800px;
+            max-width: 90vw;
+            height: 480px;
+            background:  transparent;
+            border-radius: 16px;
+            overflow: hidden;
+            z-index: 1;
+            /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); */
+        }
+
+        .form-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.88); /* 半透明白色背景 */
+            border-radius: 0 16px 16px 0;
+        }
+
+        .info-section {
+            flex: 1;
+            background-color: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #eaf6ff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            backdrop-filter: blur(2px);
+            box-shadow: 0 0 16px rgba(0, 0, 0, 0.4);
+            z-index: 1;
+        }
+
+
+
+        .info-section h2 {
+            margin: 0 0 20px 0;
+            font-family:'Arial Black', sans-serif;
+            font-size: 43px;
+            color: #eaf6ff;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+            align-self: flex-start; /* 靠左对齐 */
+            width: 100%;
+            text-align: left;
+            padding-left: 10px; /* 微调更靠左 */
+        }
+
+        .info-section h3 {
+            margin: 0;
+            font-family:'Arial Black', sans-serif;
+            font-size: 34px;
+            color: #eaf6ff;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
+            align-self: flex-end; /* 靠右对齐 */
+            width: 100%;
+            text-align: right;
+            padding-right: 10px; /* 微调更靠右 */
+        }
+
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-size: 14px;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
+            outline: none;
+        }
+
+        input[type="password"] {
+            margin-bottom: 5px;  /* 缩小 password 和 checkbox-group 之间的间距 */
+        }
+
+        .checkbox-group {
+            margin-top: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .left-link {
+            text-align: left;
+        }
+
+        .right-link {
+            text-align: right;
+        }
+
+        .form-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .form-footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .show-password-label {
+            font-size: 14px;
+            color: #333;
+            margin-left: 8px;
+        }
+
+        label {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-family: "Microsoft YaHei", "微软雅黑", "Arial", sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s ease, background 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(to right, #2980b9, #2471a3);
+            transform: scale(1.02);
+        }
+
+        /* 链接样式 */
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .login-box {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .info-section {
+                padding: 30px 0;
+                border-radius: 16px 16px 0 0;
+            }
+
+            .form-section {
+                border-radius: 0 0 16px 16px;
+            }
+        }
+
+        .error-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff4f4;
+        border: 1px solid #ff4d4f;
+        color: #a8071a;
+        padding: 10px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        max-width: 800px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+        }
+
+        .error-icon {
+        margin-right: 8px;
+        font-weight: bold;
+        font-size: 16px;
+        }
+
+        @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        }
+        
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="login-box">
+        <div class="info-section">
+            <h2>海洋牧场</h2>
+            <h3>—监测可视化系统</h3>
+        </div>
+        <div class="form-section">
+            {% if error %}
+            <div class="error-box">
+                <span class="error-icon">✖</span>
+                <span class="error-message">{{ error }}</span>
+            </div>
+            {% endif %}
+            <form method="POST" action="/login" onsubmit="return checkAgreement()">
+                <label for="username">账号</label>
+                <input type="text" id="username" name="username" required>
+
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" required>
+
+                <div class="checkbox-group">
+                    <!-- <span>
+                        <input type="checkbox" id="rememberUsername" onclick="togglePasswordVisibility()">
+                        <label for="rememberUsername" class="show-password-label">记住账号</label>
+                    </span> -->
+                    <span class="left-link">
+                        <a href="/sign">注册</a>
+                    </span>
+                    <span class="right-link">
+                        <a href="/forgot">忘记密码？</a>
+                    </span>
+                </div>
+
+                <label style="font-size: 14px;">
+                    <input type="checkbox" id="agreement"> 我已阅读并同意
+                    <a href="/terms" target="_blank">用户协议</a> 和
+                    <a href="/privacy" target="_blank">隐私政策</a>
+                </label>
+
+                <button type="submit">登录</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // function togglePasswordVisibility() {
+    //     var passwordInput = document.getElementById("password");
+    //     passwordInput.type = (passwordInput.type === "password") ? "text" : "password";
+    // }
+
+    function checkAgreement() {
+        var agree = document.getElementById("agreement");
+        if (!agree.checked) {
+            alert("请先同意用户协议和隐私政策");
+            return false;
+        }
+        return true;
+    }
+
+    function showCustomAlert(msg) {
+        const alertDiv = document.getElementById('custom-alert');
+        const msgDiv = document.getElementById('alert-message');
+        msgDiv.textContent = msg;
+        alertDiv.style.display = 'flex';
+
+        const okBtn = document.getElementById('alert-ok-btn');
+        okBtn.focus();
+        okBtn.onclick = function() {
+        alertDiv.style.display = 'none';
+        };
+    }
+
+    // 等待页面加载完毕
+    window.addEventListener('DOMContentLoaded', (event) => {
+        const errorBox = document.querySelector('.error-box');
+        if (errorBox) {
+        // 设置 3 秒后淡出并移除
+        setTimeout(() => {
+            errorBox.style.transition = 'opacity 0.5s ease';
+            errorBox.style.opacity = '0';
+            // 0.5秒后从DOM中移除
+            setTimeout(() => errorBox.remove(), 500);
+        }, 1500); // 3 秒后开始淡出
+        }
+    });
+</script>
+</body>
+</html>

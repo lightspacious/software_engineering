@@ -1,0 +1,1121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* 基础样式重置 */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #0a1f36;
+        color: white;
+        padding: 10px;
+    }
+
+    /* 主网格布局 - 桌面端使用网格，移动端使用块级布局 */
+    .main-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+    /* 卡片基础样式 */
+    .card {
+    background: rgba(4, 15, 31, 0.7);
+    border-radius: 8px;
+    padding: 15px;
+    color: white;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+    /* 响应式调整 - 在小屏幕上改为单列布局 */
+    @media (max-width: 768px) {
+        .main-grid {
+            grid-template-columns: 1fr;
+        }
+
+        /* 调整卡片内边距以适应小屏幕 */
+        .card {
+            padding: 10px;
+        }
+
+        /* 视频网格在小屏幕上改为单列 */
+        .video-grid {
+            grid-template-columns: 1fr;
+        }
+
+        /* 调整标题字体大小 */
+        h3 {
+            font-size: 1.2em;
+        }
+
+        /* 控制面板在小屏幕上改为单列 */
+        .control-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* 标题样式 */
+    h3 {
+        background: linear-gradient(to right, #00c6ff, #0072ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: bold;
+        text-shadow: 2px 2px 5px rgba(0, 114, 255, 0.7);
+        font-size: 1.5em;
+        padding: 5px;
+        transition: all 0.3s ease;
+        margin-bottom: 10px;
+    }
+
+    /* 视频部分样式 */
+    .video-section {
+        grid-column: 1 / -1;
+    }
+
+    .video-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .video-box {
+        aspect-ratio: 16/9;
+        background: #0a2342;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 数据部分样式 */
+    .data-section {
+        grid-column: 1 / -1;
+    }
+
+    /* 历史记录部分样式 */
+    .history-section {
+    grid-column: 1 / -1;
+    /* 添加固定高度限制 */
+    max-height: 600px;  /* 或根据需要调整 */
+    overflow-y: auto;   /* 添加滚动条以防内容过多 */
+}
+
+    /* 地图部分样式 */
+    .map-section {
+        grid-column: 1 / -1;
+    }
+
+    /* 控制部分样式 */
+    .control-section {
+        grid-column: 1 / -1;
+    }
+
+    /* 表格样式 */
+    .sensor-table {
+        width: 100%;
+        margin-top: 15px;
+    }
+
+    .sensor-table td {
+        padding: 8px;
+        border-bottom: 1px solid #2d5278;
+    }
+
+    .sensor-table td[id] {
+        color: #89c3ff;
+        font-weight: bold;
+    }
+
+    /* 进度条样式 */
+    progress {
+        width: 100%;
+        height: 20px;
+        border-radius: 10px;
+        background-color: #ddd;
+        -webkit-appearance: none;
+        appearance: none;
+        margin: 5px 0;
+    }
+
+    progress::-webkit-progress-bar {
+        background-color: #ddd;
+        border-radius: 10px;
+    }
+
+    progress::-webkit-progress-value {
+        background-color: #007bff;
+        border-radius: 10px;
+    }
+
+    progress::-moz-progress-bar {
+        background-color: #007bff;
+        border-radius: 10px;
+    }
+
+    /* 地图容器样式 */
+    #map-container {
+        height: 300px;
+        width: 100%;
+        margin-top: 15px;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .coordinates {
+        margin-top: 10px;
+        font-size: 0.9em;
+        color: #89c3ff;
+        display: flex;
+        gap: 15px;
+    }
+
+    /* 控制面板样式 */
+    .control-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 15px;
+        padding: 10px 0;
+    }
+
+    .control-item {
+        background-color: rgba(28, 44, 70, 0.8);
+        border-radius: 10px;
+        padding: 15px;
+        color: white;
+        text-align: center;
+    }
+
+    .control-item h4 {
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #00aaff;
+    }
+
+    .device-info {
+        margin-bottom: 15px;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    .device-info div {
+        margin-bottom: 8px;
+    }
+
+    .device-info span {
+        font-weight: bold;
+        color: #00aaff;
+    }
+
+    /* 滑动开关样式 */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 28px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 28px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 20px;
+        width: 20px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+    }
+
+    input:checked + .slider {
+        background-color: #007bff;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(22px);
+    }
+
+    /* 图表信息区域 */
+    #chart-info {
+        display: flex;
+        flex-direction: column;
+        margin-top: 10px;
+        color: white;
+        gap: 10px;
+    }
+
+    #chart-info .chart-info-left,
+    #chart-info .chart-info-right {
+        flex: 1;
+    }
+
+    #chart-info p {
+        margin: 5px 0;
+        font-size: 14px;
+    }
+
+    /* 按钮样式 */
+    .control-buttons button {
+        padding: 8px 15px;
+        background: #1a4b7a;
+        border: none;
+        color: white;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    /* 下拉框样式 */
+    select {
+        background: linear-gradient(45deg, #004d7a, #005c99);
+        border: 2px solid #003f61;
+        color: #e0e0e0;
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: 18px;
+        width: 100%;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+
+    /* 实时时间显示 */
+    .real-time {
+        color: #89c3ff;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+
+    /* 地图信息窗口 */
+    .info-window {
+        padding: 8px;
+        min-width: 180px;
+    }
+
+    .info-window h4 {
+        margin: 0 0 5px 0;
+        color: #1890ff;
+    }
+
+    .info-window p {
+        margin: 0;
+        font-size: 12px;
+    }
+
+    /* 智能问答按钮 */
+    .qa-trigger {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        text-transform: uppercase;
+        background: linear-gradient(135deg, rgba(10,132,255,1) 0%, rgba(0,210,255,1) 100%);
+        color: #fff;
+        border: none;
+        border-radius: 30px;
+        box-shadow: 0 4px 15px rgba(0,210,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.2);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .qa-trigger:hover,
+    .qa-trigger:focus {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(0,210,255,0.8), inset 0 -2px 4px rgba(0,0,0,0.25);
+    }
+
+    /* 智能问答对话框 */
+    .qa-modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .qa-modal-content {
+        background-color: rgba(4, 15, 31, 0.9);
+        margin: 10% auto;
+        padding: 15px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+        color: #fffafa;
+        position: relative;
+    }
+
+    .qa-modal-content h3 {
+        font-size: 1.3em;
+        margin-bottom: 15px;
+    }
+
+    #qa-chat-box {
+        height: 300px;
+        overflow-y: auto;
+        margin-bottom: 15px;
+        padding: 10px;
+        border: 1px solid #2d5278;
+        border-radius: 5px;
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    #qa-input {
+        width: 70%;
+        padding: 10px;
+        margin-right: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    #qa-submit {
+        padding: 10px 15px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .close {
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        position: absolute;
+        top: 5px;
+        right: 15px;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: white;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    /* 聊天消息样式 */
+    .chat-message {
+        display: flex;
+        margin: 8px 0;
+    }
+
+    .chat-message.user {
+        justify-content: flex-end;
+    }
+
+    .chat-message.system {
+        justify-content: flex-start;
+    }
+
+    .chat-bubble {
+        max-width: 80%;
+        padding: 8px 12px;
+        border-radius: 12px;
+        line-height: 1.4;
+        word-wrap: break-word;
+        font-size: 14px;
+    }
+
+    .chat-message.user .chat-bubble {
+        background-color: #daf1ff;
+        color: #055a8c;
+    }
+
+    .chat-message.system .chat-bubble {
+        background-color: #f5f5f5;
+        color: #333;
+    }
+
+    /* 图表容器 */
+    #historyChart {
+    width: 100% !important;
+    height: 300px !important;  /* 设置固定高度 */
+    margin-top: 15px;
+}
+
+    /* 权限提示 */
+    .permission-message {
+        color: #ccc;
+        text-align: center;
+        padding: 20px;
+    }
+</style>
+
+<div class="main-grid">
+    <!-- 左上方块 - 视频部分 -->
+    <div class="card video-section">
+        <div class="section-header">
+            <h3>海洋牧场：
+                <select id="video-selection" onchange="changeVideos()">
+                    <option value="1">一号舱</option>
+                    <option value="2">二号舱</option>
+                    <option value="3">三号舱</option>
+                </select>
+            </h3>
+            <div class="real-time" id="full-time-display">2024年04月31日 星期三 21:00:00</div>
+        </div>
+        <div class="video-grid">
+            <div class="video-box">
+                <video width="100%" controls autoplay muted loop>
+                    <source src="static\movie\1.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+            <div class="video-box">
+                <video width="100%" controls autoplay muted loop>
+                    <source src="static\movie\1.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+            <div class="video-box">
+                <video width="100%" controls autoplay muted loop>
+                    <source src="static\movie\2.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+            <div class="video-box">
+                <video width="100%" controls autoplay muted loop>
+                    <source src="static\movie\2.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放。
+                </video>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function changeVideos() {
+            var selectedValue = document.getElementById("video-selection").value;
+            var videoSources = [
+                ["static/movie/1.mp4", "static/movie/1.mp4", "static/movie/2.mp4", "static/movie/2.mp4"],
+                ["static/movie/2.mp4", "static/movie/1.mp4", "static/movie/1.mp4", "static/movie/2.mp4"],
+                ["static/movie/1.mp4", "static/movie/2.mp4", "static/movie/1.mp4", "static/movie/2.mp4"]
+            ];
+
+            var selectedVideos = videoSources[selectedValue - 1];
+            var videoBoxes = document.querySelectorAll('.video-box video');
+            for (var i = 0; i < videoBoxes.length; i++) {
+                videoBoxes[i].src = selectedVideos[i];
+                videoBoxes[i].load();
+            }
+        }
+    </script>
+
+    <!-- 右上方块 - 数据部分 -->
+    <div class="card data-section">
+        <div class="header">
+            <h3>实时水文气象数据</h3>
+            <button id="qa-trigger" class="qa-trigger">智能问答</button>
+        </div>
+
+        <div style="margin-bottom: 10px;">地点：北京市，白石桥</div>
+        <table class="sensor-table">
+            <tr>
+                <td>电池电压（V）</td>
+                <td><progress id="voltage-progress" value="25.90" max="30"></progress></td>
+                <td id="voltage">25.90</td>
+            </tr>
+            <tr>
+                <td>盐度（%）</td>
+                <td><progress id="salinity-progress" value="34.16" max="100"></progress></td>
+                <td id="salinity">34.16</td>
+            </tr>
+            <tr>
+                <td>溶解氧（mg/L）</td>
+                <td><progress id="dissolvedOxygen-progress" value="0.00" max="10"></progress></td>
+                <td id="dissolvedOxygen">0.00</td>
+            </tr>
+            <tr>
+                <td>浊度（NTU）</td>
+                <td><progress id="turbidity-progress" value="2.05" max="10"></progress></td>
+                <td id="turbidity">2.05</td>
+            </tr>
+            <tr>
+                <td>pH</td>
+                <td><progress id="ph-progress" value="8.37" max="14"></progress></td>
+                <td id="ph">8.37</td>
+            </tr>
+            <tr>
+                <td>水温（℃）</td>
+                <td><progress id="temperature-progress" value="15" max="30"></progress></td>
+                <td id="temperature">15</td>
+            </tr>
+        </table>
+
+        <div id="last-updated" style="color: #89c3ff; margin-top: 10px; font-size: 14px;">
+            上次更新时间: <span id="update-time">--</span>
+        </div>
+    </div>
+
+    <!-- 中间左侧 - 历史记录 -->
+    <div class="card history-section">
+        <div class="history-header">
+            <h3>历史记录</h3>
+            <div class="time-range">
+                统计时间：2021-04-01 4:00 至：2021-04-05 12:00
+            </div>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="line-field-selection">选择折线图字段:
+            <select id="line-field-selection" onchange="updateChart()">
+                <option value="水温">水温（℃）</option>
+                <option value="pH">pH</option>
+                <option value="溶解氧">溶解氧（mg/L）</option>
+                <option value="电导率">电导率（μS/cm）</option>
+                <option value="浊度">浊度（NTU）</option>
+            </select></label>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="bar-field-selection">选择柱形图字段:
+            <select id="bar-field-selection" onchange="updateChart()">
+                <option value="高锰酸盐">高锰酸盐指数（mg/L）</option>
+                <option value="氨氮">氨氮（mg/L）</option>
+                <option value="总磷">总磷（mg/L）</option>
+                <option value="总氮">总氮（mg/L）</option>
+                <option value="叶绿素α">叶绿素α（mg/L）</option>
+                <option value="藻密度">藻密度（cells/L）</option>
+            </select></label>
+        </div>
+
+        <canvas id="historyChart"></canvas>
+
+        <div id="chart-info">
+            <div class="chart-info-left">
+                <p>省份：<span id="province">加载中...</span></p>
+                <p>流域：<span id="watershed">加载中...</span></p>
+                <p>断面名称：<span id="sectionName">加载中...</span></p>
+            </div>
+            <div class="chart-info-right">
+                <label for="file-upload">上传数据集：
+                    <input type="file" id="file-upload" onchange="handleFileUpload(event)">
+                </label>
+                <button id="downloadBtn" onclick="downloadChart()">下载图表</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 中间右侧 - 地图 -->
+    <div class="card map-section">
+        <h3>海洋牧场位置展示</h3>
+        <div id="map-container" class="map-placeholder"></div>
+        <div class="coordinates">
+            <span>经度：122.2077</span>
+            <span>纬度：29.9853</span>
+        </div>
+    </div>
+
+    <!-- 底部左侧 - 设备控制 -->
+    {% if session.identity != '0' %}
+    <div class="card control-section">
+        <h3>设备控制</h3>
+        <div class="control-grid">
+            <div class="control-item">
+                <h4>摄像机</h4>
+                <div class="device-info">
+                    <div><span>设备ID：</span>7E22A110-9B01-432F-9C97</div>
+                    <div><span>主控状态：</span><span id="camera-status">正常</span></div>
+                    <div><span>版本：</span>V2.3.4</div>
+                    <div><span>温度：</span>42.12℃</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="camera-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-item">
+                <h4>灯光</h4>
+                <div class="device-info">
+                    <div><span>设备ID：</span>3B9FBD34-54F0-426A-A231</div>
+                    <div><span>主控状态：</span><span id="light-status">关闭</span></div>
+                    <div><span>版本：</span>V1.2.0</div>
+                    <div><span>温度：</span>30.50℃</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="light-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="control-item">
+                <h4>清洁刷</h4>
+                <div class="device-info">
+                    <div><span>设备ID：</span>9A5C3F8D-12D0-4F9A-9D85</div>
+                    <div><span>主控状态：</span><span id="brush-status">正常</span></div>
+                    <div><span>版本：</span>V4.0.1</div>
+                    <div><span>温度：</span>36.98℃</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="brush-toggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card control-section">
+        <h3>设备控制</h3>
+        <p class="permission-message">您没有控制权限。</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- 智能问答对话框 -->
+<div id="qa-modal" class="qa-modal">
+    <div class="qa-modal-content">
+        <span class="close" id="qa-close">&times;</span>
+        <h3>智能问答</h3>
+        <div id="qa-chat-box">
+            <!-- 问答内容会显示在这里 -->
+        </div>
+        <input type="text" id="qa-input" placeholder="请输入问题...">
+        <button id="qa-submit">提交</button>
+    </div>
+</div>
+
+<script>
+    // 完整时间显示
+    function updateFullTime() {
+        const now = new Date();
+        const weekdays = ["日","一","二","三","四","五","六"];
+        document.getElementById('full-time-display').textContent =
+            `${now.getFullYear()}年${(now.getMonth()+1).toString().padStart(2,'0')}月${now.getDate().toString().padStart(2,'0')}日 星期${weekdays[now.getDay()]} ` +
+            `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+    }
+    setInterval(updateFullTime, 1000);
+    updateFullTime();
+
+    // 地图初始化
+    function initMap() {
+        var map = new AMap.Map('map-container', {
+            center: [122.2077, 29.9853],
+            zoom: 10,
+            scrollWheel: true
+        });
+
+        var markersData = [
+            { position: [122.2077, 29.9853], title: "主养殖区", info: "智能养殖舱 - 大黄鱼养殖区" },
+            { position: [122.1800, 29.9500], title: "育苗基地", info: "鱼苗培育与科研中心" },
+            { position: [122.2300, 30.0200], title: "加工平台", info: "海上加工与物流中转站" },
+            { position: [122.2500, 29.8900], title: "生态保护区", info: "海洋生态修复示范区" }
+        ];
+
+        var markers = [];
+        markersData.forEach(function(data) {
+            var marker = new AMap.Marker({
+                position: data.position,
+                title: data.title,
+                map: map,
+                icon: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png',
+                offset: new AMap.Pixel(-13, -30)
+            });
+
+            var infoWindow = new AMap.InfoWindow({
+                content: `<div class="info-window">
+                            <h4>${data.title}</h4>
+                            <p>${data.info}</p>
+                          </div>`,
+                offset: new AMap.Pixel(0, -40)
+            });
+
+            marker.on('click', function() {
+                infoWindow.open(map, marker.getPosition());
+            });
+
+            markers.push(marker);
+        });
+
+        map.setFitView(markers);
+    }
+
+    // 数据加载
+    function parseCSV(csvText) {
+        const rows = csvText.split("\n");
+        const data = [];
+
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].split(",");
+            if (cells.length === 6) {
+                data.push({
+                    voltage: parseFloat(cells[0]),
+                    salinity: parseFloat(cells[1]),
+                    dissolvedOxygen: parseFloat(cells[2]),
+                    turbidity: parseFloat(cells[3]),
+                    ph: parseFloat(cells[4]),
+                    temperature: parseFloat(cells[5])
+                });
+            }
+        }
+        return data;
+    }
+
+    function loadDataFromCSV() {
+        fetch('/static/dataset/水文.csv')
+            .then(response => response.text())
+            .then(csvText => {
+                const dataSet = parseCSV(csvText);
+
+                setInterval(function() {
+                    const randomIndex = Math.floor(Math.random() * dataSet.length);
+                    const data = dataSet[randomIndex];
+
+                    document.getElementById('voltage').textContent = data.voltage;
+                    document.getElementById('salinity').textContent = data.salinity;
+                    document.getElementById('dissolvedOxygen').textContent = data.dissolvedOxygen;
+                    document.getElementById('turbidity').textContent = data.turbidity;
+                    document.getElementById('ph').textContent = data.ph;
+                    document.getElementById('temperature').textContent = data.temperature;
+
+                    document.getElementById('voltage-progress').value = data.voltage;
+                    document.getElementById('salinity-progress').value = data.salinity;
+                    document.getElementById('dissolvedOxygen-progress').value = data.dissolvedOxygen;
+                    document.getElementById('turbidity-progress').value = data.turbidity;
+                    document.getElementById('ph-progress').value = data.ph;
+                    document.getElementById('temperature-progress').value = data.temperature;
+
+                    const now = new Date();
+                    const timeString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+                    document.getElementById('update-time').textContent = timeString;
+
+                }, 30000);
+            })
+            .catch(error => console.error('Error loading CSV file:', error));
+    }
+
+    // 图表相关功能
+    function parseCSV2(csvText) {
+        const rows = csvText.split("\n");
+        const data = [];
+
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].split(",");
+
+            if (cells.length > 1) {
+                const item = {
+                    省份: cells[0],
+                    流域: cells[1],
+                    断面名称: cells[2],
+                    time: cells[3],
+                    水质类别: cells[4],
+                    水温: parseFloat(cells[5]),
+                    pH: parseFloat(cells[6]),
+                    溶解氧: parseFloat(cells[7]),
+                    电导率: parseFloat(cells[8]),
+                    浊度: parseFloat(cells[9]),
+                    高锰酸盐: parseFloat(cells[10]),
+                    氨氮: parseFloat(cells[11]),
+                    总磷: parseFloat(cells[12]),
+                    总氮: parseFloat(cells[13]),
+                    叶绿素α: parseFloat(cells[14]),
+                    藻密度: parseFloat(cells[15]),
+                    站点情况: cells[16]
+                };
+                data.push(item);
+            }
+        }
+        return data;
+    }
+
+    async function fetchCSVData(filePath) {
+        try {
+            const response = await fetch(filePath);
+            const csvText = await response.text();
+            return parseCSV2(csvText);
+        } catch (error) {
+            console.error('Error fetching CSV file:', error);
+            return null;
+        }
+    }
+
+    let historyChart = null;
+    let currentDataset = [];
+
+    async function loadData(filePath) {
+        try {
+            const dataset = await fetchCSVData(filePath);
+            if (Array.isArray(dataset)) {
+                const labels = dataset.map(item => item.time);
+                return labels, dataset;
+            } else {
+                console.error("数据格式错误");
+                return [];
+            }
+        } catch (error) {
+            console.error("出错:", error);
+            return [];
+        }
+    }
+
+    async function loadDefaultData() {
+        const province = "北京市";
+        const lineField = document.getElementById('line-field-selection').value;
+        const barField = document.getElementById('bar-field-selection').value;
+
+        const datasetPath = `/static/dataset/history/${province}.csv`;
+
+        try {
+            currentDataset = await loadData(datasetPath);
+            renderChart(lineField, barField, currentDataset);
+        } catch (error) {
+            console.error('Error loading default data:', error);
+        }
+    }
+
+    async function renderChart(lineField, barField, dataset) {
+        try {
+            if (historyChart) {
+                historyChart.destroy();
+            }
+
+            const labels = dataset.map(item => item.time);
+
+            function getData(field) {
+                return dataset.map(item => item[field]);
+            }
+
+            const lineData = getData(lineField);
+            const barData = getData(barField);
+
+            const firstData = dataset[0];
+            document.getElementById('province').textContent = firstData.省份 || '未知省份';
+            document.getElementById('watershed').textContent = firstData.流域 || '未知流域';
+            document.getElementById('sectionName').textContent = firstData.断面名称 || '未知断面';
+
+            const ctx = document.getElementById('historyChart').getContext('2d');
+
+            historyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: `${lineField} 数据 (折线图)`,
+                            data: lineData,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderWidth: 1,
+                            yAxisID: 'y1',
+                            tension: 0.4
+                        },
+                        {
+                            label: `${barField} 数据 (柱形图)`,
+                            data: barData,
+                            backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                            borderWidth: 1,
+                            type: 'bar',
+                            yAxisID: 'y2'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,  // 保持这个设置为false
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: '时间'
+                            }
+                        },
+                        y1: {
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: `${lineField} 数据`
+                            },
+                            min: 0
+                        },
+                        y2: {
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: `${barField} 数据 (柱形图)`
+                            },
+                            min: 0
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error loading data:', error);
+        }
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const csvText = e.target.result;
+            currentDataset = parseCSV2(csvText);
+
+            const lineField = document.getElementById('line-field-selection').value;
+            const barField = document.getElementById('bar-field-selection').value;
+
+            renderChart(lineField, barField, currentDataset);
+        };
+        reader.readAsText(file);
+    }
+
+    function updateChart() {
+        const lineField = document.getElementById('line-field-selection').value;
+        const barField = document.getElementById('bar-field-selection').value;
+        renderChart(lineField, barField, currentDataset);
+    }
+
+    // 页面加载
+    window.onload = function() {
+        loadDefaultData();
+        loadDataFromCSV();
+        initMap();
+    };
+
+    function downloadChart() {
+        const link = document.createElement('a');
+        link.href = historyChart.toBase64Image();
+        link.download = 'chart.png';
+        link.click();
+    }
+
+    // 设备控制
+    document.getElementById("camera-toggle").addEventListener("change", function() {
+        var status = this.checked ? "正常" : "关闭";
+        document.getElementById("camera-status").textContent = status;
+    });
+
+    document.getElementById("light-toggle").addEventListener("change", function() {
+        var status = this.checked ? "正常" : "关闭";
+        document.getElementById("light-status").textContent = status;
+    });
+
+    document.getElementById("brush-toggle").addEventListener("change", function() {
+        var status = this.checked ? "正常" : "关闭";
+        document.getElementById("brush-status").textContent = status;
+    });
+
+    // 智能问答
+    const qaTrigger = document.getElementById('qa-trigger');
+    const qaModal = document.getElementById('qa-modal');
+    const qaClose = document.getElementById('qa-close');
+    const qaInput = document.getElementById('qa-input');
+    const qaSubmit = document.getElementById('qa-submit');
+    const qaChatBox = document.getElementById('qa-chat-box');
+
+    qaTrigger.onclick = function() {
+        qaModal.style.display = "block";
+    }
+
+    qaClose.onclick = function() {
+        qaModal.style.display = "none";
+    }
+
+    qaSubmit.onclick = function() {
+        const question = qaInput.value.trim();
+        if (question) {
+            displayChatMessage('用户', question);
+            getSystemResponse(question).then(answer => {
+                displayChatMessage('系统', answer);
+            });
+            qaInput.value = '';
+        }
+    }
+
+    function displayChatMessage(sender, message) {
+        const wrapper = document.createElement('div');
+        wrapper.classList.add('chat-message', sender === '系统' ? 'system' : 'user');
+
+        const bubble = document.createElement('div');
+        bubble.classList.add('chat-bubble');
+
+        if (sender === '系统') {
+            bubble.innerHTML = marked.parse(message);
+        } else {
+            bubble.innerHTML = `<strong>${sender}：</strong>${message}`;
+        }
+
+        wrapper.appendChild(bubble);
+        qaChatBox.appendChild(wrapper);
+        qaChatBox.scrollTop = qaChatBox.scrollHeight;
+    }
+
+    async function getSystemResponse(prompt) {
+        const apiKey = 'sk-d8d6e12e34ab47d992b434efe655576d';
+        const url = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                },
+                body: JSON.stringify({
+                    model: "qwen-plus",
+                    messages: [
+                        {
+                            role: "system",
+                            content: "你是一名海洋牧场的平台助手，你需要根据用户的要求，给出有关海洋牧场的信息和养殖建议等。"
+                        },
+                        {
+                            role: "user",
+                            content: prompt
+                        }
+                    ]
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`网络请求失败，状态码 ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.choices?.[0]?.message?.content
+                   || "抱歉，我没有理解您的问题。";
+        } catch (error) {
+            console.error('智能问答出错:', error);
+            return "抱歉，出现了问题。";
+        }
+    }
+
+    window.onclick = function(event) {
+        if (event.target === qaModal) {
+            qaModal.style.display = "none";
+        }
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+{% endblock %}

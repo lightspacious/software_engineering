@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧海洋牧场可视化系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css"> <!-- 图标库 -->
+    <!-- 引入英文 + 中文字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <!-- 引入 FlipClock 所需样式与脚本 -->
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.min.css"
+    />
+    <!-- main_info  start-->
+        <!-- 地图api调用 -->
+        <script src="https://webapi.amap.com/maps?v=2.0&key=7c882591ee715175fb7123288649beff"></script>
+        <!-- <script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=7c882591ee715175fb7123288649beff"></script> -->
+        <!-- chart绘制 -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- main_info  end-->
+
+    <!-- 引入 FlipClock 所需样式与脚本 -->
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.min.css"
+    />
+    <style>
+        /* 基础样式 */
+        body {
+            margin: 0;
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #0d1b4c;
+            color: #fff;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #0d1b4c;
+            flex-wrap: wrap;
+        }
+
+        .nav-left, .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-left a {
+            margin: 5px 5px;
+        }
+
+        .nav-title {
+            margin: 10px 0px;
+            text-align: center;
+        }
+
+        .nav-right div {
+            margin: 0px 0px;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .nav-left, .nav-right {
+                margin-top: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-left a {
+                margin: 5px 10px;
+            }
+
+            .nav-title {
+                margin: 10px 0;
+                text-align: center;
+            }
+
+            .nav-right div {
+                margin: 5px 10px;
+            }
+        }
+
+        .error-box {
+        display: flex;
+        align-items: center;
+        background-color: #fff4f4;
+        border: 1px solid #ff4d4f;
+        color: #a8071a;
+        padding: 10px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        max-width: 800px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+        }
+
+        .error-icon {
+        margin-right: 8px;
+        font-weight: bold;
+        font-size: 16px;
+        }
+
+        @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <div class="nav-title">
+            智慧海洋牧场大数据可视化系统
+        </div>
+
+        <!-- 导航容器，包含左侧菜单和右侧图标信息 -->
+        <div class="nav-container">
+        <!-- 左侧菜单 -->
+        <div class="nav-left">
+            <a href="{{ url_for('main_info') }}" class="{% if request.endpoint == 'main_info' %}active{% endif %}">主要信息</a>
+            {% if session.identity == '2' or session.identity == '1' %}
+                <a href="{{ url_for('underwater') }}" class="{% if request.endpoint == 'underwater' %}active{% endif %}">水下系统</a>
+            {% else %}
+                <a href="#" onclick="noAccess()">水下系统</a>
+            {% endif %}
+
+            {% if session.identity == '2' or session.identity == '1' %}
+                <a href="{{ url_for('smart_center') }}" class="{% if request.endpoint == 'smart_center' %}active{% endif %}">智能中心</a>
+            {% else %}
+                <a href="#" onclick="noAccess()">智能中心</a>
+            {% endif %}
+
+            {% if session.identity == '2' or session.identity == '1' %}
+                <a href="{{ url_for('data_center') }}" class="{% if request.endpoint == 'data_center' %}active{% endif %}">数据中心</a>
+            {% else %}
+                <a href="#" onclick="noAccess()">数据中心</a>
+            {% endif %}
+
+            {% if session.identity == '2' %}
+                <a href="{{ url_for('admin') }}" class="{% if request.endpoint == 'admin' %}active{% endif %}">管理界面</a>
+            {% else %}
+                <a href="#" onclick="noAccess()">管理界面</a>
+            {% endif %}
+        </div>
+
+        <!-- 中间标题 -->
+
+
+        <!-- 右侧图标信息 -->
+        <div class="nav-right">
+            <div><i class="ri-time-line"></i><span id="time-display">--:--:--</span></div>
+            <div><i class="ri-calendar-line"></i><span id="date-display">----</span></div>
+            <div><i class="ri-thermometer-line"></i>12~14°C</div>
+            <div onclick="logout()" style="cursor: pointer;" title="退出登录">
+                <i class="ri-logout-box-line"></i><span id="exit">退出登录</span>
+            </div>
+
+        </div>
+        
+    </div>
+    </div>
+
+    <!-- 页面级提示框容器 -->
+    <div id="alert-box" class="error-box" style="display: none;"></div>
+
+    <!-- 页面内容区域 -->
+    <div class="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+    // window.addEventListener('beforeunload', function () {
+    //     navigator.sendBeacon('/offline');
+    // });
+
+    function updateTimeAndDate() {
+        const now = new Date();
+
+        // 时间格式 HH:MM:SS
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('time-display').textContent = `${hours}:${minutes}:${seconds}`;
+
+        // 日期格式 YYYY.MM.DD
+        const year = now.getFullYear();
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        document.getElementById('date-display').textContent = `${year}.${month}.${day}`;
+    }
+
+    updateTimeAndDate();             // 初始化一次
+    setInterval(updateTimeAndDate, 1000);  // 每秒刷新
+
+    function updateTime() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        const timeStr = `${hours}:${minutes}:${seconds}`;
+        document.getElementById('time-display').textContent = timeStr;
+    }
+
+    // 初始加载一次
+    updateTime();
+
+    // 每秒更新时间
+    setInterval(updateTime, 1000);
+
+    function noAccess() {
+        showAlert("您无权限访问该页面！");
+    }
+
+    function showAlert(message) {
+        const alertBox = document.getElementById("alert-box");
+        alertBox.textContent = message;
+        alertBox.style.display = "block";
+        alertBox.style.opacity = "1";
+        alertBox.style.fontWeight = "bold";
+
+        // 3秒后自动淡出并移除
+        setTimeout(() => {
+            alertBox.style.transition = 'opacity 0.5s ease';
+            alertBox.style.opacity = '0';
+            setTimeout(() => alertBox.style.display = 'none', 500);
+        }, 3000);
+    }
+    
+    function logout() {
+        if (confirm("确定要退出登录吗？")) {
+            window.location.href = "{{ url_for('logout') }}";
+        }
+    }
+    </script>
+</body>
+</html>
