@@ -1468,7 +1468,7 @@ function downloadChart() {
 
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
 <script>
 (function(){
   // 初始化仪表盘
@@ -1568,7 +1568,113 @@ function downloadChart() {
   // 自适应
   window.addEventListener('resize', ()=> gaugeChart.resize());
 })();
-</script>
+</script> -->
+
+
+<script>
+  (function(){
+    const gaugeChart = echarts.init(document.getElementById('waterQualityGauge'));
+  
+    let data = {
+      score: 0,
+      temp: 24,
+      do: 8.5,
+      ph: 7.2,
+      turb: 4
+    };
+  
+    function calculateScore(d) {
+      let score = 100;
+  
+      // 1. 水温（理想值为 25℃）
+      const tempDiff = Math.abs(d.temp - 25);
+      const tempPenalty = Math.min(tempDiff * 5, 25);  // 每1°C偏差扣5分
+      score -= tempPenalty * 0.25;
+  
+      // 2. 溶解氧（越高越好，8 为理想）
+      const doPenalty = Math.max(0, (8 - d.do) * 10);  // 每少1 mg/L扣10分
+      score -= Math.min(doPenalty, 30) * 0.3;
+  
+      // 3. pH 值（6.5 ~ 8 之间最佳）
+      let phPenalty = 0;
+      if (d.ph < 6.5) phPenalty = (6.5 - d.ph) * 10;
+      else if (d.ph > 8) phPenalty = (d.ph - 8) * 10;
+      score -= Math.min(phPenalty, 25) * 0.25;
+  
+      // 4. 浊度（NTU ≤ 5）
+      const turbPenalty = Math.max(0, (d.turb - 5) * 4);
+      score -= Math.min(turbPenalty, 20) * 0.2;
+  
+      return Math.round(Math.max(0, Math.min(score, 100))); // 保证在 0~100
+    }
+  
+    function render() {
+      // 更新卡片
+      document.getElementById('tempVal').textContent = data.temp + '°C';
+      document.getElementById('doVal').textContent   = data.do   + ' mg/L';
+      document.getElementById('phVal').textContent   = data.ph;
+      document.getElementById('turbVal').textContent = data.turb + ' NTU';
+  
+      // 更新仪表盘
+      gaugeChart.setOption({
+        series: [{
+          type: 'gauge',
+          startAngle: 200,
+          endAngle: -20,
+          min: 0,
+          max: 100,
+          axisLine: {
+            lineStyle: {
+              width: 16,
+              color: [
+                [0.3, '#d93b3b'],
+                [0.7, '#f5a623'],
+                [1, '#0fcb5e']
+              ]
+            }
+          },
+          axisLabel: { color: '#ffffff', distance: 12, fontSize: 12 },
+          axisTick: {
+            length: 6,
+            lineStyle: { color: '#88cfff', width: 2 }
+          },
+          splitLine: {
+            length: 10,
+            lineStyle: { color: '#00c3ff', width: 2 }
+          },
+          pointer: { show: true },
+          detail: {
+            valueAnimation: true,
+            formatter: '{value} 分',
+            fontSize: 24,
+            color: '#fff',
+            offsetCenter: ['0%', '20%'] 
+          },
+          data: [{ value: data.score }]
+        }]
+      });
+    }
+  
+    // 初次渲染
+    data.score = calculateScore(data);
+    render();
+  
+    document.getElementById('refreshBtn').addEventListener('click', ()=>{
+      data = {
+        temp: +(18 + Math.random()*10).toFixed(1),
+        do:   +(5 + Math.random()*5).toFixed(1),
+        ph:   +(6 + Math.random()*2).toFixed(1),
+        turb: Math.round(1 + Math.random()*9)
+      };
+      data.score = calculateScore(data);
+      render();
+    });
+  
+    window.addEventListener('resize', ()=> gaugeChart.resize());
+  })();
+  </script>
+
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.min.js"></script>
