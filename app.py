@@ -775,7 +775,7 @@ def fish_track_stream(video_path='top_view.mp4', max_len=20, memory=30, min_area
 @app.route('/video_feed_top')
 def video_feed_top():
     return Response(
-        fish_track_stream(video_path='top_view2.mp4')(),  # 调用返回生成器
+        fish_track_stream(video_path='static/video/top_view2.mp4')(),  # 调用返回生成器
         mimetype='multipart/x-mixed-replace; boundary=frame'
     )
 
@@ -783,7 +783,23 @@ def video_feed_top():
 @app.route('/video_feed_front')
 def video_feed_front():
     return Response(
-        fish_track_stream(video_path='front_view2.mp4')(),
+        fish_track_stream(video_path='static/video/front_view2.mp4')(),
+        mimetype='multipart/x-mixed-replace; boundary=frame'
+    )
+
+# 1号箱俯视轨迹
+@app.route('/video_feed_top1')
+def video_feed_top1():
+    return Response(
+        fish_track_stream(video_path='static/video/top_view1.mp4')(),  # 调用返回生成器
+        mimetype='multipart/x-mixed-replace; boundary=frame'
+    )
+
+# 1号箱正视轨迹
+@app.route('/video_feed_front1')
+def video_feed_front1():
+    return Response(
+        fish_track_stream(video_path='static/video/front_view1.mp4')(),
         mimetype='multipart/x-mixed-replace; boundary=frame'
     )
 
