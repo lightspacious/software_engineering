@@ -4701,7 +4701,7 @@ function getAqiDescription(pm25) {
 
 <!--截屏 图片识别-->
 <script>
-  const videoList = ["static/movie/1.mp4", "static/movie/2.mp4"];
+  let videoList = ["static/movie/1.mp4", "static/movie/2.mp4"];
   let currentIndex = 0;
 
   const videoPlayer = document.getElementById("video-player");
@@ -4709,6 +4709,7 @@ function getAqiDescription(pm25) {
 
   function updateVideo() {
     videoSource.src = videoList[currentIndex];
+
     console.log("current_viedo ",currentIndex);
     videoPlayer.load();
     videoPlayer.play();
@@ -4726,16 +4727,46 @@ function getAqiDescription(pm25) {
   }
 
   // 添加新视频（本地）
-  document.getElementById("video-upload").addEventListener("change", function (e) {
+  // document.getElementById("video-upload").addEventListener("change", function (e) {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const url = URL.createObjectURL(file);
+  //     // const fileName = file.name; 
+  //     videoList.push(url);
+  //     currentIndex = videoList.length - 1;
+  //     updateVideo();
+
+  //   }
+  // });
+    document.getElementById("video-upload").addEventListener("change", function (e) {
     const file = e.target.files[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      videoList.push(url);
-      currentIndex = videoList.length - 1;
-      updateVideo();
+      const formData = new FormData();
+      formData.append("file", file);
 
+      fetch("/upload_video", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const serverPath = data.video_path; // 服务器返回可访问的视频路径
+
+          videoList.push(serverPath);
+          currentIndex = videoList.length - 1;
+          updateVideo();
+        } else {
+          alert("视频上传失败");
+        }
+      })
+      .catch(error => {
+        console.error("上传错误:", error);
+        alert("视频上传出错");
+      });
     }
   });
+
   
   let eventSource = null;
   function startStream() {

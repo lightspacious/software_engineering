@@ -21,6 +21,9 @@ import traceback
 app = Flask(__name__)
 app.secret_key = '123456789'
 
+UPLOAD_FOLDER = 'static/upload_videos'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 #鱼类识别api_key  secret_key  赠送 10000 次
 API_KEY = "sI7jkJ8is6ei4xQWRoOfCKBU"
 SECRET_KEY = "ezsAUibMpFUR63cN5AmoQ6ZceFrdopXp"
@@ -630,6 +633,23 @@ def stream_analyze_video():
 
     return Response(stream_with_context(generate()), content_type='text/event-stream')
 
+@app.route('/upload_video', methods=['POST'])
+def upload_video():
+    if 'file' not in request.files:
+        return jsonify(success=False, message="No file part")
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify(success=False, message="No selected file")
+    
+    # 生成保存路径
+    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+    file.save(filepath)
+
+    # 返回路径供前端识别分析
+    return jsonify(success=True, video_path=filepath.replace("\\", "/"))
+
+
 #smart_center app.py修改部分结束
 
 
@@ -886,6 +906,8 @@ def generate_advice():
     except Exception as e:
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
+
 
 #####  养殖建议一键生成部分 end end end ##################
 
