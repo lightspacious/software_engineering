@@ -8,24 +8,39 @@
         padding: 0;
         width: 100%;
         height: 100%;
-        overflow: hidden; /* 防止出现滚动条 */
+        /* 修改点1 */
+        /* overflow: hidden;  防止出现滚动条 */
+        /* overflow: hidden; 移除，允许内容在手机上下滚 */
     }
 
     .container {
-        width: 100vw;
-        height: 100vh;
-        padding: 0;
-        margin: 0;
-    }
-
-    .grid-layout {
-        display: grid;
-        grid-template-columns: 3fr 4fr; /* 调整为左侧1份，右侧2份 */
-        grid-template-rows: 1fr; /* 单行 */
         width: 100%;
-        height: 100%;
-        gap: 0; /* 移除网格间隙 */
+        max-width: 1200px;
+        height: 100vh;
+        padding: 0 10px;
+        margin: 0 auto;
+        box-sizing: border-box;
     }
+    
+
+
+    /* 修改点2 */
+    /* 默认单列堆叠 */
+   .grid-layout {
+       display: grid;
+       grid-template-columns: 1fr;
+       grid-auto-rows: auto;
+       gap: 1rem;
+       width: 100%;
+       height: 100%;
+   }
+   /* 平板及以上，两栏布局 */
+   @media (min-width: 768px) {
+     .grid-layout {
+       grid-template-columns: 3fr 4fr;
+       gap: 0;
+     }
+   }
 
     .grid-item {
         padding: 0;
@@ -38,8 +53,11 @@
         background-color: rgba(0, 0, 0, 0.3);
         width: 100%;
         height: 100%;
-        padding: 15px;
+        padding: 12px;
         box-sizing: border-box; /* 确保内边距不影响总尺寸 */
+        border-radius: 4px;
+        flex: 1;
+        overflow-x: auto;
     }
 
     .chart-title {
@@ -60,6 +78,7 @@
         padding: 12px;
         height: 100%;
         flex: 1;
+        overflow-x: auto;
     }
 
     .panel-header {
@@ -83,17 +102,26 @@
         border-radius: 3px;
         cursor: pointer;
         margin-left: 5px;
+        white-space: nowrap;
+        flex-shrink: 0;        /* 防止按钮压缩 */
     }
 
     .action-btn:hover {
         background-color: #34495e;
     }
 
-    .user-table {
-        width: 100%;
-        border-collapse: collapse;
+    .action-btn + .action-btn {
+        margin-left: 8px;
+        margin-top: 0;
     }
 
+    /* 修改点3 */
+    /* 表格 & 卡片切换 */
+    .user-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
     .user-table th, .user-table td {
         padding: 8px;
         text-align: left;
@@ -105,7 +133,47 @@
         background-color: rgba(0, 123, 255, 0.5);
         color: white;
     }
+    .user-cards {
+        display: none;
+    }
 
+
+     /* 手机默认隐藏表格，显示卡片 */
+   @media (max-width: 767px) {
+        .user-table {
+            display: none !important;
+        }
+        .user-cards {
+            display: block !important;
+        }
+    }
+   /* 平板及以上：表格可见，隐藏卡片 */
+   @media (min-width: 768px) {
+     .user-table { display: table; }
+     .user-cards { display: none; }
+   }
+
+    /* 卡片列表样式（仅移动端可见） */
+   .user-cards { display: none; padding: 0 0.5rem; }
+   .user-card {
+     border: 1px solid rgba(255,255,255,0.1);
+     border-radius: 0.5rem;
+     padding: 0.75rem;
+     margin-bottom: 0.75rem;
+     background: rgba(0,0,0,0.3);
+     color: #e0e0e0;
+   }
+   .user-card .actions {
+     margin-top: 0.5rem;
+     display: flex;
+     gap: 0.5rem;
+   }
+   .user-card p {
+        margin: 4px 0;
+        word-break: break-word;
+    }
+
+   /* Modal 自适应 */
     .modal {
         display: none;
         position: fixed;
@@ -123,8 +191,19 @@
         background-color: #2c3e50;
         padding: 20px;
         border-radius: 5px;
-        width: 400px;
-        max-width: 90%;
+        /* width: 400px;
+        max-width: 90%; */
+        width: 90vw;
+        max-width: 400px;
+    }
+
+    /* 小屏全屏化 */
+    @media (max-width: 576px) {
+        .modal-content {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        }
     }
 
     .modal-header {
@@ -206,6 +285,94 @@
         margin: 0;
     }
 
+    /* 养殖场卡片网格 */
+    #farmPanel{
+        display:grid;
+        grid-template-columns:1fr;
+        gap:.75rem;
+    }
+    #farmPanel > div {
+        min-width: 0;
+        word-wrap: break-word;
+    }
+    @media (min-width:576px){
+        #farmPanel{grid-template-columns:1fr 1fr;}
+    }
+    @media (min-width:1024px){
+        #farmPanel{grid-template-columns:repeat(4,1fr);}
+    }
+
+    /* 移动端养殖网格显示 */
+    /* 整体 flex，可换行 */
+    /* —— 第一行：标题 + 链接 —— */
+    .farm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    }
+    .farm-header h3 {
+    color: #00c3ff;
+    font-size: 18px;
+    margin: 0;
+    }
+    .view-data-btn {
+    padding: 4px 8px;
+    font-size: 14px;
+    background: #2c3e50;
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    }
+    .view-data-btn:hover {
+    background: #34495e;
+    }
+
+    /* —— 第二行：下拉 —— */
+    .farm-select-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 15px;  /* 与下方卡片的间距 */
+    }
+    .select-btn {
+    padding: 4px 8px;
+    font-size: 14px;
+    background: #2c3e50;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    min-width: 80px;
+    max-width: 150px;
+    white-space: nowrap;
+    }
+    .select-btn option {
+    color: #000;
+    }
+
+    /* —— 小屏幕下下拉居中 —— */
+    @media (max-width: 576px) {
+    .farm-select-wrapper {
+        justify-content: center;
+    }
+    .select-btn {
+        width: 100%;
+        max-width: none;
+    }
+    }
+
+
+    .farm-card {
+        padding: 10px;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 4px;
+        background-color: rgba(0, 0, 139, 0.5);
+        color: #e0e0e0;
+    }
+
+
     /* 其他现有样式保持不变 */
 </style>
 
@@ -261,6 +428,37 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    <!-- 修改点4 -->
+                    <!-- 移动端卡片列表 -->
+                    <div class="user-cards">
+                        {% for user in users %}
+                        <div class="user-card">
+                        <p><strong>ID:</strong> {{ user.userid }}</p>
+                        <p><strong>用户名:</strong> {{ user.username }}</p>
+                        <p><strong>身份:</strong>
+                            {% if user.identity=='0' %}
+                            普通用户
+                            {% elif user.identity=='1' %}
+                            养殖户
+                            {% else %}
+                            管理员
+                            {% endif %}
+                        </p>
+                        <p><strong>在线:</strong>
+                            {% if user.online %}
+                            <span style="color:#2ecc71;">在线</span>
+                            {% else %}
+                            <span style="color:#95a5a6;">离线</span>
+                            {% endif %}
+                        </p>
+                        <p><strong>邮箱:</strong> {{ user.mail }}</p>
+                        <div class="actions">
+                            <button class="action-btn edit-btn" data-userid="{{ user.userid }}">编辑</button>
+                            <button class="action-btn delete-btn" data-userid="{{ user.userid }}">删除</button>
+                        </div>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -270,29 +468,24 @@
             <h2 class="chart-title">养殖场硬件信息概览</h2>
             <div class="panel-container" style="flex-direction: column; gap: 15px;">
                 <!-- 标题、按钮和下拉选择框容器 -->
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 37.8px;">
-                    <h3 style="color: #00c3ff; margin: 0; font-size: 18px;" id="farmTitle">1号养殖场</h3>
-                    <div style="display: flex; gap: 37.8px;">
-                        <a href="{{ url_for('main_info') }}" class="btn" style="padding: 8px 16px; font-size: 14px;">
-                            查看实时数据
-                        </a>
-                        <select id="farmSelector" class="btn" style="padding: 8px 16px; width: 200px; background: #2c3e50; color: #fff; border: none; cursor: pointer;">
-                            {% for i in range(1,7) %}
-                            <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}号养殖场</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                <div class="farm-header">
+                    <h3 id="farmTitle">1号养殖场</h3>
+                    <a href="{{ url_for('main_info') }}" class="btn view-data-btn">查看实时数据</a>
+                </div>
+                <!-- 第二行：下拉选择框（右对齐） -->
+                <div class="farm-select-wrapper">
+                <select id="farmSelector" class="btn select-btn">
+                    {% for i in range(1,7) %}
+                    <option value="{{ i }}" {% if i == 1 %}selected{% endif %}>{{ i }}号养殖场</option>
+                    {% endfor %}
+                </select>
                 </div>
 
                 <!-- 养殖场信息面板 -->
-                <div class="panel-box" style="padding: 15px;">
-                    <div class="panel-header">
-                        <!-- 这里的标题会被 JavaScript 动态更新 -->
-                    </div>
-
-                    <!-- 设备信息网格布局 -->
-                    <div id="farmPanel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <!-- 这里的内容将通过JavaScript动态更新 -->
+                <div class="panel-box" style="max-height: 70vh; overflow-y: auto;">
+                    <!-- 修改第五点 -->
+                    <div id="farmPanel">
+                        <!-- JS 动态生成卡片 -->
                     </div>
                 </div>
             </div>
@@ -420,7 +613,7 @@
         // 创建新的面板内容
         panel.innerHTML = `
             <!-- 第一行：摄像机和灯光 -->
-            <div style="padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;background-color: rgba(0, 0, 139, 0.5);">
+            <div class="farm-card">
                 <h6 style="margin: 0 0 8px 0; color: #fff;font-size: 16px;">摄像机</h6>
                 <p style="margin: 4px 0; color: #e0e0e0;">设备ID: <span style="color: #00c3ff;">${farm.camera.id}</span></p>
                 <p style="margin: 4px 0; color: #e0e0e0;">状态:
@@ -429,7 +622,7 @@
                 </p>
                 <p style="margin: 4px 0; color: #e0e0e0;">分辨率: <span style="color: #00c3ff;">${farm.camera.resolution}</span></p>
             </div>
-            <div style="padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;background-color: rgba(0, 0, 139, 0.5);">
+            <div class="farm-card">
                 <h6 style="margin: 0 0 8px 0; color: #fff;font-size: 16px;">灯光控制</h6>
                 <p style="margin: 4px 0; color: #e0e0e0;">设备ID: <span style="color: #00c3ff;">${farm.light.id}</span></p>
                 <p style="margin: 4px 0; color: #e0e0e0;">状态:
@@ -439,7 +632,7 @@
             </div>
 
             <!-- 第二行：清洁刷和传感器 -->
-            <div style="padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;background-color: rgba(0, 0, 139, 0.5);">
+            <div class="farm-card">
                 <h6 style="margin: 0 0 8px 0; color: #fff;font-size: 16px;">清洁刷</h6>
                 <p style="margin: 4px 0; color: #e0e0e0;">设备ID: <span style="color: #00c3ff;">${farm.cleaner.id}</span></p>
                 <p style="margin: 4px 0; color: #e0e0e0;">状态:
@@ -448,7 +641,7 @@
                 </p>
                 <p style="margin: 4px 0; color: #e0e0e0;">最后清洁: <span style="color: #00c3ff;">${farm.cleaner.lastClean}</span></p>
             </div>
-            <div style="padding: 10px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;background-color: rgba(0, 0, 139, 0.5);">
+            <div class="farm-card">
                 <h6 style="margin: 0 0 8px 0; color: #fff;font-size: 16px;">环境传感器</h6>
                 <p style="margin: 4px 0; color: #e0e0e0;">设备ID: <span style="color: #00c3ff;">${farm.sensor.id}</span></p>
                 <p style="margin: 4px 0; color: #e0e0e0;">状态:
@@ -613,7 +806,7 @@
     document.getElementById('confirmPrivilegeDelete').addEventListener('click', function() {
         const privilegeCode = document.getElementById('privilegeCodeDelete').value;
 
-        if (privilegeCode === '1') {
+        if (privilegeCode === '13579') {
             // 特权码正确，执行删除操作
             const userId = document.querySelector('.delete-btn[data-userid]').getAttribute('data-userid');
 
